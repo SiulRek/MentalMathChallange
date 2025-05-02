@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>Results</title></head>
+<body>
+  <h2>Your Results</h2>
+  <ul>
+    {% for res in results %}
+      <li>
+        {{ res.question }} = {{ res.correct_answer }} |
+        Your answer: 
+        {% if res.is_correct %}
+          <b style="color:green">{{ res.user_answer }}</b>
+        {% else %}
+          <b style="color:red">{{ res.user_answer }}</b> (Correct: {{ res.correct_answer }})
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  <a href="{{ url_for('index') }}">Play Again</a>
+</body>
+</html>
