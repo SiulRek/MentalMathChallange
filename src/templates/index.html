@@ -4,6 +4,9 @@
 <body>
   <h1>Mental Math Challenge</h1>
   <form action="{{ url_for('start') }}" method="post">
+    <label for="config">Configuration (e.g., questions=5):</label>
+    <input type="text" id="config" name="config">
+    <br><br>
     <button type="submit">Start</button>
   </form>
 </body>
