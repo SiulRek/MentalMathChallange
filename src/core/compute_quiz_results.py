@@ -25,9 +25,9 @@ def _collect_user_answers(submitted_answers, total_expected_answers):
     return sorted_answers
 
 
-def compute_quiz_results(quiz, submission, total_expected_answers):
+def compute_quiz_results(quiz, submission):
     user_answers = _collect_user_answers(
-        submitted_answers=submission, total_expected_answers=total_expected_answers
+        submitted_answers=submission, total_expected_answers=len(quiz)
     )
     questions, correct_answers = zip(*[(q["question"], q["answer"]) for q in quiz])
     results = []

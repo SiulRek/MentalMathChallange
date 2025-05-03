@@ -24,7 +24,7 @@ def start():
 def submit():
     quiz = session.get("quiz", [])
     results = compute_quiz_results(
-        quiz, submission=request.form, total_expected_answers=len(quiz)
+        quiz, submission=request.form
     )
     return render_template("result.html", results=results)
 
