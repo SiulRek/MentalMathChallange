@@ -7,8 +7,7 @@ def _collect_user_answers(submitted_answers, total_expected_answers):
             key = item[0]
         except (ValueError, IndexError):
             raise ValueError(
-                f"Invalid answer key '{item[0]}'. Expected format "
-                "'answer_<index>'."
+                f"Invalid answer key '{item[0]}'. Expected format " "'answer_<index>'."
             )
         return int(key.split("_")[1])
 
@@ -26,6 +25,35 @@ def _collect_user_answers(submitted_answers, total_expected_answers):
 
 
 def compute_quiz_results(quiz, submission):
+    """
+    Compute the results of a quiz based on the user's answers.
+
+    Parameters
+    ----------
+    quiz : list of dict
+        A list of dictionaries, where each dictionary contains:
+        - "question" : str
+            The question text.
+        - "answer" : str
+            The correct answer to the question.
+    submission : dict
+        A dictionary containing the user's answers. The keys are expected to be
+        in the format "answer_<index>", where <index> is the index of the question
+        in the quiz.
+
+    Returns
+    -------
+    list of dict
+        A list of dictionaries, where each dictionary contains:
+        - "question" : str
+            The question text.
+        - "correct_answer" : str
+            The correct answer to the question.
+        - "user_answer" : str
+            The user's answer to the question.
+        - "is_correct" : bool
+            Whether the user's answer is correct.
+    """
     user_answers = _collect_user_answers(
         submitted_answers=submission, total_expected_answers=len(quiz)
     )
