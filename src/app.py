@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session
 
-from src.helpers.fetch_answers import fetch_answers
-from src.helpers.generate_questions import generate_questions
+from src.helpers.quiz_generator import compute_quiz_results
+from src.helpers.quiz_generator import generate_quiz
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -15,37 +15,17 @@ def index():
 @app.route("/start", methods=["POST"])
 def start():
     config_text = request.form.get("config", "")
-
-    questions = generate_questions(config_text=config_text)
-    session["questions"] = questions
-    return render_template("quiz.html", questions=questions)
+    quiz = generate_quiz(config_text=config_text)
+    session["quiz"] = quiz
+    return render_template("quiz.html", quiz=quiz)
 
 
 @app.route("/submit", methods=["POST"])
 def submit():
-    questions, correct_answers = zip(
-        *[(q["question"], q["answer"]) for q in session.get("questions", [])]
+    quiz = session.get("quiz", [])
+    results = compute_quiz_results(
+        quiz, submission=request.form, total_expected_answers=len(quiz)
     )
-    user_answers = fetch_answers(total_expected_answers=len(questions))
-    results = []
-
-    for question, correct_answer, user_answer in zip(
-        questions, correct_answers, user_answers
-    ):
-        try:
-            user_answer = int(user_answer)
-        except ValueError:
-            pass
-        correct = user_answer == correct_answer
-        results.append(
-            {
-                "question": question,
-                "correct_answer": correct_answer,
-                "user_answer": user_answer or "Not answered",
-                "is_correct": correct,
-            }
-        )
-
     return render_template("result.html", results=results)
 
 

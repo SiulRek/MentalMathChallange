@@ -5,8 +5,9 @@
   <h1>Mental Math Challenge</h1>
   <form action="{{ url_for('start') }}" method="post">
     <label for="config">Configuration (e.g., questions=5):</label>
-    <input type="text" id="config" name="config">
-    <br><br>
+    <br>
+    <textarea id="config" name="config" rows="5" cols="50" style="display: block; margin: 10px 0;"></textarea>
+    <br>
     <button type="submit">Start</button>
   </form>
 </body>
