@@ -1,27 +1,4 @@
-import random
-
-
-def generate_quiz(config_text):
-    config = {}
-    for part in config_text.split(","):
-        if "=" in part:
-            key, value = part.split("=", 1)
-            config[key.strip()] = value.strip()
-
-    try:
-        n = int(config.get("questions", 10))
-    except ValueError:
-        n = 10
-    operations = ["+", "-", "*"]
-    questions = []
-    for _ in range(n):
-        a = random.randint(1, 10)
-        b = random.randint(1, 10)
-        op = random.choice(operations)
-        expr = f"{a} {op} {b}"
-        result = eval(expr)
-        questions.append({"question": expr, "answer": result})
-    return questions
+from src.core.quiz_parser import parse_user_answer
 
 
 def _collect_user_answers(submitted_answers, total_expected_answers):
@@ -57,10 +34,7 @@ def compute_quiz_results(quiz, submission, total_expected_answers):
     for question, correct_answer, user_answer in zip(
         questions, correct_answers, user_answers
     ):
-        try:
-            user_answer = int(user_answer)
-        except ValueError:
-            pass
+        user_answer = parse_user_answer(user_answer)
         correct = user_answer == correct_answer
         results.append(
             {

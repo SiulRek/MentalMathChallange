@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session
 
-from src.helpers.quiz_generator import compute_quiz_results
-from src.helpers.quiz_generator import generate_quiz
+from src.core.compute_quiz_results import compute_quiz_results
+from src.core.generate_quiz import generate_quiz
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
