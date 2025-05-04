@@ -1,27 +1,46 @@
-from src.core.quiz_parser import parse_user_answer
+from src.core.date_utils import sanitize_weekday_string
 
 
 def _collect_user_answers(submitted_answers, total_expected_answers):
     def _get_index(item):
         try:
             key = item[0]
+            return int(key.split("_")[1])
         except (ValueError, IndexError):
             raise ValueError(
-                f"Invalid answer key '{item[0]}'. Expected format " "'answer_<index>'."
+                f"Invalid answer key '{item[0]}'. Expected format "
+                "'answer_<index>'."
             )
-        return int(key.split("_")[1])
 
-    for i in range(total_expected_answers - 1):
+    for i in range(total_expected_answers):
         try:
             key = f"answer_{i}"
             if key not in submitted_answers:
-                submitted_answers[key] = None
+                submitted_answers[key] = ""
         except (ValueError, IndexError):
             pass
     sorted_form = dict(sorted(submitted_answers.items(), key=_get_index))
-    # Expecting form values as answers
     sorted_answers = list(sorted_form.values())
+    sorted_answers = [
+        str(answer) for answer in sorted_answers
+    ]  # XXX: Is this required?
     return sorted_answers
+
+
+def _parse_user_answer(user_answer, is_weekday=False):
+    if not user_answer:
+        return
+    user_answer = user_answer.strip()
+    if is_weekday:
+        return sanitize_weekday_string(user_answer)
+    try:
+        user_answer = float(user_answer)
+    except Exception as e:
+        raise ValueError(
+            f"Invalid answer '{user_answer}'. Error: {e}. Answer must be "
+            "numeric."
+        ) from e
+    return str(user_answer)
 
 
 def compute_quiz_results(quiz, submission):
@@ -36,6 +55,8 @@ def compute_quiz_results(quiz, submission):
             The question text.
         - "answer" : str
             The correct answer to the question.
+        - "is_weekday" : bool
+            If True, the question is treated as a weekday string.
     submission : dict
         A dictionary containing the user's answers. The keys are expected to be
         in the format "answer_<index>", where <index> is the index of the question
@@ -57,13 +78,23 @@ def compute_quiz_results(quiz, submission):
     user_answers = _collect_user_answers(
         submitted_answers=submission, total_expected_answers=len(quiz)
     )
-    questions, correct_answers = zip(*[(q["question"], q["answer"]) for q in quiz])
+    quiz = [(q["question"], q["answer"], q["is_weekday"]) for q in quiz]
     results = []
-    for question, correct_answer, user_answer in zip(
-        questions, correct_answers, user_answers
-    ):
-        user_answer = parse_user_answer(user_answer)
-        correct = user_answer == correct_answer
+    for quiz_elem, user_answer in zip(quiz, user_answers):
+        question, correct_answer, is_weekday = quiz_elem
+        user_answer = _parse_user_answer(user_answer, is_weekday)
+        if user_answer is None:
+            correct = False
+        elif is_weekday:
+            correct = user_answer == correct_answer
+        else:
+            correct = correct_answer.startswith(user_answer)
+            correct_answer = float(correct_answer)
+            correct_answer = (
+                f"{correct_answer:.10f}"
+                if correct_answer % 1
+                else f"{correct_answer:.0f}"
+            )
         results.append(
             {
                 "question": question,
