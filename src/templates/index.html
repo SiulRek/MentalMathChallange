@@ -3,10 +3,15 @@
 <head><title>Calculator Play</title></head>
 <body>
   <h1>Mental Math Challenge</h1>
+
+  {% if error %}
+    <p style="color:red;"><strong>Error:</strong> {{ error }}</p>
+  {% endif %}
+
   <form action="{{ url_for('start') }}" method="post">
-    <label for="config">Configuration (e.g., questions=5):</label>
+    <label for="config">Configuration:</label>
     <br>
-    <textarea id="config" name="config" rows="15" cols="50" style="display: block; margin: 10px 0;"></textarea>
+    <textarea id="config" name="config" rows="15" cols="50" style="display: block; margin: 10px 0;">{{ config_text or "" }}</textarea>
     <br>
     <button type="submit">Start</button>
   </form>

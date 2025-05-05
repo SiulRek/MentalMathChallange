@@ -2,7 +2,7 @@ import unittest
 
 from src.core.compute_quiz_results import compute_quiz_results
 from src.core.generate_quiz import generate_quiz
-from src.core.parse_config_from_text import parse_config_from_text
+from src.core.parse_config_from_text import _parse_config_from_text
 
 
 class TestQuizIntegration(unittest.TestCase):
@@ -17,7 +17,7 @@ date: 1
   start 2020
   end 2020
 """
-        parsed = parse_config_from_text(config_text)
+        parsed = _parse_config_from_text(config_text)
         quiz = generate_quiz(parsed)
 
         self.assertEqual(len(quiz), 2)
@@ -53,7 +53,7 @@ date: 1
   op +
   int 1 1
 """
-        parsed = parse_config_from_text(config_text)
+        parsed = _parse_config_from_text(config_text)
         quiz = generate_quiz(parsed)
 
         user_answers = {
@@ -74,7 +74,7 @@ date: 1
   op *
   int 1 1
 """
-        parsed = parse_config_from_text(config_text)
+        parsed = _parse_config_from_text(config_text)
         quiz = generate_quiz(parsed)
 
         user_answers = {"answer_0": "not_a_number"}
@@ -88,7 +88,7 @@ date: 1
   op +
   float 2.0 2.0
 """
-        parsed = parse_config_from_text(config_text)
+        parsed = _parse_config_from_text(config_text)
         quiz = generate_quiz(parsed)
 
         correct = float(quiz[0]["answer"])
@@ -110,7 +110,7 @@ date: 1
   op /
   int 1 1
 """
-        parsed = parse_config_from_text(config_text)
+        parsed = _parse_config_from_text(config_text)
         quiz = generate_quiz(parsed)
         user_answers = {"answer_0": quiz[0]["answer"]}
         results = compute_quiz_results(quiz, user_answers)
@@ -122,7 +122,7 @@ date: 1
   op /
   int 0 0
 """
-        parsed = parse_config_from_text(config_text)
+        parsed = _parse_config_from_text(config_text)
         quiz = generate_quiz(parsed)
         self.assertEqual(quiz[0]["answer"], "inf")
         user_answers = {"answer_0": "inf"}
@@ -134,7 +134,7 @@ date: 1
   start 2020
   end 2020
 """
-        parsed = parse_config_from_text(config_text)
+        parsed = _parse_config_from_text(config_text)
         quiz = generate_quiz(parsed)
         user_answers = {"answer_0": quiz[0]["answer"].lower()}
         results = compute_quiz_results(quiz, user_answers)
@@ -146,7 +146,7 @@ date: 1
   op +
   float 2.987654321 2.987654321
 """
-        parsed = parse_config_from_text(config_text)
+        parsed = _parse_config_from_text(config_text)
         quiz = generate_quiz(parsed)
         truncated = str(round(float(quiz[0]["answer"]), 6))
         user_answers = {"answer_0": truncated}
@@ -160,7 +160,7 @@ date: 1
   op *
 """
         with self.assertRaises(AssertionError):
-            parse_config_from_text(config_text)
+            _parse_config_from_text(config_text)
 
 
 if __name__ == "__main__":

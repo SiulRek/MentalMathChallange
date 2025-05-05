@@ -2,6 +2,11 @@ from src.core.date_utils import sanitize_weekday_string
 from src.core.generate_quiz import MAX_PRECISION
 
 
+class UserResponseError(Exception):
+    """Base class for user answer processing errors."""
+    pass
+
+
 def _collect_user_answers(submitted_answers, total_expected_answers):
     def _get_index(item):
         try:
@@ -14,12 +19,10 @@ def _collect_user_answers(submitted_answers, total_expected_answers):
             )
 
     for i in range(total_expected_answers):
-        try:
-            key = f"answer_{i}"
-            if key not in submitted_answers:
-                submitted_answers[key] = ""
-        except (ValueError, IndexError):
-            pass
+        key = f"answer_{i}"
+        if key not in submitted_answers:
+            submitted_answers[key] = ""
+
     sorted_form = dict(sorted(submitted_answers.items(), key=_get_index))
     sorted_answers = list(sorted_form.values())
     sorted_answers = [
@@ -33,12 +36,19 @@ def _parse_user_answer(user_answer, is_weekday=False):
         return
     user_answer = user_answer.strip()
     if is_weekday:
-        return sanitize_weekday_string(user_answer)
+        try:
+            return sanitize_weekday_string(user_answer)
+        except ValueError as e:
+            raise UserResponseError(
+                f"Invalid weekday string '{user_answer}'. Error: {e}. "
+                "Expected one of ['monday', 'tuesday', 'wednesday', "
+                "'thursday', 'friday', 'saturday', 'sunday']."
+            )
     try:
         user_answer = float(user_answer)
-    except Exception as e:
-        raise ValueError(
-            f"Invalid answer '{user_answer}'. Error: {e}. Answer must be "
+    except ValueError as e:
+        raise UserResponseError(
+            f"Invalid answer '{user_answer}'. Answer must be "
             "numeric."
         ) from e
     user_answer = str(user_answer)
@@ -90,7 +100,11 @@ def compute_quiz_results(quiz, submission):
         elif is_weekday:
             correct = user_answer == correct_answer
         else:
-            correct = correct_answer.startswith(user_answer)
+            correct = (
+                correct_answer.startswith(user_answer)
+                if len(correct_answer) > len(user_answer)
+                else user_answer.startswith(correct_answer)
+            )
             # Prettify the correct answer
             correct_answer = f"{float(correct_answer):.{MAX_PRECISION}f}"
             correct_answer = (

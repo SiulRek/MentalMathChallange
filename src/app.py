@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, session
 
-from src.core.compute_quiz_results import compute_quiz_results
+from src.core.compute_quiz_results import compute_quiz_results, UserResponseError
 from src.core.generate_quiz import generate_quiz
-from src.core.parse_config_from_text import parse_config_from_text
+from src.core.parse_config_from_text import parse_config_from_text, UserConfigError
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -16,8 +16,11 @@ def index():
 @app.route("/start", methods=["POST"])
 def start():
     config_text = request.form.get("config", "")
-    config = parse_config_from_text(config_text)
-    quiz = generate_quiz(config)
+    try:
+        config = parse_config_from_text(config_text)
+        quiz = generate_quiz(config)
+    except UserConfigError as e:
+        return render_template("index.html", config_text=config_text, error=str(e))
     session["quiz"] = quiz
     return render_template("quiz.html", quiz=quiz)
 
@@ -25,7 +28,10 @@ def start():
 @app.route("/submit", methods=["POST"])
 def submit():
     quiz = session.get("quiz", [])
-    results = compute_quiz_results(quiz, submission=request.form)
+    try:
+        results = compute_quiz_results(quiz, submission=request.form)
+    except UserResponseError as e:
+        return render_template("quiz.html", quiz=quiz, error=str(e))
     return render_template("result.html", results=results)
 
 
