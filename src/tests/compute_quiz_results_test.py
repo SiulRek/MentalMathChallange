@@ -1,6 +1,6 @@
 import unittest
 
-from src.core.compute_quiz_results import compute_quiz_results
+from src.core.compute_quiz_results import compute_quiz_results, UserResponseError
 
 
 class TestComputeQuizResults(unittest.TestCase):
@@ -27,7 +27,7 @@ class TestComputeQuizResults(unittest.TestCase):
     def test_incorrect_format_numeric(self):
         quiz = [{"question": "3 * 3", "answer": "9.0", "is_weekday": False}]
         submission = {"answer_0": "nine"}
-        with self.assertRaises(ValueError):
+        with self.assertRaises(UserResponseError):
             compute_quiz_results(quiz, submission)
 
     def test_all_correct_weekdays(self):
@@ -44,7 +44,7 @@ class TestComputeQuizResults(unittest.TestCase):
             {"question": "Day of 2023-05-04", "answer": "thursday", "is_weekday": True}
         ]
         submission = {"answer_0": "noday"}
-        with self.assertRaises(ValueError):
+        with self.assertRaises(UserResponseError):
             compute_quiz_results(quiz, submission)
 
     def test_missing_answers_are_handled(self):

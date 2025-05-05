@@ -1,6 +1,6 @@
 import unittest
 
-from src.core.compute_quiz_results import compute_quiz_results
+from src.core.compute_quiz_results import compute_quiz_results, UserResponseError
 from src.core.generate_quiz import generate_quiz
 from src.core.parse_config_from_text import _parse_config_from_text
 
@@ -79,7 +79,7 @@ date: 1
 
         user_answers = {"answer_0": "not_a_number"}
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(UserResponseError):
             compute_quiz_results(quiz, user_answers)
 
     def test_fuzzy_float_answer_check(self):

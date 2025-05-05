@@ -1,5 +1,5 @@
 import unittest
-from src.core.generate_quiz import generate_quiz
+from src.core.generate_quiz import generate_quiz, UserConfigError
 
 
 class TestGenerateQuiz(unittest.TestCase):
@@ -89,7 +89,7 @@ class TestGenerateQuiz(unittest.TestCase):
                 1,
             )
         ]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(UserConfigError):
             generate_quiz(config)
 
     def test_step_rescaling_logic(self):
@@ -110,7 +110,7 @@ class TestGenerateQuiz(unittest.TestCase):
         self.assertEqual(len(quiz), 1)
         question = quiz[0]["question"]
         self.assertTrue(question.startswith("1.0 + 2.0") or question.startswith("1 + 2"))
-        self.assertEqual(quiz[0]["answer"], "3.0")
+        self.assertEqual(quiz[0]["answer"], "3")
 
     def test_zero_division_handling(self):
         config = [
