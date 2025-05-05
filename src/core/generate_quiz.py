@@ -1,10 +1,19 @@
 import random
 
 from src.core.date_utils import random_date, derive_weekday
+from src.core.parse_config_from_text import UserConfigError, SUPPORTED_OPERATORS
 
 MAX_PRECISION = 10  # Max number of decimal places to retain in the result
 
-
+def _assert_valid_operators(ops):
+    ops = ops if isinstance(ops, list) else [ops]
+    for op in ops:
+        if op not in SUPPORTED_OPERATORS:
+            raise UserConfigError(
+                f"Invalid operator '{op}'. Supported operators are: "
+                f"{', '.join(SUPPORTED_OPERATORS)}."
+            )
+        
 def _generate_expression(expr_config):
     if expr_config["type"] == "date":
         start_year = expr_config.get("start_year", 1900)
@@ -12,33 +21,26 @@ def _generate_expression(expr_config):
         assert end_year >= start_year, "End year must be greater or equal to start year"
         return random_date(start_year, end_year), True
     if expr_config["type"] == "math":
-        elements = expr_config.get("elements", [])
-        assert len(elements) > 0, "At least one element must be defined"
+        elements = expr_config["elements"]
         expr = ""
         for elem in elements:
             if elem["type"] in ["int", "float"]:
                 start = elem.get("start", 0)
                 end = elem.get("end", None)
-                assert end is not None, "At least End must be defined"
-                assert end >= start, "End must be greater or equal to start"
+                assert end is not None, "At least End must be defined in int/float"
+                assert end >= start, "End must be greater or equal to start in int/float"
 
                 if elem["type"] == "int":
                     expr += str(random.randint(start, end))
                 elif elem["type"] == "float":
                     d = random.uniform(start, end)
-                    expr += f"{d:.{MAX_PRECISION}f}"
+                    d = f"{d:.{MAX_PRECISION}f}"
+                    expr += d.rstrip("0").rstrip(".") if "." in d else d
             elif elem["type"] == "operator":
                 op = elem["value"]
                 if isinstance(op, list):
                     op = random.choice(op)
-                assert op in [
-                    "+",
-                    "-",
-                    "*",
-                    "/",
-                    "//",
-                    "%",
-                ], "Operator must be one of +, -, *, /"
+                _assert_valid_operators(op)
                 expr += op
             else:
                 raise ValueError(
@@ -66,8 +68,7 @@ def _evaluate_expression(expr, is_weekday=False):
             f"Invalid expression '{expr}'. Error: {e}. Expression must be " "numeric."
         ) from e
 
-    res = str(res)
-    return res.rstrip("0").rstrip(".") if "." in res else res
+    return str(res)
 
 
 def generate_quiz(config):
@@ -113,7 +114,12 @@ def generate_quiz(config):
     quiz = []
     for expr_config, n in config:
         for _ in range(n):
-            expr, is_weekday = _generate_expression(expr_config)
+            try:
+                expr, is_weekday = _generate_expression(expr_config)
+            except AssertionError as e:
+                raise UserConfigError(
+                    f"Invalid configuration: {e}"
+                )
             answer = _evaluate_expression(expr, is_weekday=is_weekday)
             quiz.append({"question": expr, "answer": answer, "is_weekday": is_weekday})
     return quiz

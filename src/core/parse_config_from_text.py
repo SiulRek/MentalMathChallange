@@ -1,3 +1,5 @@
+SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%"}
+
 class UserConfigError(Exception):
     """Base class for user configuration errors."""
 
@@ -13,7 +15,7 @@ def _parse_tokens_to_kwargs(tokens, keys, type_map):
 
 
 def _assert_valid_operators(ops):
-    reminder = set(ops) - {"+", "-", "*", "/", "//", "%"}
+    reminder = set(ops) - SUPPORTED_OPERATORS
     assert not reminder, f"Invalid operator(s): {reminder}"
 
 
