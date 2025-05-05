@@ -2,6 +2,8 @@ import random
 
 from src.core.date_utils import random_date, derive_weekday
 
+MAX_PRECISION = 10  # Max number of decimal places to retain in the result
+
 
 def _generate_expression(expr_config):
     if expr_config["type"] == "date":
@@ -23,7 +25,8 @@ def _generate_expression(expr_config):
                 if elem["type"] == "int":
                     expr += str(random.randint(start, end))
                 elif elem["type"] == "float":
-                    expr += str(random.uniform(start, end))
+                    d = random.uniform(start, end)
+                    expr += f"{d:.{MAX_PRECISION}f}"
             elif elem["type"] == "operator":
                 op = elem["value"]
                 if isinstance(op, list):
@@ -62,7 +65,9 @@ def _evaluate_expression(expr, is_weekday=False):
         raise ValueError(
             f"Invalid expression '{expr}'. Error: {e}. Expression must be " "numeric."
         ) from e
-    return str(res)
+
+    res = str(res)
+    return res.rstrip("0").rstrip(".") if "." in res else res
 
 
 def generate_quiz(config):
@@ -71,10 +76,27 @@ def generate_quiz(config):
 
     Parameters
     ----------
-    config : dict
-        A dictionary containing the configuration for the quiz. The
-        configuration should specify the type of expressions to generate and
-        their parameters.
+    config : list of tuple (dict, int)
+        A list of (expression_config, count) pairs, where:
+        - expression_config : dict
+            Specifies the expression generation rules. Must include:
+            - "type": str, one of {"date", "math"}.
+              - If "type" == "date":
+                  Optional:
+                    - "start_year": int (default=1900)
+                    - "end_year": int (default=2050)
+              - If "type" == "math":
+                  - "elements": list of dicts, each with:
+                      - "type": str, one of {"int", "float", "operator"}
+                          - If "int" or "float":
+                              - "start": int or float
+                              - "end": int or float
+                          - If "operator":
+                              - "value": str or list of str, one or more of
+                                {"+", "-", "*", "/", "//", "%"}
+        - count : int
+            The number of expressions to generate with the given config.
+
 
     Returns
     -------
@@ -93,7 +115,5 @@ def generate_quiz(config):
         for _ in range(n):
             expr, is_weekday = _generate_expression(expr_config)
             answer = _evaluate_expression(expr, is_weekday=is_weekday)
-            quiz.append(
-                {"question": expr, "answer": answer, "is_weekday": is_weekday}
-            )
+            quiz.append({"question": expr, "answer": answer, "is_weekday": is_weekday})
     return quiz

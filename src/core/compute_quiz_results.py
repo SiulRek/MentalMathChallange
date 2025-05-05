@@ -1,4 +1,5 @@
 from src.core.date_utils import sanitize_weekday_string
+from src.core.generate_quiz import MAX_PRECISION
 
 
 def _collect_user_answers(submitted_answers, total_expected_answers):
@@ -40,7 +41,8 @@ def _parse_user_answer(user_answer, is_weekday=False):
             f"Invalid answer '{user_answer}'. Error: {e}. Answer must be "
             "numeric."
         ) from e
-    return str(user_answer)
+    user_answer = str(user_answer)
+    return user_answer.rstrip("0").rstrip(".") if "." in user_answer else user_answer
 
 
 def compute_quiz_results(quiz, submission):
@@ -89,11 +91,12 @@ def compute_quiz_results(quiz, submission):
             correct = user_answer == correct_answer
         else:
             correct = correct_answer.startswith(user_answer)
-            correct_answer = float(correct_answer)
+            # Prettify the correct answer
+            correct_answer = f"{float(correct_answer):.{MAX_PRECISION}f}"
             correct_answer = (
-                f"{correct_answer:.10f}"
-                if correct_answer % 1
-                else f"{correct_answer:.0f}"
+                correct_answer.rstrip("0").rstrip(".")
+                if "." in correct_answer
+                else correct_answer
             )
         results.append(
             {
