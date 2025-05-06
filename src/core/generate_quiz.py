@@ -74,6 +74,27 @@ def _generate_expression(expr_blueprint):
     )
 
 
+def _prettify_expression(expr, category):
+    month_names = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ]
+    if category == "date":
+        year, month, day = expr.split("-")
+        month = month_names[int(month) - 1]
+        return f"{month} {day}, {year}"
+    return expr
+
 def _evaluate_expression(expr, category=False):
     if category == "date":
         return derive_weekday(expr)
@@ -109,7 +130,7 @@ def generate_quiz(blueprint):
               - If "category" == "math":
                   - "elements": list of dicts, each with:
                       - "type": str, one of:
-                        {"int", "float", "operator", "float.<precision>"}
+                        {"int", "float", "float.<precision>", "operator"}
                           - If "int" or "float":
                               - "start": int or float
                               - "end": int or float
@@ -143,6 +164,7 @@ def generate_quiz(blueprint):
             except AssertionError as e:
                 raise UserConfigError(f"Invalid blueprinturation: {e}")
             answer = _evaluate_expression(expr, category=category)
+            expr = _prettify_expression(expr, category=category)
             quiz.append(
                 {"question": expr, "answer": answer, "category": category}
             )

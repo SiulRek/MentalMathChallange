@@ -58,7 +58,7 @@ class TestGenerateQuiz(BaseTestCase):
         self.assertEqual(len(quiz), 3)
         for q in quiz:
             self.assertEqual(q["category"], "date")
-            self.assertRegex(q["question"], r"\d{4}-\d{2}-\d{2}")
+            self.assertRegex(q["question"], r"\w+ \d{2}, \d{4}")
             self.assertIn(
                 q["answer"],
                 [
