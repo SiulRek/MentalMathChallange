@@ -1,7 +1,7 @@
 SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%"}
 
 class UserConfigError(Exception):
-    """Base class for user configuration errors."""
+    """Base class for user blueprinturation errors."""
 
     pass
 
@@ -38,9 +38,9 @@ def _assert_valid_math_expression_elements(elements):
         )
 
 
-def _parse_config_from_text(config_text):
-    configs = []
-    lines = config_text.strip().splitlines()
+def _parse_blueprint_from_text(blueprint_text):
+    blueprints = []
+    lines = blueprint_text.strip().splitlines()
     i = 0
 
     while i < len(lines):
@@ -52,7 +52,7 @@ def _parse_config_from_text(config_text):
         # Parse the block header
         if ":" not in line:
             raise UserConfigError(
-                f"Invalid config block start: '{line}'"
+                f"Invalid blueprint block start: '{line}'"
             )
 
         try:
@@ -61,9 +61,9 @@ def _parse_config_from_text(config_text):
             count = int(count_element.strip())
         except ValueError as e:
             raise UserConfigError(
-                f"Invalid config block start: '{line}'"
+                f"Invalid blueprint block start: '{line}'"
             ) from e
-        expr_config = {"category": expr_cat}
+        expr_blueprint = {"category": expr_cat}
         i += 1
 
         # Parse the block body
@@ -112,11 +112,11 @@ def _parse_config_from_text(config_text):
                         "start must have exactly 1 argument"
                     )
                     assert tokens[1].isdigit(), "start must be a number"
-                    expr_config["start_year"] = int(tokens[1])
+                    expr_blueprint["start_year"] = int(tokens[1])
                 elif key == "end":
                     assert len(tokens) == 2, "end must have exactly 1 argument"
                     assert tokens[1].isdigit(), "end must be a number"
-                    expr_config["end_year"] = int(tokens[1])
+                    expr_blueprint["end_year"] = int(tokens[1])
                 else:
                     raise UserConfigError(
                         f"Unknown date sub-key: '{key}'"
@@ -131,22 +131,23 @@ def _parse_config_from_text(config_text):
 
         if expr_cat == "math":
             _assert_valid_math_expression_elements(elements)
-            expr_config["elements"] = elements
+            expr_blueprint["elements"] = elements
 
-        configs.append((expr_config, count))
+        blueprints.append((expr_blueprint, count))
 
-    return configs
+    return blueprints
 
 
-def parse_config_from_text(config_text):
+def parse_blueprint_from_text(blueprint_text):
     """
-    Parses human-friendly configuration text into structured expression configs.
+    Parses human-friendly blueprinturation text into structured expression
+    blueprints.
 
     Supported Syntax:
     - Each block starts with a header line in the form: '<type>: <count>'
         - <type>: 'math' or 'date'
         - <count>: number of expressions to generate
-    - The lines that follow (indented) define the configuration parameters:
+    - The lines that follow (indented) define the blueprinturation parameters:
         For math:
           - int <start> <end>
           - float <start> <end>
@@ -168,15 +169,15 @@ def parse_config_from_text(config_text):
 
     Parameters
     ----------
-    config_text : str
-        A string representation of the configuration written in a concise,
+    blueprint_text : str
+        A string representation of the blueprinturation written in a concise,
         human-friendly format, as described above.
 
     Returns
     -------
     list of tuple
-        A list of (expression_config, count) pairs, where:
-        expression_config : dict
+        A list of (expression_blueprint, count) pairs, where:
+        expression_blueprint : dict
             Specifies the expression generation rules. Must include:
             - "category" : {"date", "math"}
               - If "category" == "date":
@@ -192,11 +193,11 @@ def parse_config_from_text(config_text):
                               - "value" : str or list of str, one or more of
                                 {"+", "-", "*", "/", "//", "%"}
         count : int
-            The number of expressions to generate with the given config.
+            The number of expressions to generate with the given blueprint.
     """
     try:
-        return _parse_config_from_text(config_text)
+        return _parse_blueprint_from_text(blueprint_text)
     except AssertionError as e:
         raise UserConfigError(
-            f"Invalid configuration: {e}"
+            f"Invalid blueprinturation: {e}"
         )

@@ -7,7 +7,7 @@ from src.tests.utils.base_test_case import BaseTestCase
 class TestGenerateQuiz(BaseTestCase):
 
     def test_generate_single_math_quiz_hardcoded(self):
-        config = [
+        blueprint = [
             (
                 {
                     "category": "math",
@@ -20,14 +20,14 @@ class TestGenerateQuiz(BaseTestCase):
                 1,
             )
         ]
-        quiz = generate_quiz(config)
+        quiz = generate_quiz(blueprint)
         self.assertEqual(len(quiz), 1)
         self.assertEqual(quiz[0]["question"], "2 + 3")
         self.assertEqual(quiz[0]["answer"], "5")
         self.assertFalse(quiz[0]["is_weekday"])
 
     def test_generate_multiple_quizzes_fixed_output(self):
-        config = [
+        blueprint = [
             (
                 {
                     "category": "math",
@@ -40,7 +40,7 @@ class TestGenerateQuiz(BaseTestCase):
                 3,
             )
         ]
-        quiz = generate_quiz(config)
+        quiz = generate_quiz(blueprint)
         self.assertEqual(len(quiz), 3)
         for q in quiz:
             self.assertEqual(q["question"], "1 * 5")
@@ -48,13 +48,13 @@ class TestGenerateQuiz(BaseTestCase):
             self.assertFalse(q["is_weekday"])
 
     def test_generate_date_question(self):
-        config = [
+        blueprint = [
             (
                 {"category": "date", "start_year": 2000, "end_year": 2000},
                 3,
             )
         ]
-        quiz = generate_quiz(config)
+        quiz = generate_quiz(blueprint)
         self.assertEqual(len(quiz), 3)
         for q in quiz:
             self.assertTrue(q["is_weekday"])
@@ -73,12 +73,12 @@ class TestGenerateQuiz(BaseTestCase):
             )
 
     def test_invalid_expr_type_raises(self):
-        config = [({"category": "invalid_type"}, 1)]
+        blueprint = [({"category": "invalid_type"}, 1)]
         with self.assertRaises(ValueError):
-            generate_quiz(config)
+            generate_quiz(blueprint)
 
     def test_invalid_operator_raises(self):
-        config = [
+        blueprint = [
             (
                 {
                     "category": "math",
@@ -92,10 +92,10 @@ class TestGenerateQuiz(BaseTestCase):
             )
         ]
         with self.assertRaises(UserConfigError):
-            generate_quiz(config)
+            generate_quiz(blueprint)
 
     def test_step_rescaling_logic(self):
-        config = [
+        blueprint = [
             (
                 {
                     "category": "math",
@@ -108,7 +108,7 @@ class TestGenerateQuiz(BaseTestCase):
                 1,
             )
         ]
-        quiz = generate_quiz(config)
+        quiz = generate_quiz(blueprint)
         self.assertEqual(len(quiz), 1)
         question = quiz[0]["question"]
         self.assertTrue(
@@ -117,7 +117,7 @@ class TestGenerateQuiz(BaseTestCase):
         self.assertEqual(quiz[0]["answer"], "3")
 
     def test_zero_division_handling(self):
-        config = [
+        blueprint = [
             (
                 {
                     "category": "math",
@@ -130,12 +130,12 @@ class TestGenerateQuiz(BaseTestCase):
                 1,
             )
         ]
-        quiz = generate_quiz(config)
+        quiz = generate_quiz(blueprint)
         self.assertEqual(quiz[0]["question"], "1 / 0")
         self.assertEqual(quiz[0]["answer"], "inf")
 
     def test_invalid_element_type_raises(self):
-        config = [
+        blueprint = [
             (
                 {
                     "category": "math",
@@ -147,10 +147,10 @@ class TestGenerateQuiz(BaseTestCase):
             )
         ]
         with self.assertRaises(ValueError):
-            generate_quiz(config)
+            generate_quiz(blueprint)
 
     def test_generate_quiz_with_float_precision_pattern(self):
-        config = [
+        blueprint = [
             (
                 {
                     "category": "math",
@@ -171,7 +171,7 @@ class TestGenerateQuiz(BaseTestCase):
                 1,
             )
         ]
-        quiz = generate_quiz(config)
+        quiz = generate_quiz(blueprint)
         self.assertEqual(len(quiz), 1)
         question = quiz[0]["question"]
         answer = quiz[0]["answer"]

@@ -5,14 +5,14 @@ from src.core.compute_quiz_results import (
     UserResponseError,
 )
 from src.core.generate_quiz import generate_quiz
-from src.core.parse_config_from_text import _parse_config_from_text
+from src.core.parse_blueprint_from_text import _parse_blueprint_from_text
 from src.tests.utils.base_test_case import BaseTestCase
 
 
 class TestQuizIntegration(BaseTestCase):
 
     def test_full_integration_math_and_date(self):
-        config_text = """math: 1
+        blueprint_text = """math: 1
   int 1 1
   op +
   int 2 2
@@ -21,7 +21,7 @@ date: 1
   start 2020
   end 2020
 """
-        parsed = _parse_config_from_text(config_text)
+        parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         self.assertEqual(len(quiz), 2)
@@ -50,12 +50,12 @@ date: 1
         self.assertEqual(results[1]["user_answer"], date_question["answer"])
 
     def test_partial_answers_and_incorrect(self):
-        config_text = """math: 2
+        blueprint_text = """math: 2
   int 1 1
   op +
   int 1 1
 """
-        parsed = _parse_config_from_text(config_text)
+        parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         user_answers = {
@@ -70,12 +70,12 @@ date: 1
         self.assertFalse(results[1]["is_correct"])
 
     def test_invalid_user_input_format(self):
-        config_text = """math: 1
+        blueprint_text = """math: 1
   int 1 1
   op *
   int 1 1
 """
-        parsed = _parse_config_from_text(config_text)
+        parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         user_answers = {"answer_0": "not_a_number"}
@@ -84,12 +84,12 @@ date: 1
             compute_quiz_results(quiz, user_answers)
 
     def test_fuzzy_float_answer_check(self):
-        config_text = """math: 1
+        blueprint_text = """math: 1
   float 1.0 1.0
   op +
   float 2.0 2.0
 """
-        parsed = _parse_config_from_text(config_text)
+        parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         correct = float(quiz[0]["answer"])
@@ -101,26 +101,26 @@ date: 1
         self.assertTrue(results[0]["is_correct"])
 
     def test_integration_multiple_operators(self):
-        config_text = """math: 1
+        blueprint_text = """math: 1
   int 1 1
   op + - *
   int 2 2
   op /
   int 1 1
 """
-        parsed = _parse_config_from_text(config_text)
+        parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
         user_answers = {"answer_0": quiz[0]["answer"]}
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
 
     def test_integration_zero_division(self):
-        config_text = """math: 1
+        blueprint_text = """math: 1
   int 1 1
   op /
   int 0 0
 """
-        parsed = _parse_config_from_text(config_text)
+        parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
         self.assertEqual(quiz[0]["answer"], "inf")
         user_answers = {"answer_0": "inf"}
@@ -128,37 +128,37 @@ date: 1
         self.assertTrue(results[0]["is_correct"])
 
     def test_integration_weekday_case_insensitivity(self):
-        config_text = """date: 1
+        blueprint_text = """date: 1
   start 2020
   end 2020
 """
-        parsed = _parse_config_from_text(config_text)
+        parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
         user_answers = {"answer_0": quiz[0]["answer"].lower()}
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
 
     def test_integration_float_precision_mismatch(self):
-        config_text = """math: 1
+        blueprint_text = """math: 1
   float 1.123456789 1.123456789
   op +
   float 2.987654321 2.987654321
 """
-        parsed = _parse_config_from_text(config_text)
+        parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
         truncated = str(round(float(quiz[0]["answer"]), 6))
         user_answers = {"answer_0": truncated}
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
 
-    def test_integration_invalid_config_rejected(self):
-        config_text = """math: 1
+    def test_integration_invalid_blueprint_rejected(self):
+        blueprint_text = """math: 1
   op +
   op -
   op *
 """
         with self.assertRaises(AssertionError):
-            _parse_config_from_text(config_text)
+            _parse_blueprint_from_text(blueprint_text)
 
 
 if __name__ == "__main__":

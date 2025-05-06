@@ -55,7 +55,7 @@ class TestResultLogger:
         Parameters
         ----------
         logger : logging.Logger
-            Logger object to configure.
+            Logger object to blueprinture.
         file_path : str
             File path for logging.
         level : int, optional

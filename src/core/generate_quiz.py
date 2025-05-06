@@ -2,7 +2,10 @@ import random
 import re
 
 from src.core.date_utils import random_date, derive_weekday
-from src.core.parse_config_from_text import UserConfigError, SUPPORTED_OPERATORS
+from src.core.parse_blueprint_from_text import (
+    UserConfigError,
+    SUPPORTED_OPERATORS,
+)
 
 MAX_PRECISION = 10  # Max number of decimal places to retain in the result
 
@@ -17,16 +20,16 @@ def _assert_valid_operators(ops):
             )
 
 
-def _generate_expression(expr_config):
-    if expr_config["category"] == "date":
-        start_year = expr_config.get("start_year", 1900)
-        end_year = expr_config.get("end_year", 2050)
-        assert end_year >= start_year, (
-            "End year must be greater or equal to start year"
-        )
+def _generate_expression(expr_blueprint):
+    if expr_blueprint["category"] == "date":
+        start_year = expr_blueprint.get("start_year", 1900)
+        end_year = expr_blueprint.get("end_year", 2050)
+        assert (
+            end_year >= start_year
+        ), "End year must be greater or equal to start year"
         return random_date(start_year, end_year), True
-    if expr_config["category"] == "math":
-        elements = expr_config["elements"]
+    if expr_blueprint["category"] == "math":
+        elements = expr_blueprint["elements"]
         expr = ""
         for elem in elements:
             type_ = elem["type"]
@@ -34,9 +37,9 @@ def _generate_expression(expr_config):
             if elem["type"] in ["int", "float"] or float_precision_match:
                 start = elem.get("start", 0)
                 end = elem.get("end", None)
-                assert end is not None, (
-                    "At least 'end' must be defined in 'int/float' range."
-                )
+                assert (
+                    end is not None
+                ), "At least 'end' must be defined in 'int/float' range."
                 assert (
                     end >= start
                 ), "End must be greater or equal to start in int/float"
@@ -66,8 +69,8 @@ def _generate_expression(expr_config):
             expr += " "
         return expr.rstrip(), False
     raise ValueError(
-        f"Invalid expression category '{expr_config['category']}'. Expected 'date' "
-        "or 'math'."
+        f"Invalid expression category '{expr_blueprint['category']}'. Expected" 
+        " 'date' or 'math'."
     )
 
 
@@ -87,15 +90,15 @@ def _evaluate_expression(expr, is_weekday=False):
     return str(res)
 
 
-def generate_quiz(config):
+def generate_quiz(blueprint):
     """
-    Generate a quiz based on the provided configuration text.
+    Generate a quiz based on the provided blueprinturation text.
 
     Parameters
     ----------
-    config : list of tuple (dict, int)
-        A list of (expression_config, count) pairs, where:
-        - expression_config : dict
+    blueprint : list of tuple (dict, int)
+        A list of (expression_blueprint, count) pairs, where:
+        - expression_blueprint : dict
             Specifies the expression generation rules. Must include:
             - "category": str, one of {"date", "math"}.
               - If "category" == "date":
@@ -110,7 +113,7 @@ def generate_quiz(config):
                               - "start": int or float
                               - "end": int or float
                           - If "float.<precision>":
-                              - Precision can be set manually after "float." 
+                              - Precision can be set manually after "float."
                                 (e.g., "float.3" for 3 decimal places).
                               - "start": float
                               - "end": float
@@ -118,7 +121,7 @@ def generate_quiz(config):
                               - "value": str or list of str, one or more of
                                 {"+", "-", "*", "/", "//", "%"}
         - count : int
-            The number of expressions to generate with the given config.
+            The number of expressions to generate with the given blueprint.
 
     Returns
     -------
@@ -133,12 +136,14 @@ def generate_quiz(config):
             If False, the expression is treated as a mathematical expression.
     """
     quiz = []
-    for expr_config, n in config:
+    for expr_blueprint, n in blueprint:
         for _ in range(n):
             try:
-                expr, is_weekday = _generate_expression(expr_config)
+                expr, is_weekday = _generate_expression(expr_blueprint)
             except AssertionError as e:
-                raise UserConfigError(f"Invalid configuration: {e}")
+                raise UserConfigError(f"Invalid blueprinturation: {e}")
             answer = _evaluate_expression(expr, is_weekday=is_weekday)
-            quiz.append({"question": expr, "answer": answer, "is_weekday": is_weekday})
+            quiz.append(
+                {"question": expr, "answer": answer, "is_weekday": is_weekday}
+            )
     return quiz

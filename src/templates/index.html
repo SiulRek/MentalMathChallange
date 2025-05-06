@@ -9,9 +9,9 @@
   {% endif %}
 
   <form action="{{ url_for('start') }}" method="post">
-    <label for="config">Configuration:</label>
+    <label for="blueprint">Blueprint:</label>
     <br>
-    <textarea id="config" name="config" rows="15" cols="50" style="display: block; margin: 10px 0;">{{ config_text or "" }}</textarea>
+    <textarea id="blueprint" name="blueprint" rows="15" cols="50" style="display: block; margin: 10px 0;">{{ blueprint_text or "" }}</textarea>
     <br>
     <button type="submit">Start</button>
   </form>
