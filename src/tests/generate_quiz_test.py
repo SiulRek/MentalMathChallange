@@ -1,4 +1,5 @@
 import unittest
+
 from src.core.generate_quiz import generate_quiz, UserConfigError
 
 
@@ -82,7 +83,8 @@ class TestGenerateQuiz(unittest.TestCase):
                     "type": "math",
                     "elements": [
                         {"type": "int", "start": 1, "end": 5},
-                        {"type": "operator", "value": "^^"},  # invalid
+                        {"type": "operator", "value": "^^"},  
+
                         {"type": "int", "start": 1, "end": 5},
                     ],
                 },
@@ -109,7 +111,9 @@ class TestGenerateQuiz(unittest.TestCase):
         quiz = generate_quiz(config)
         self.assertEqual(len(quiz), 1)
         question = quiz[0]["question"]
-        self.assertTrue(question.startswith("1.0 + 2.0") or question.startswith("1 + 2"))
+        self.assertTrue(
+            question.startswith("1.0 + 2.0") or question.startswith("1 + 2")
+        )
         self.assertEqual(quiz[0]["answer"], "3")
 
     def test_zero_division_handling(self):
@@ -128,7 +132,8 @@ class TestGenerateQuiz(unittest.TestCase):
         ]
         quiz = generate_quiz(config)
         self.assertEqual(quiz[0]["question"], "1 / 0")
-        self.assertEqual(quiz[0]["answer"], "inf")  # handled by ZeroDivisionError
+        self.assertEqual(quiz[0]["answer"], "inf")  
+
 
     def test_invalid_element_type_raises(self):
         config = [
@@ -144,6 +149,38 @@ class TestGenerateQuiz(unittest.TestCase):
         ]
         with self.assertRaises(ValueError):
             generate_quiz(config)
+
+    def test_generate_quiz_with_float_precision_pattern(self):
+        config = [
+            (
+                {
+                    "type": "math",
+                    "elements": [
+                        {"type": "float.4", "start": 1.123456, "end": 1.123456},
+                        {"type": "operator", "value": "+"},
+                        {"type": "float.4", "start": 2.654321, "end": 2.654321},
+                    ],
+                },
+                1,
+            )
+        ]
+        quiz = generate_quiz(config)
+        self.assertEqual(len(quiz), 1)
+        question = quiz[0]["question"]
+        answer = quiz[0]["answer"]
+
+        self.assertIn("+", question)
+        parts = question.split("+")
+        self.assertEqual(len(parts), 2)
+
+        left = parts[0].strip()
+        right = parts[1].strip()
+
+        self.assertRegex(left, r"\d+\.\d{4}")
+        self.assertRegex(right, r"\d+\.\d{4}")
+
+        expected = round(1.1235 + 2.6543, 4)
+        self.assertEqual(float(answer), expected)
 
 
 if __name__ == "__main__":

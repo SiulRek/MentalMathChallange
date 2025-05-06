@@ -1,9 +1,11 @@
 import random
+import re
 
 from src.core.date_utils import random_date, derive_weekday
 from src.core.parse_config_from_text import UserConfigError, SUPPORTED_OPERATORS
 
 MAX_PRECISION = 10  # Max number of decimal places to retain in the result
+
 
 def _assert_valid_operators(ops):
     ops = ops if isinstance(ops, list) else [ops]
@@ -13,7 +15,8 @@ def _assert_valid_operators(ops):
                 f"Invalid operator '{op}'. Supported operators are: "
                 f"{', '.join(SUPPORTED_OPERATORS)}."
             )
-        
+
+
 def _generate_expression(expr_config):
     if expr_config["type"] == "date":
         start_year = expr_config.get("start_year", 1900)
@@ -24,17 +27,26 @@ def _generate_expression(expr_config):
         elements = expr_config["elements"]
         expr = ""
         for elem in elements:
-            if elem["type"] in ["int", "float"]:
+            type_ = elem["type"]
+            float_precision_match = re.match(r"float\.(\d+)", type_)
+            if elem["type"] in ["int", "float"] or float_precision_match:
                 start = elem.get("start", 0)
                 end = elem.get("end", None)
                 assert end is not None, "At least End must be defined in int/float"
-                assert end >= start, "End must be greater or equal to start in int/float"
+                assert (
+                    end >= start
+                ), "End must be greater or equal to start in int/float"
 
                 if elem["type"] == "int":
                     expr += str(random.randint(start, end))
-                elif elem["type"] == "float":
+                else:
+                    prec = (
+                        int(float_precision_match.group(1))
+                        if float_precision_match
+                        else MAX_PRECISION
+                    )
                     d = random.uniform(start, end)
-                    d = f"{d:.{MAX_PRECISION}f}"
+                    d = f"{d:.{prec}f}"
                     expr += d.rstrip("0").rstrip(".") if "." in d else d
             elif elem["type"] == "operator":
                 op = elem["value"]
@@ -63,11 +75,10 @@ def _evaluate_expression(expr, is_weekday=False):
         float(res)
     except ZeroDivisionError:
         res = float("inf")
-    except (ValueError, TypeError) as e:
+    except (ValueError, TypeError, SyntaxError) as e:
         raise ValueError(
             f"Invalid expression '{expr}'. Error: {e}. Expression must be " "numeric."
         ) from e
-
     return str(res)
 
 
@@ -88,16 +99,21 @@ def generate_quiz(config):
                     - "end_year": int (default=2050)
               - If "type" == "math":
                   - "elements": list of dicts, each with:
-                      - "type": str, one of {"int", "float", "operator"}
+                      - "type": str, one of:
+                        {"int", "float", "operator", "float.<precision>"}
                           - If "int" or "float":
                               - "start": int or float
                               - "end": int or float
+                          - If "float.<precision>":
+                              - Precision can be set manually after "float." 
+                                (e.g., "float.3" for 3 decimal places).
+                              - "start": float
+                              - "end": float
                           - If "operator":
                               - "value": str or list of str, one or more of
                                 {"+", "-", "*", "/", "//", "%"}
         - count : int
             The number of expressions to generate with the given config.
-
 
     Returns
     -------
@@ -117,9 +133,7 @@ def generate_quiz(config):
             try:
                 expr, is_weekday = _generate_expression(expr_config)
             except AssertionError as e:
-                raise UserConfigError(
-                    f"Invalid configuration: {e}"
-                )
+                raise UserConfigError(f"Invalid configuration: {e}")
             answer = _evaluate_expression(expr, is_weekday=is_weekday)
             quiz.append({"question": expr, "answer": answer, "is_weekday": is_weekday})
     return quiz
