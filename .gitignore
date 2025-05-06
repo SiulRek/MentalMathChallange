@@ -11,3 +11,4 @@ __pycache__/
 **/local/
 **/temp.*
 **/test.*
+src/tests/outputs/*

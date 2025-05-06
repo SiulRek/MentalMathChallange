@@ -1,11 +1,15 @@
 import unittest
 
-from src.core.compute_quiz_results import compute_quiz_results, UserResponseError   # noqa: E501
+from src.core.compute_quiz_results import (
+    compute_quiz_results,
+    UserResponseError,
+)
 from src.core.generate_quiz import generate_quiz
 from src.core.parse_config_from_text import _parse_config_from_text
+from src.tests.utils.base_test_case import BaseTestCase
 
 
-class TestQuizIntegration(unittest.TestCase):
+class TestQuizIntegration(BaseTestCase):
 
     def test_full_integration_math_and_date(self):
         config_text = """math: 1
@@ -25,7 +29,6 @@ date: 1
         math_question = quiz[0]
         date_question = quiz[1]
 
-        # Sanity structure checks
         self.assertIn("question", math_question)
         self.assertIn("answer", math_question)
         self.assertFalse(math_question["is_weekday"])
@@ -33,10 +36,9 @@ date: 1
         self.assertTrue(date_question["is_weekday"])
         self.assertRegex(date_question["answer"], r"^[A-Za-z]+$")
 
-        # Simulate user answers
         user_answers = {
-            "answer_0": "3",  # 1 + 2 = 3
-            "answer_1": date_question["answer"],  # Correct weekday
+            "answer_0": "3",
+            "answer_1": date_question["answer"],
         }
 
         results = compute_quiz_results(quiz, user_answers)
@@ -57,8 +59,7 @@ date: 1
         quiz = generate_quiz(parsed)
 
         user_answers = {
-            "answer_0": "1",  # incorrect, 1+1 != 1
-            # answer_1 missing
+            "answer_0": "1",
         }
 
         results = compute_quiz_results(quiz, user_answers)
@@ -94,13 +95,10 @@ date: 1
         correct = float(quiz[0]["answer"])
         rounded_str = str(round(correct, 1))
 
-        # Slight truncation allowed by `startswith` logic
         user_answers = {"answer_0": rounded_str}
 
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
-
-    # --------- EXTENDED TESTS -----------------
 
     def test_integration_multiple_operators(self):
         config_text = """math: 1

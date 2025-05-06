@@ -1,9 +1,10 @@
 import unittest
 
 from src.core.generate_quiz import generate_quiz, UserConfigError
+from src.tests.utils.base_test_case import BaseTestCase
 
 
-class TestGenerateQuiz(unittest.TestCase):
+class TestGenerateQuiz(BaseTestCase):
 
     def test_generate_single_math_quiz_hardcoded(self):
         config = [
@@ -83,8 +84,7 @@ class TestGenerateQuiz(unittest.TestCase):
                     "type": "math",
                     "parts": [
                         {"type": "int", "start": 1, "end": 5},
-                        {"type": "operator", "value": "^^"},  
-
+                        {"type": "operator", "value": "^^"},
                         {"type": "int", "start": 1, "end": 5},
                     ],
                 },
@@ -132,8 +132,7 @@ class TestGenerateQuiz(unittest.TestCase):
         ]
         quiz = generate_quiz(config)
         self.assertEqual(quiz[0]["question"], "1 / 0")
-        self.assertEqual(quiz[0]["answer"], "inf")  
-
+        self.assertEqual(quiz[0]["answer"], "inf")
 
     def test_invalid_element_type_raises(self):
         config = [
@@ -156,9 +155,17 @@ class TestGenerateQuiz(unittest.TestCase):
                 {
                     "type": "math",
                     "parts": [
-                        {"type": "float.4", "start": 1.123456, "end": 1.123456},
+                        {
+                            "type": "float.4",
+                            "start": 1.123456,
+                            "end": 1.123456,
+                        },
                         {"type": "operator", "value": "+"},
-                        {"type": "float.4", "start": 2.654321, "end": 2.654321},
+                        {
+                            "type": "float.4",
+                            "start": 2.654321,
+                            "end": 2.654321,
+                        },
                     ],
                 },
                 1,

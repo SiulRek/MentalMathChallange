@@ -1,9 +1,10 @@
 import unittest
 
 from src.core.compute_quiz_results import compute_quiz_results, UserResponseError   # noqa: E501
+from src.tests.utils.base_test_case import BaseTestCase
 
 
-class TestComputeQuizResults(unittest.TestCase):
+class TestComputeQuizResults(BaseTestCase):
 
     def test_all_correct_numeric(self):
         quiz = [

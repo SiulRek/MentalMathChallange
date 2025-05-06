@@ -1,9 +1,13 @@
 import unittest
 
-from src.core.parse_config_from_text import _parse_config_from_text, UserConfigError    # noqa: E501
+from src.core.parse_config_from_text import (
+    _parse_config_from_text,
+    UserConfigError,
+)
+from src.tests.utils.base_test_case import BaseTestCase
 
 
-class TestParseConfigFromText(unittest.TestCase):
+class TestParseConfigFromText(BaseTestCase):
 
     def test_valid_math_config_single_operator(self):
         config = """math: 2
