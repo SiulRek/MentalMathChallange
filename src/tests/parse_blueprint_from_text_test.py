@@ -7,7 +7,7 @@ from src.core.parse_blueprint_from_text import (
 from src.tests.utils.base_test_case import BaseTestCase
 
 
-class TestParseConfigFromText(BaseTestCase):
+class TestParseBlueprintFromText(BaseTestCase):
 
     def test_valid_math_blueprint_single_operator(self):
         blueprint = """math: 2
@@ -48,6 +48,16 @@ class TestParseConfigFromText(BaseTestCase):
         result = _parse_blueprint_from_text(blueprint)
         self.assertEqual(result[0][0]["elements"][0]["type"], "float")
         self.assertEqual(result[0][0]["elements"][-1]["type"], "float")
+
+    def test_valid_math_with_float_precision(self):
+        blueprint = """math: 1
+  float.2 1.1 2.2
+  op /
+  float.3 3.3 4.4
+"""
+        result = _parse_blueprint_from_text(blueprint)
+        self.assertEqual(result[0][0]["elements"][0]["type"], "float.2")
+        self.assertEqual(result[0][0]["elements"][-1]["type"], "float.3")
 
     def test_valid_date_blueprint(self):
         blueprint = """date: 1

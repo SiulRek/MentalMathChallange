@@ -150,6 +150,20 @@ date: 1
         user_answers = {"answer_0": truncated}
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
+    
+    def test_intagration_float_precision_setting(self):
+        blueprint_text = """math: 1
+  float.2 1.123456789 1.123456789
+  op +
+  float.3 2.987654321 2.987654321
+"""
+        parsed = _parse_blueprint_from_text(blueprint_text)
+        quiz = generate_quiz(parsed)
+        self.assertEqual(quiz[0]["question"], "1.12 + 2.988")
+        truncated = str(round(float(quiz[0]["answer"]), 3))
+        user_answers = {"answer_0": truncated}
+        results = compute_quiz_results(quiz, user_answers)
+        self.assertTrue(results[0]["is_correct"])
 
     def test_integration_invalid_blueprint_rejected(self):
         blueprint_text = """math: 1

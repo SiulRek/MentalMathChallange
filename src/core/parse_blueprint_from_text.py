@@ -1,4 +1,7 @@
+import re
+
 SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%"}
+
 
 class UserConfigError(Exception):
     """Base class for user blueprinturation errors."""
@@ -20,18 +23,21 @@ def _assert_valid_operators(ops):
 
 
 def _assert_valid_math_expression_elements(elements):
+    def _is_numeric_type(type_):
+        return type_ in ["int", "float"] or re.match(r"float\.(\d+)", type_)
+    
     assert len(elements) > 0, "At least one element must be defined"
-    assert elements[0]["type"] in ["int", "float"], (
+    assert _is_numeric_type(elements[0]["type"]), (
         "First element must be of type int or float, but got "
         f"{elements[0]['type']}"
     )
-    assert elements[-1]["type"] in ["int", "float"], (
+    assert _is_numeric_type(elements[-1]["type"]), (
         "Last element must be of type int or float, but got "
         f"{elements[-1]['type']}"
     )
     for i in range(1, len(elements) - 1):
-        i_is_numeric = elements[i]["type"] in ["int", "float"]
-        i_plus_1_is_numeric = elements[i + 1]["type"] in ["int", "float"]
+        i_is_numeric = _is_numeric_type(elements[i]["type"])
+        i_plus_1_is_numeric = _is_numeric_type(elements[i + 1]["type"])
         assert i_is_numeric != i_plus_1_is_numeric, (
             f"Element {i} and {i + 1} must be of different types, but both are "
             f"{elements[i]['type']}"
@@ -86,7 +92,7 @@ def _parse_blueprint_from_text(blueprint_text):
                         tokens, ["type", "end", "start"], [str, int, int]
                     )
                     elements.append(kwargs)
-                elif key == "float":
+                elif key == "float" or re.match(r"float\.(\d+)", key):
                     assert (
                         1 < len(tokens) <= 3
                     ), "float must have 2 or 3 arguments"
@@ -108,9 +114,9 @@ def _parse_blueprint_from_text(blueprint_text):
 
             elif expr_cat == "date":
                 if key == "start":
-                    assert len(tokens) == 2, (
-                        "start must have exactly 1 argument"
-                    )
+                    assert (
+                        len(tokens) == 2
+                    ), "start must have exactly 1 argument"
                     assert tokens[1].isdigit(), "start must be a number"
                     expr_blueprint["start_year"] = int(tokens[1])
                 elif key == "end":

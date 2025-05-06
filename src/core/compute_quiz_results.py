@@ -4,6 +4,7 @@ from src.core.generate_quiz import MAX_PRECISION
 
 class UserResponseError(Exception):
     """Base class for user answer processing errors."""
+
     pass
 
 
@@ -48,8 +49,7 @@ def _parse_user_answer(user_answer, category):
         user_answer = float(user_answer)
     except ValueError as e:
         raise UserResponseError(
-            f"Invalid answer '{user_answer}'. Answer must be "
-            "numeric."
+            f"Invalid answer '{user_answer}'. Answer must be numeric."
         ) from e
     user_answer = str(user_answer)
     return (
@@ -57,6 +57,58 @@ def _parse_user_answer(user_answer, category):
         if "." in user_answer
         else user_answer
     )
+
+
+def _truncate_decimal_with_rounding(number_string, decimal_target_length):
+    if "." not in number_string:
+        raise ValueError("Input must be a decimal number string.")
+
+    integer_str, decimal_str = number_string.split(".")
+
+    if decimal_target_length == 0:
+        rounding_digit = int(decimal_str[0]) if len(decimal_str) > 0 else 0
+        result = int(integer_str)
+        if rounding_digit >= 5:
+            result += 1
+        return str(result)
+
+    decimal_str = decimal_str.ljust(decimal_target_length + 1, "0")
+
+    trunc_part = decimal_str[:decimal_target_length]
+    rounding_digit = int(decimal_str[decimal_target_length])
+
+    if rounding_digit >= 5:
+        new_decimal_int = int(trunc_part) + 1
+        new_decimal_str = str(new_decimal_int).rjust(
+            decimal_target_length, "0"
+        )
+        if len(new_decimal_str) > decimal_target_length:
+            integer_str = str(int(integer_str) + 1)
+            new_decimal_str = "0" * decimal_target_length
+    else:
+        new_decimal_str = trunc_part
+
+    return f"{integer_str}.{new_decimal_str}"
+
+
+def _compare_numeric_strings(user_answer, correct_answer):
+    if not "." in user_answer + correct_answer:
+        return user_answer == correct_answer
+    if len(user_answer) < len(correct_answer):
+        decimal_length = (
+            len(user_answer.split(".")[1]) if "." in user_answer else 0
+        )
+        correct_answer = _truncate_decimal_with_rounding(
+            correct_answer, decimal_length
+        )
+    elif len(user_answer) > len(correct_answer):
+        decimal_length = (
+            len(correct_answer.split(".")[1]) if "." in correct_answer else 0
+        )
+        user_answer = _truncate_decimal_with_rounding(
+            user_answer, decimal_length
+        )
+    return user_answer == correct_answer
 
 
 def compute_quiz_results(quiz, submission):
@@ -104,11 +156,7 @@ def compute_quiz_results(quiz, submission):
         elif category == "date":
             correct = user_answer == correct_answer
         else:
-            correct = (
-                correct_answer.startswith(user_answer)
-                if len(correct_answer) > len(user_answer)
-                else user_answer.startswith(correct_answer)
-            )
+            correct = _compare_numeric_strings(user_answer, correct_answer)
             # Prettify the correct answer
             correct_answer = f"{float(correct_answer):.{MAX_PRECISION}f}"
             correct_answer = (

@@ -81,7 +81,7 @@ class TestComputeQuizResults(BaseTestCase):
             "category": "math",
             }
         ]
-        submission = {"answer_0": "3.1415"}
+        submission = {"answer_0": "3.1416"}
         result = compute_quiz_results(quiz, submission)
         self.assertTrue(result[0]["is_correct"])
 
