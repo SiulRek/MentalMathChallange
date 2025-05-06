@@ -18,8 +18,8 @@ class TestParseConfigFromText(BaseTestCase):
         result = _parse_config_from_text(config)
         expected = [
             {
-                "type": "math",
-                "parts": [
+                "category": "math",
+                "elements": [
                     {"type": "int", "start": 1, "end": 10},
                     {"type": "operator", "value": "+"},
                     {"type": "float", "start": 3.0, "end": 7.5},
@@ -36,8 +36,8 @@ class TestParseConfigFromText(BaseTestCase):
   float 2.5 5.5
 """
         result = _parse_config_from_text(config)
-        self.assertEqual(result[0][0]["type"], "math")
-        self.assertEqual(len(result[0][0]["parts"]), 3)
+        self.assertEqual(result[0][0]["category"], "math")
+        self.assertEqual(len(result[0][0]["elements"]), 3)
 
     def test_valid_math_with_float_start_and_end(self):
         config = """math: 1
@@ -46,8 +46,8 @@ class TestParseConfigFromText(BaseTestCase):
   float 3.3 4.4
 """
         result = _parse_config_from_text(config)
-        self.assertEqual(result[0][0]["parts"][0]["type"], "float")
-        self.assertEqual(result[0][0]["parts"][-1]["type"], "float")
+        self.assertEqual(result[0][0]["elements"][0]["type"], "float")
+        self.assertEqual(result[0][0]["elements"][-1]["type"], "float")
 
     def test_valid_date_config(self):
         config = """date: 1
@@ -57,7 +57,7 @@ class TestParseConfigFromText(BaseTestCase):
         result = _parse_config_from_text(config)
         expected = [
             {
-                "type": "date",
+                "category": "date",
                 "start_year": 1990,
                 "end_year": 2020,
             },
@@ -77,8 +77,8 @@ date: 2
 """
         result = _parse_config_from_text(config)
         self.assertEqual(len(result), 2)
-        self.assertEqual(result[0][0]["type"], "math")
-        self.assertEqual(result[1][0]["type"], "date")
+        self.assertEqual(result[0][0]["category"], "math")
+        self.assertEqual(result[1][0]["category"], "date")
 
     def test_invalid_block_header_missing_colon(self):
         config = """math 3
@@ -192,8 +192,8 @@ math: 1
   float 2.0 4.0
 """
         result = _parse_config_from_text(config)
-        self.assertEqual(result[0][0]["type"], "math")
-        self.assertEqual(len(result[0][0]["parts"]), 3)
+        self.assertEqual(result[0][0]["category"], "math")
+        self.assertEqual(len(result[0][0]["elements"]), 3)
 
     def test_operator_multiple_values(self):
         config = """math: 1
@@ -202,7 +202,7 @@ math: 1
   float 5.0 7.0
 """
         result = _parse_config_from_text(config)
-        self.assertEqual(result[0][0]["parts"][1]["value"], ["+", "-", "/"])
+        self.assertEqual(result[0][0]["elements"][1]["value"], ["+", "-", "/"])
 
 
 if __name__ == "__main__":

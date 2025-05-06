@@ -56,14 +56,14 @@ def _parse_config_from_text(config_text):
             )
 
         try:
-            type_part, count_part = line.split(":")
-            expr_type = type_part.strip()
-            count = int(count_part.strip())
+            category_element, count_element = line.split(":")
+            expr_cat = category_element.strip()
+            count = int(count_element.strip())
         except ValueError as e:
             raise UserConfigError(
                 f"Invalid config block start: '{line}'"
             ) from e
-        expr_config = {"type": expr_type}
+        expr_config = {"category": expr_cat}
         i += 1
 
         # Parse the block body
@@ -76,7 +76,7 @@ def _parse_config_from_text(config_text):
 
             key = tokens[0]
 
-            if expr_type == "math":
+            if expr_cat == "math":
                 if key == "int":
                     assert (
                         1 < len(tokens) <= 3
@@ -106,7 +106,7 @@ def _parse_config_from_text(config_text):
                         f"Unknown math sub-key: '{key}'"
                     )
 
-            elif expr_type == "date":
+            elif expr_cat == "date":
                 if key == "start":
                     assert len(tokens) == 2, (
                         "start must have exactly 1 argument"
@@ -124,14 +124,14 @@ def _parse_config_from_text(config_text):
 
             else:
                 raise UserConfigError(
-                    f"Unknown expression type: '{expr_type}'"
+                    f"Unknown expression type: '{expr_cat}'"
                 )
 
             i += 1
 
-        if expr_type == "math":
+        if expr_cat == "math":
             _assert_valid_math_expression_elements(elements)
-            expr_config["parts"] = elements
+            expr_config["elements"] = elements
 
         configs.append((expr_config, count))
 
@@ -178,16 +178,15 @@ def parse_config_from_text(config_text):
         A list of (expression_config, count) pairs, where:
         expression_config : dict
             Specifies the expression generation rules. Must include:
-            - "type" : {"date", "math"}
-              - If "type" == "date":
-                  Optional:
-                      - "start_year" : int, default=1900
-                      - "end_year" : int, default=2050
-              - If "type" == "math":
-                  - "parts" : list of dict
+            - "category" : {"date", "math"}
+              - If "category" == "date":
+                      - "start_year" : int (optional, default=1900)
+                      - "end_year" : int (optional, default=2050)
+              - If "category" == "math":
+                  - "elements" : list of dict
                       - "type" : {"int", "float", "operator"}
                           - If "int" or "float":
-                              - "start" : int or float
+                              - "start" : int or float (optional, default 0)
                               - "end" : int or float
                           - If "operator":
                               - "value" : str or list of str, one or more of

@@ -15,7 +15,7 @@ class TestComputeQuizResults(BaseTestCase):
         result = compute_quiz_results(quiz, submission)
         self.assertTrue(all(entry["is_correct"] for entry in result))
 
-    def test_partial_correct_numeric(self):
+    def test_elemential_correct_numeric(self):
         quiz = [
             {"question": "2 + 3", "answer": "5.0", "is_weekday": False},
             {"question": "10 / 2", "answer": "5.0", "is_weekday": False},

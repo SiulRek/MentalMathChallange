@@ -10,8 +10,8 @@ class TestGenerateQuiz(BaseTestCase):
         config = [
             (
                 {
-                    "type": "math",
-                    "parts": [
+                    "category": "math",
+                    "elements": [
                         {"type": "int", "start": 2, "end": 2},
                         {"type": "operator", "value": "+"},
                         {"type": "int", "start": 3, "end": 3},
@@ -30,8 +30,8 @@ class TestGenerateQuiz(BaseTestCase):
         config = [
             (
                 {
-                    "type": "math",
-                    "parts": [
+                    "category": "math",
+                    "elements": [
                         {"type": "int", "start": 1, "end": 1},
                         {"type": "operator", "value": "*"},
                         {"type": "int", "start": 5, "end": 5},
@@ -50,7 +50,7 @@ class TestGenerateQuiz(BaseTestCase):
     def test_generate_date_question(self):
         config = [
             (
-                {"type": "date", "start_year": 2000, "end_year": 2000},
+                {"category": "date", "start_year": 2000, "end_year": 2000},
                 3,
             )
         ]
@@ -73,7 +73,7 @@ class TestGenerateQuiz(BaseTestCase):
             )
 
     def test_invalid_expr_type_raises(self):
-        config = [({"type": "invalid_type"}, 1)]
+        config = [({"category": "invalid_type"}, 1)]
         with self.assertRaises(ValueError):
             generate_quiz(config)
 
@@ -81,8 +81,8 @@ class TestGenerateQuiz(BaseTestCase):
         config = [
             (
                 {
-                    "type": "math",
-                    "parts": [
+                    "category": "math",
+                    "elements": [
                         {"type": "int", "start": 1, "end": 5},
                         {"type": "operator", "value": "^^"},
                         {"type": "int", "start": 1, "end": 5},
@@ -98,8 +98,8 @@ class TestGenerateQuiz(BaseTestCase):
         config = [
             (
                 {
-                    "type": "math",
-                    "parts": [
+                    "category": "math",
+                    "elements": [
                         {"type": "float", "start": 1.0, "end": 1.0},
                         {"type": "operator", "value": "+"},
                         {"type": "float", "start": 2.0, "end": 2.0},
@@ -120,8 +120,8 @@ class TestGenerateQuiz(BaseTestCase):
         config = [
             (
                 {
-                    "type": "math",
-                    "parts": [
+                    "category": "math",
+                    "elements": [
                         {"type": "int", "start": 1, "end": 1},
                         {"type": "operator", "value": "/"},
                         {"type": "int", "start": 0, "end": 0},
@@ -138,8 +138,8 @@ class TestGenerateQuiz(BaseTestCase):
         config = [
             (
                 {
-                    "type": "math",
-                    "parts": [
+                    "category": "math",
+                    "elements": [
                         {"type": "str", "value": "bad"},
                     ],
                 },
@@ -153,8 +153,8 @@ class TestGenerateQuiz(BaseTestCase):
         config = [
             (
                 {
-                    "type": "math",
-                    "parts": [
+                    "category": "math",
+                    "elements": [
                         {
                             "type": "float.4",
                             "start": 1.123456,
@@ -177,11 +177,11 @@ class TestGenerateQuiz(BaseTestCase):
         answer = quiz[0]["answer"]
 
         self.assertIn("+", question)
-        parts = question.split("+")
-        self.assertEqual(len(parts), 2)
+        elements = question.split("+")
+        self.assertEqual(len(elements), 2)
 
-        left = parts[0].strip()
-        right = parts[1].strip()
+        left = elements[0].strip()
+        right = elements[1].strip()
 
         self.assertRegex(left, r"\d+\.\d{4}")
         self.assertRegex(right, r"\d+\.\d{4}")

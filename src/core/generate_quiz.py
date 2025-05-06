@@ -18,22 +18,22 @@ def _assert_valid_operators(ops):
 
 
 def _generate_expression(expr_config):
-    if expr_config["type"] == "date":
+    if expr_config["category"] == "date":
         start_year = expr_config.get("start_year", 1900)
         end_year = expr_config.get("end_year", 2050)
         assert end_year >= start_year, (
             "End year must be greater or equal to start year"
         )
         return random_date(start_year, end_year), True
-    if expr_config["type"] == "math":
-        parts = expr_config["parts"]
+    if expr_config["category"] == "math":
+        elements = expr_config["elements"]
         expr = ""
-        for part in parts:
-            type_ = part["type"]
+        for elem in elements:
+            type_ = elem["type"]
             float_precision_match = re.match(r"float\.(\d+)", type_)
-            if part["type"] in ["int", "float"] or float_precision_match:
-                start = part.get("start", 0)
-                end = part.get("end", None)
+            if elem["type"] in ["int", "float"] or float_precision_match:
+                start = elem.get("start", 0)
+                end = elem.get("end", None)
                 assert end is not None, (
                     "At least 'end' must be defined in 'int/float' range."
                 )
@@ -41,7 +41,7 @@ def _generate_expression(expr_config):
                     end >= start
                 ), "End must be greater or equal to start in int/float"
 
-                if part["type"] == "int":
+                if elem["type"] == "int":
                     expr += str(random.randint(start, end))
                 else:
                     prec = (
@@ -52,21 +52,21 @@ def _generate_expression(expr_config):
                     d = random.uniform(start, end)
                     d = f"{d:.{prec}f}"
                     expr += d.rstrip("0").rstrip(".") if "." in d else d
-            elif part["type"] == "operator":
-                op = part["value"]
+            elif elem["type"] == "operator":
+                op = elem["value"]
                 if isinstance(op, list):
                     op = random.choice(op)
                 _assert_valid_operators(op)
                 expr += op
             else:
                 raise ValueError(
-                    f"Invalid part type '{part['type']}'. Expected "
+                    f"Invalid element type '{elem['type']}'. Expected "
                     "'int', 'float', or 'operator'."
                 )
             expr += " "
         return expr.rstrip(), False
     raise ValueError(
-        f"Invalid expression type '{expr_config['type']}'. Expected 'date' "
+        f"Invalid expression category '{expr_config['category']}'. Expected 'date' "
         "or 'math'."
     )
 
@@ -97,13 +97,13 @@ def generate_quiz(config):
         A list of (expression_config, count) pairs, where:
         - expression_config : dict
             Specifies the expression generation rules. Must include:
-            - "type": str, one of {"date", "math"}.
-              - If "type" == "date":
+            - "category": str, one of {"date", "math"}.
+              - If "category" == "date":
                   Optional:
                     - "start_year": int (default=1900)
                     - "end_year": int (default=2050)
-              - If "type" == "math":
-                  - "parts": list of dicts, each with:
+              - If "category" == "math":
+                  - "elements": list of dicts, each with:
                       - "type": str, one of:
                         {"int", "float", "operator", "float.<precision>"}
                           - If "int" or "float":
