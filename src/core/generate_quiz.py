@@ -27,7 +27,7 @@ def _generate_expression(expr_blueprint):
         assert (
             end_year >= start_year
         ), "End year must be greater or equal to start year"
-        return random_date(start_year, end_year), True
+        return random_date(start_year, end_year), "date"
     if expr_blueprint["category"] == "math":
         elements = expr_blueprint["elements"]
         expr = ""
@@ -67,16 +67,17 @@ def _generate_expression(expr_blueprint):
                     "'int', 'float', or 'operator'."
                 )
             expr += " "
-        return expr.rstrip(), False
+        return expr.rstrip(), "math"
     raise ValueError(
         f"Invalid expression category '{expr_blueprint['category']}'. Expected" 
         " 'date' or 'math'."
     )
 
 
-def _evaluate_expression(expr, is_weekday=False):
-    if is_weekday:
+def _evaluate_expression(expr, category=False):
+    if category == "date":
         return derive_weekday(expr)
+    # Else category == "math"
     try:
         res = eval(expr)
         float(res)
@@ -131,19 +132,18 @@ def generate_quiz(blueprint):
             The mathematical expression as a string.
         - "answer" : int or float
             The evaluated result of the expression.
-        - "is_weekday" : bool
-            If True, the expression is treated as a weekday string.
-            If False, the expression is treated as a mathematical expression.
+        - "category" : str
+            The category of the expression, either "date" or "math".
     """
     quiz = []
     for expr_blueprint, n in blueprint:
         for _ in range(n):
             try:
-                expr, is_weekday = _generate_expression(expr_blueprint)
+                expr, category = _generate_expression(expr_blueprint)
             except AssertionError as e:
                 raise UserConfigError(f"Invalid blueprinturation: {e}")
-            answer = _evaluate_expression(expr, is_weekday=is_weekday)
+            answer = _evaluate_expression(expr, category=category)
             quiz.append(
-                {"question": expr, "answer": answer, "is_weekday": is_weekday}
+                {"question": expr, "answer": answer, "category": category}
             )
     return quiz

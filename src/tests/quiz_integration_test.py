@@ -31,9 +31,9 @@ date: 1
 
         self.assertIn("question", math_question)
         self.assertIn("answer", math_question)
-        self.assertFalse(math_question["is_weekday"])
+        self.assertEqual(math_question["category"], "math")
 
-        self.assertTrue(date_question["is_weekday"])
+        self.assertEqual(date_question["category"], "date")
         self.assertRegex(date_question["answer"], r"^[A-Za-z]+$")
 
         user_answers = {

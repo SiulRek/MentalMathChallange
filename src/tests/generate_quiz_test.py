@@ -24,7 +24,7 @@ class TestGenerateQuiz(BaseTestCase):
         self.assertEqual(len(quiz), 1)
         self.assertEqual(quiz[0]["question"], "2 + 3")
         self.assertEqual(quiz[0]["answer"], "5")
-        self.assertFalse(quiz[0]["is_weekday"])
+        self.assertEqual(quiz[0]["category"], "math")
 
     def test_generate_multiple_quizzes_fixed_output(self):
         blueprint = [
@@ -45,7 +45,7 @@ class TestGenerateQuiz(BaseTestCase):
         for q in quiz:
             self.assertEqual(q["question"], "1 * 5")
             self.assertEqual(q["answer"], "5")
-            self.assertFalse(q["is_weekday"])
+            self.assertEqual(q["category"], "math")
 
     def test_generate_date_question(self):
         blueprint = [
@@ -57,7 +57,7 @@ class TestGenerateQuiz(BaseTestCase):
         quiz = generate_quiz(blueprint)
         self.assertEqual(len(quiz), 3)
         for q in quiz:
-            self.assertTrue(q["is_weekday"])
+            self.assertEqual(q["category"], "date")
             self.assertRegex(q["question"], r"\d{4}-\d{2}-\d{2}")
             self.assertIn(
                 q["answer"],

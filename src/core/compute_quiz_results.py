@@ -31,11 +31,11 @@ def _collect_user_answers(submitted_answers, total_expected_answers):
     return sorted_answers
 
 
-def _parse_user_answer(user_answer, is_weekday=False):
+def _parse_user_answer(user_answer, category):
     if not user_answer:
         return
     user_answer = user_answer.strip()
-    if is_weekday:
+    if category == "date":
         try:
             return sanitize_weekday_string(user_answer)
         except ValueError as e:
@@ -71,8 +71,8 @@ def compute_quiz_results(quiz, submission):
             The question text.
         - "answer" : str
             The correct answer to the question.
-        - "is_weekday" : bool
-            If True, the question is treated as a weekday string.
+        - "category" : str
+            The category of the question, either "date" or "math".
     submission : dict
         A dictionary containing the user's answers. The keys are expected to be
         in the format "answer_<index>", where <index> is the index of the
@@ -94,14 +94,14 @@ def compute_quiz_results(quiz, submission):
     user_answers = _collect_user_answers(
         submitted_answers=submission, total_expected_answers=len(quiz)
     )
-    quiz = [(q["question"], q["answer"], q["is_weekday"]) for q in quiz]
+    quiz = [(q["question"], q["answer"], q["category"]) for q in quiz]
     results = []
     for quiz_elem, user_answer in zip(quiz, user_answers):
-        question, correct_answer, is_weekday = quiz_elem
-        user_answer = _parse_user_answer(user_answer, is_weekday)
+        question, correct_answer, category = quiz_elem
+        user_answer = _parse_user_answer(user_answer, category)
         if user_answer is None:
             correct = False
-        elif is_weekday:
+        elif category == "date":
             correct = user_answer == correct_answer
         else:
             correct = (
