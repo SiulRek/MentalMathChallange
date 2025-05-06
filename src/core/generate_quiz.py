@@ -26,14 +26,14 @@ def _generate_expression(expr_config):
         )
         return random_date(start_year, end_year), True
     if expr_config["type"] == "math":
-        elements = expr_config["elements"]
+        parts = expr_config["parts"]
         expr = ""
-        for elem in elements:
-            type_ = elem["type"]
+        for part in parts:
+            type_ = part["type"]
             float_precision_match = re.match(r"float\.(\d+)", type_)
-            if elem["type"] in ["int", "float"] or float_precision_match:
-                start = elem.get("start", 0)
-                end = elem.get("end", None)
+            if part["type"] in ["int", "float"] or float_precision_match:
+                start = part.get("start", 0)
+                end = part.get("end", None)
                 assert end is not None, (
                     "At least 'end' must be defined in 'int/float' range."
                 )
@@ -41,7 +41,7 @@ def _generate_expression(expr_config):
                     end >= start
                 ), "End must be greater or equal to start in int/float"
 
-                if elem["type"] == "int":
+                if part["type"] == "int":
                     expr += str(random.randint(start, end))
                 else:
                     prec = (
@@ -52,15 +52,15 @@ def _generate_expression(expr_config):
                     d = random.uniform(start, end)
                     d = f"{d:.{prec}f}"
                     expr += d.rstrip("0").rstrip(".") if "." in d else d
-            elif elem["type"] == "operator":
-                op = elem["value"]
+            elif part["type"] == "operator":
+                op = part["value"]
                 if isinstance(op, list):
                     op = random.choice(op)
                 _assert_valid_operators(op)
                 expr += op
             else:
                 raise ValueError(
-                    f"Invalid element type '{elem['type']}'. Expected "
+                    f"Invalid part type '{part['type']}'. Expected "
                     "'int', 'float', or 'operator'."
                 )
             expr += " "
@@ -103,7 +103,7 @@ def generate_quiz(config):
                     - "start_year": int (default=1900)
                     - "end_year": int (default=2050)
               - If "type" == "math":
-                  - "elements": list of dicts, each with:
+                  - "parts": list of dicts, each with:
                       - "type": str, one of:
                         {"int", "float", "operator", "float.<precision>"}
                           - If "int" or "float":
@@ -140,9 +140,5 @@ def generate_quiz(config):
             except AssertionError as e:
                 raise UserConfigError(f"Invalid configuration: {e}")
             answer = _evaluate_expression(expr, is_weekday=is_weekday)
-            quiz.append({
-                "question": expr,
-                "answer": answer,
-                "is_weekday": is_weekday
-            })
+            quiz.append({"question": expr, "answer": answer, "is_weekday": is_weekday})
     return quiz

@@ -10,7 +10,7 @@ class TestGenerateQuiz(unittest.TestCase):
             (
                 {
                     "type": "math",
-                    "elements": [
+                    "parts": [
                         {"type": "int", "start": 2, "end": 2},
                         {"type": "operator", "value": "+"},
                         {"type": "int", "start": 3, "end": 3},
@@ -30,7 +30,7 @@ class TestGenerateQuiz(unittest.TestCase):
             (
                 {
                     "type": "math",
-                    "elements": [
+                    "parts": [
                         {"type": "int", "start": 1, "end": 1},
                         {"type": "operator", "value": "*"},
                         {"type": "int", "start": 5, "end": 5},
@@ -81,7 +81,7 @@ class TestGenerateQuiz(unittest.TestCase):
             (
                 {
                     "type": "math",
-                    "elements": [
+                    "parts": [
                         {"type": "int", "start": 1, "end": 5},
                         {"type": "operator", "value": "^^"},  
 
@@ -99,7 +99,7 @@ class TestGenerateQuiz(unittest.TestCase):
             (
                 {
                     "type": "math",
-                    "elements": [
+                    "parts": [
                         {"type": "float", "start": 1.0, "end": 1.0},
                         {"type": "operator", "value": "+"},
                         {"type": "float", "start": 2.0, "end": 2.0},
@@ -121,7 +121,7 @@ class TestGenerateQuiz(unittest.TestCase):
             (
                 {
                     "type": "math",
-                    "elements": [
+                    "parts": [
                         {"type": "int", "start": 1, "end": 1},
                         {"type": "operator", "value": "/"},
                         {"type": "int", "start": 0, "end": 0},
@@ -140,7 +140,7 @@ class TestGenerateQuiz(unittest.TestCase):
             (
                 {
                     "type": "math",
-                    "elements": [
+                    "parts": [
                         {"type": "str", "value": "bad"},
                     ],
                 },
@@ -155,7 +155,7 @@ class TestGenerateQuiz(unittest.TestCase):
             (
                 {
                     "type": "math",
-                    "elements": [
+                    "parts": [
                         {"type": "float.4", "start": 1.123456, "end": 1.123456},
                         {"type": "operator", "value": "+"},
                         {"type": "float.4", "start": 2.654321, "end": 2.654321},

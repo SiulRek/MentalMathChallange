@@ -1,6 +1,6 @@
 import unittest
 
-from src.core.parse_config_from_text import _parse_config_from_text
+from src.core.parse_config_from_text import _parse_config_from_text, UserConfigError    # noqa: E501
 
 
 class TestParseConfigFromText(unittest.TestCase):
@@ -15,7 +15,7 @@ class TestParseConfigFromText(unittest.TestCase):
         expected = [
             {
                 "type": "math",
-                "elements": [
+                "parts": [
                     {"type": "int", "start": 1, "end": 10},
                     {"type": "operator", "value": "+"},
                     {"type": "float", "start": 3.0, "end": 7.5},
@@ -33,7 +33,7 @@ class TestParseConfigFromText(unittest.TestCase):
 """
         result = _parse_config_from_text(config)
         self.assertEqual(result[0][0]["type"], "math")
-        self.assertEqual(len(result[0][0]["elements"]), 3)
+        self.assertEqual(len(result[0][0]["parts"]), 3)
 
     def test_valid_math_with_float_start_and_end(self):
         config = """math: 1
@@ -42,8 +42,8 @@ class TestParseConfigFromText(unittest.TestCase):
   float 3.3 4.4
 """
         result = _parse_config_from_text(config)
-        self.assertEqual(result[0][0]["elements"][0]["type"], "float")
-        self.assertEqual(result[0][0]["elements"][-1]["type"], "float")
+        self.assertEqual(result[0][0]["parts"][0]["type"], "float")
+        self.assertEqual(result[0][0]["parts"][-1]["type"], "float")
 
     def test_valid_date_config(self):
         config = """date: 1
@@ -82,14 +82,14 @@ date: 2
   op +
   float 2.0 4.0
 """
-        with self.assertRaises(ValueError):
+        with self.assertRaises(UserConfigError):
             _parse_config_from_text(config)
 
     def test_unknown_expression_type(self):
         config = """logic: 1
   gate and
 """
-        with self.assertRaises(ValueError):
+        with self.assertRaises(UserConfigError):
             _parse_config_from_text(config)
 
     def test_invalid_operator(self):
@@ -189,7 +189,7 @@ math: 1
 """
         result = _parse_config_from_text(config)
         self.assertEqual(result[0][0]["type"], "math")
-        self.assertEqual(len(result[0][0]["elements"]), 3)
+        self.assertEqual(len(result[0][0]["parts"]), 3)
 
     def test_operator_multiple_values(self):
         config = """math: 1
@@ -198,7 +198,7 @@ math: 1
   float 5.0 7.0
 """
         result = _parse_config_from_text(config)
-        self.assertEqual(result[0][0]["elements"][1]["value"], ["+", "-", "/"])
+        self.assertEqual(result[0][0]["parts"][1]["value"], ["+", "-", "/"])
 
 
 if __name__ == "__main__":

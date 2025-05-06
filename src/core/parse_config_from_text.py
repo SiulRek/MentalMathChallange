@@ -131,7 +131,7 @@ def _parse_config_from_text(config_text):
 
         if expr_type == "math":
             _assert_valid_math_expression_elements(elements)
-            expr_config["elements"] = elements
+            expr_config["parts"] = elements
 
         configs.append((expr_config, count))
 
@@ -184,7 +184,7 @@ def parse_config_from_text(config_text):
                       - "start_year" : int, default=1900
                       - "end_year" : int, default=2050
               - If "type" == "math":
-                  - "elements" : list of dict
+                  - "parts" : list of dict
                       - "type" : {"int", "float", "operator"}
                           - If "int" or "float":
                               - "start" : int or float
