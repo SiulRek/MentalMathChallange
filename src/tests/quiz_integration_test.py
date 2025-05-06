@@ -1,6 +1,6 @@
 import unittest
 
-from src.core.compute_quiz_results import compute_quiz_results, UserResponseError
+from src.core.compute_quiz_results import compute_quiz_results, UserResponseError   # noqa: E501
 from src.core.generate_quiz import generate_quiz
 from src.core.parse_config_from_text import _parse_config_from_text
 

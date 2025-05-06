@@ -52,7 +52,11 @@ def _parse_user_answer(user_answer, is_weekday=False):
             "numeric."
         ) from e
     user_answer = str(user_answer)
-    return user_answer.rstrip("0").rstrip(".") if "." in user_answer else user_answer
+    return (
+        user_answer.rstrip("0").rstrip(".")
+        if "." in user_answer
+        else user_answer
+    )
 
 
 def compute_quiz_results(quiz, submission):
@@ -71,8 +75,8 @@ def compute_quiz_results(quiz, submission):
             If True, the question is treated as a weekday string.
     submission : dict
         A dictionary containing the user's answers. The keys are expected to be
-        in the format "answer_<index>", where <index> is the index of the question
-        in the quiz.
+        in the format "answer_<index>", where <index> is the index of the
+        question in the quiz.
 
     Returns
     -------

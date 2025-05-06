@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, session
 
-from src.core.compute_quiz_results import compute_quiz_results, UserResponseError
+from src.core.compute_quiz_results import compute_quiz_results, UserResponseError   # noqa: E501
 from src.core.generate_quiz import generate_quiz
-from src.core.parse_config_from_text import parse_config_from_text, UserConfigError
+from src.core.parse_config_from_text import parse_config_from_text, UserConfigError    # noqa: E501
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -20,7 +20,9 @@ def start():
         config = parse_config_from_text(config_text)
         quiz = generate_quiz(config)
     except UserConfigError as e:
-        return render_template("index.html", config_text=config_text, error=str(e))
+        return render_template(
+            "index.html", config_text=config_text, error=str(e)
+        )
     session["quiz"] = quiz
     return render_template("quiz.html", quiz=quiz)
 

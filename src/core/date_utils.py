@@ -44,9 +44,11 @@ def random_date(start_year, end_year):
         days_in_year = 366 if calendar.isleap(current_year) else 365
         total_days += days_in_year
         end_day_index = total_days
-        year_day_ranges.append(
-            {"year": current_year, "start": start_day_index, "end": end_day_index}
-        )
+        year_day_ranges.append({
+            "year": current_year,
+            "start": start_day_index,
+            "end": end_day_index
+        })
 
     # Choose a random day index within total span
     random_day_index = random.randint(0, total_days - 1)

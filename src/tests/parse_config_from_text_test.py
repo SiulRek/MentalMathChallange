@@ -137,7 +137,9 @@ date: 2
 """
         with self.assertRaises(AssertionError) as cm:
             _parse_config_from_text(config)
-        self.assertIn("First element must be of type int or float", str(cm.exception))
+        self.assertIn(
+            "First element must be of type int or float", str(cm.exception)
+        )
 
     def test_invalid_math_no_numeric_end(self):
         config = """math: 1
@@ -146,7 +148,9 @@ date: 2
 """
         with self.assertRaises(AssertionError) as cm:
             _parse_config_from_text(config)
-        self.assertIn("Last element must be of type int or float", str(cm.exception))
+        self.assertIn(
+            "Last element must be of type int or float", str(cm.exception)
+        )
 
     def test_invalid_math_two_consecutive_numeric_elements(self):
         config = """math: 1

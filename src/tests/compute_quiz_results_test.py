@@ -1,6 +1,6 @@
 import unittest
 
-from src.core.compute_quiz_results import compute_quiz_results, UserResponseError
+from src.core.compute_quiz_results import compute_quiz_results, UserResponseError   # noqa: E501
 
 
 class TestComputeQuizResults(unittest.TestCase):
@@ -32,8 +32,16 @@ class TestComputeQuizResults(unittest.TestCase):
 
     def test_all_correct_weekdays(self):
         quiz = [
-            {"question": "Day of 2023-05-04", "answer": "thursday", "is_weekday": True},
-            {"question": "Day of 2023-12-25", "answer": "monday", "is_weekday": True},
+            {
+            "question": "Day of 2023-05-04",
+            "answer": "thursday",
+            "is_weekday": True,
+            },
+            {
+            "question": "Day of 2023-12-25",
+            "answer": "monday",
+            "is_weekday": True,
+            },
         ]
         submission = {"answer_0": "Thu", "answer_1": "  MON  "}
         result = compute_quiz_results(quiz, submission)
@@ -41,7 +49,11 @@ class TestComputeQuizResults(unittest.TestCase):
 
     def test_invalid_weekday_submission(self):
         quiz = [
-            {"question": "Day of 2023-05-04", "answer": "thursday", "is_weekday": True}
+            {
+            "question": "Day of 2023-05-04",
+            "answer": "thursday",
+            "is_weekday": True,
+            }
         ]
         submission = {"answer_0": "noday"}
         with self.assertRaises(UserResponseError):
@@ -61,7 +73,13 @@ class TestComputeQuizResults(unittest.TestCase):
         self.assertFalse(result[1]["is_correct"])
 
     def test_float_precision_acceptance(self):
-        quiz = [{"question": "Pi value", "answer": "3.1415926535", "is_weekday": False}]
+        quiz = [
+            {
+            "question": "Pi value",
+            "answer": "3.1415926535",
+            "is_weekday": False,
+            }
+        ]
         submission = {"answer_0": "3.1415"}
         result = compute_quiz_results(quiz, submission)
         self.assertTrue(result[0]["is_correct"])

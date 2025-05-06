@@ -21,14 +21,14 @@ def _assert_valid_operators(ops):
 
 def _assert_valid_math_expression_elements(elements):
     assert len(elements) > 0, "At least one element must be defined"
-    assert elements[0]["type"] in [
-        "int",
-        "float",
-    ], f"First element must be of type int or float, but got {elements[0]['type']}"
-    assert elements[-1]["type"] in [
-        "int",
-        "float",
-    ], f"Last element must be of type int or float, but got {elements[-1]['type']}"
+    assert elements[0]["type"] in ["int", "float"], (
+        "First element must be of type int or float, but got "
+        f"{elements[0]['type']}"
+    )
+    assert elements[-1]["type"] in ["int", "float"], (
+        "Last element must be of type int or float, but got "
+        f"{elements[-1]['type']}"
+    )
     for i in range(1, len(elements) - 1):
         i_is_numeric = elements[i]["type"] in ["int", "float"]
         i_plus_1_is_numeric = elements[i + 1]["type"] in ["int", "float"]
@@ -108,7 +108,9 @@ def _parse_config_from_text(config_text):
 
             elif expr_type == "date":
                 if key == "start":
-                    assert len(tokens) == 2, "start must have exactly 1 argument"
+                    assert len(tokens) == 2, (
+                        "start must have exactly 1 argument"
+                    )
                     assert tokens[1].isdigit(), "start must be a number"
                     expr_config["start_year"] = int(tokens[1])
                 elif key == "end":

@@ -21,7 +21,9 @@ def _generate_expression(expr_config):
     if expr_config["type"] == "date":
         start_year = expr_config.get("start_year", 1900)
         end_year = expr_config.get("end_year", 2050)
-        assert end_year >= start_year, "End year must be greater or equal to start year"
+        assert end_year >= start_year, (
+            "End year must be greater or equal to start year"
+        )
         return random_date(start_year, end_year), True
     if expr_config["type"] == "math":
         elements = expr_config["elements"]
@@ -32,7 +34,9 @@ def _generate_expression(expr_config):
             if elem["type"] in ["int", "float"] or float_precision_match:
                 start = elem.get("start", 0)
                 end = elem.get("end", None)
-                assert end is not None, "At least End must be defined in int/float"
+                assert end is not None, (
+                    "At least 'end' must be defined in 'int/float' range."
+                )
                 assert (
                     end >= start
                 ), "End must be greater or equal to start in int/float"
@@ -77,7 +81,8 @@ def _evaluate_expression(expr, is_weekday=False):
         res = float("inf")
     except (ValueError, TypeError, SyntaxError) as e:
         raise ValueError(
-            f"Invalid expression '{expr}'. Error: {e}. Expression must be " "numeric."
+            f"Invalid expression '{expr}'. Error: {e}. "
+            "Expression must be numeric."
         ) from e
     return str(res)
 
@@ -135,5 +140,9 @@ def generate_quiz(config):
             except AssertionError as e:
                 raise UserConfigError(f"Invalid configuration: {e}")
             answer = _evaluate_expression(expr, is_weekday=is_weekday)
-            quiz.append({"question": expr, "answer": answer, "is_weekday": is_weekday})
+            quiz.append({
+                "question": expr,
+                "answer": answer,
+                "is_weekday": is_weekday
+            })
     return quiz

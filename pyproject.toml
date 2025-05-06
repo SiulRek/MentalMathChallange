@@ -1,0 +1,22 @@
+# NOTE: Apply ruff on src/
+[tool.ruff]
+line-length = 80
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle error
+    "F",  # Pyflakes
+    "I",  # isort
+]
+ignore = [
+    "I001",  # ignore sort of imports,
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["E501", "F401"]  # lines too long; imported but unused
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.black]
+line-length = 79
