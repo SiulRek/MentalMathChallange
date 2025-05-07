@@ -1,6 +1,6 @@
 import unittest
 
-from src.core.generate_quiz import generate_quiz, UserConfigError
+from src.core.generate_quiz import generate_quiz
 from src.tests.utils.base_test_case import BaseTestCase
 
 
@@ -140,23 +140,6 @@ class TestGenerateQuiz(BaseTestCase):
     def test_invalid_expr_type_raises(self):
         blueprint = [({"category": "invalid_type"}, 1)]
         with self.assertRaises(ValueError):
-            generate_quiz(blueprint)
-
-    def test_invalid_operator_raises(self):
-        blueprint = [
-            (
-                {
-                    "category": "math",
-                    "elements": [
-                        {"type": "int", "start": 1, "end": 5},
-                        {"type": "operator", "value": "^^"},
-                        {"type": "int", "start": 1, "end": 5},
-                    ],
-                },
-                1,
-            )
-        ]
-        with self.assertRaises(UserConfigError):
             generate_quiz(blueprint)
 
     def test_step_rescaling_logic(self):

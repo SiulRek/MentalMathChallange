@@ -12,22 +12,9 @@ from scipy.constants import (
 )
 
 from src.core.date_utils import random_date, derive_weekday
-from src.core.parse_blueprint_from_text import (
-    UserConfigError,
-    SUPPORTED_OPERATORS,
-)
+from src.core.parse_blueprint_from_text import UserConfigError
 
 MAX_PRECISION = 10  # Max number of decimal places to retain in the result
-
-
-def _assert_valid_operators(ops):
-    ops = ops if isinstance(ops, list) else [ops]
-    for op in ops:
-        if op not in SUPPORTED_OPERATORS:
-            raise UserConfigError(
-                f"Invalid operator '{op}'. Supported operators are: "
-                f"{', '.join(SUPPORTED_OPERATORS)}."
-            )
 
 
 def _generate_expression(expr_blueprint):
@@ -48,10 +35,13 @@ def _generate_expression(expr_blueprint):
                 expr += elem["value"]
             elif elem_type in ["int", "float"] or float_precision_match:
                 start = elem.get("start", 0)
-                end = elem.get("end", None)
-                assert (
-                    end is not None
-                ), "At least 'end' must be defined in 'int/float' range."
+                try:
+                    end = elem["end"]
+                except KeyError as exc:
+                    raise UserConfigError(
+                        "At least 'end' must be defined in 'int/float' "
+                        "range."
+                    ) from exc
                 assert (
                     end >= start
                 ), "End must be greater or equal to start in int/float"
@@ -71,7 +61,6 @@ def _generate_expression(expr_blueprint):
                 op = elem["value"]
                 if isinstance(op, list):
                     op = random.choice(op)
-                _assert_valid_operators(op)
                 expr += op
             elif elem_type in ["function", "constant"]:
                 specifier = elem["value"]
