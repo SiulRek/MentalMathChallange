@@ -1,7 +1,7 @@
 import unittest
 
 from src.core.parse_blueprint_from_text import (
-    _parse_blueprint_from_text,
+    parse_blueprint_from_text,
     UserConfigError,
 )
 from src.tests.utils.base_test_case import BaseTestCase
@@ -15,7 +15,7 @@ class TestParseBlueprintFromText(BaseTestCase):
   op +
   float 3.0 7.5
 """
-        result = _parse_blueprint_from_text(blueprint)
+        result = parse_blueprint_from_text(blueprint)
         expected = [
             {
                 "category": "math",
@@ -35,9 +35,12 @@ class TestParseBlueprintFromText(BaseTestCase):
   op -
   float 2.5 5.5
 """
-        result = _parse_blueprint_from_text(blueprint)
+        result = parse_blueprint_from_text(blueprint)
         self.assertEqual(result[0][0]["category"], "math")
         self.assertEqual(len(result[0][0]["elements"]), 3)
+        self.assertEqual(result[0][0]["elements"][0]["type"], "int")
+        self.assertEqual(result[0][0]["elements"][1]["value"], "-")
+        self.assertEqual(result[0][0]["elements"][-1]["type"], "float")
 
     def test_valid_math_with_float_start_and_end(self):
         blueprint = """math: 1
@@ -45,8 +48,18 @@ class TestParseBlueprintFromText(BaseTestCase):
   op *
   float 3.3 4.4
 """
-        result = _parse_blueprint_from_text(blueprint)
-        self.assertEqual(result[0][0]["elements"][0]["type"], "float")
+        result = parse_blueprint_from_text(blueprint)
+        self.assertEqual(len(result[0][0]["elements"]), 3)
+
+    def test_valid_math_with_numeric_end(self):
+        blueprint = """math: 1
+    int 0
+    op +
+    float 0.0
+"""
+        result = parse_blueprint_from_text(blueprint)
+        self.assertEqual(result[0][0]["elements"][0]["type"], "int")
+        self.assertEqual(result[0][0]["elements"][1]["value"], "+")
         self.assertEqual(result[0][0]["elements"][-1]["type"], "float")
 
     def test_valid_math_with_float_precision(self):
@@ -55,16 +68,42 @@ class TestParseBlueprintFromText(BaseTestCase):
   op /
   float.3 3.3 4.4
 """
-        result = _parse_blueprint_from_text(blueprint)
+        result = parse_blueprint_from_text(blueprint)
         self.assertEqual(result[0][0]["elements"][0]["type"], "float.2")
         self.assertEqual(result[0][0]["elements"][-1]["type"], "float.3")
+
+    def test_valid_math_with_multiple_operators(self):
+        blueprint = """math: 1
+    int 1 5
+    op + - /
+    float 2.0 4.0
+"""
+        result = parse_blueprint_from_text(blueprint)
+        self.assertEqual(len(result[0][0]["elements"]), 3)
+        self.assertEqual(result[0][0]["elements"][1]["value"], ["+", "-", "/"])
+
+    def test_valid_math_with_brackets(self):
+        blueprint = """math: 1
+    (
+    int 1 5
+    op +
+    float 2.0 4.0
+    )
+    op -
+    int 3 7
+"""
+        result = parse_blueprint_from_text(blueprint)
+        elements = result[0][0]["elements"]
+        self.assertEqual(len(elements), 7)
+        self.assertEqual(elements[0]["value"], "(")
+        self.assertEqual(elements[4]["value"], ")")
 
     def test_valid_date_blueprint(self):
         blueprint = """date: 1
   start 1990
   end 2020
 """
-        result = _parse_blueprint_from_text(blueprint)
+        result = parse_blueprint_from_text(blueprint)
         expected = [
             {
                 "category": "date",
@@ -85,7 +124,7 @@ date: 2
   start 2000
   end 2010
 """
-        result = _parse_blueprint_from_text(blueprint)
+        result = parse_blueprint_from_text(blueprint)
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0][0]["category"], "math")
         self.assertEqual(result[1][0]["category"], "date")
@@ -97,14 +136,14 @@ date: 2
   float 2.0 4.0
 """
         with self.assertRaises(UserConfigError):
-            _parse_blueprint_from_text(blueprint)
+            parse_blueprint_from_text(blueprint)
 
     def test_unknown_expression_type(self):
         blueprint = """logic: 1
   gate and
 """
         with self.assertRaises(UserConfigError):
-            _parse_blueprint_from_text(blueprint)
+            parse_blueprint_from_text(blueprint)
 
     def test_invalid_operator(self):
         blueprint = """math: 1
@@ -112,22 +151,22 @@ date: 2
   op &
   int 2 5
 """
-        with self.assertRaises(AssertionError):
-            _parse_blueprint_from_text(blueprint)
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
 
     def test_invalid_token_count_for_int(self):
         blueprint = """math: 1
   int
 """
-        with self.assertRaises(AssertionError):
-            _parse_blueprint_from_text(blueprint)
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
 
     def test_invalid_token_count_for_float(self):
         blueprint = """math: 1
   float
 """
-        with self.assertRaises(AssertionError):
-            _parse_blueprint_from_text(blueprint)
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
 
     def test_invalid_token_count_for_op(self):
         blueprint = """math: 1
@@ -135,60 +174,53 @@ date: 2
   op
   int 2 5
 """
-        with self.assertRaises(AssertionError):
-            _parse_blueprint_from_text(blueprint)
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
 
     def test_missing_elements_in_math_block(self):
         blueprint = """math: 1
 """
-        with self.assertRaises(AssertionError):
-            _parse_blueprint_from_text(blueprint)
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
 
     def test_invalid_math_no_numeric_start(self):
         blueprint = """math: 1
-  op +
+  op **
   int 1 10
 """
-        with self.assertRaises(AssertionError) as cm:
-            _parse_blueprint_from_text(blueprint)
-        self.assertIn(
-            "First element must be of type int or float", str(cm.exception)
-        )
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
 
     def test_invalid_math_no_numeric_end(self):
         blueprint = """math: 1
   float 2.0 3.0
   op -
 """
-        with self.assertRaises(AssertionError) as cm:
-            _parse_blueprint_from_text(blueprint)
-        self.assertIn(
-            "Last element must be of type int or float", str(cm.exception)
-        )
-
+        with self.assertRaises(UserConfigError) as cm:
+            parse_blueprint_from_text(blueprint)
+        
     def test_invalid_math_two_consecutive_numeric_elements(self):
         blueprint = """math: 1
   int 1 5
   float 2.0 3.0
   int 4 6
 """
-        with self.assertRaises(AssertionError) as cm:
-            _parse_blueprint_from_text(blueprint)
-        self.assertIn("must be of different types", str(cm.exception))
+        with self.assertRaises(UserConfigError) as cm:
+            parse_blueprint_from_text(blueprint)
 
     def test_date_with_non_numeric_start(self):
         blueprint = """date: 1
   start year2000
 """
-        with self.assertRaises(AssertionError):
-            _parse_blueprint_from_text(blueprint)
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
 
     def test_extra_tokens_in_date(self):
         blueprint = """date: 1
   start 2000 extra
 """
-        with self.assertRaises(AssertionError):
-            _parse_blueprint_from_text(blueprint)
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
 
     def test_whitespace_and_empty_lines(self):
         blueprint = """
@@ -201,7 +233,7 @@ math: 1
   op +
   float 2.0 4.0
 """
-        result = _parse_blueprint_from_text(blueprint)
+        result = parse_blueprint_from_text(blueprint)
         self.assertEqual(result[0][0]["category"], "math")
         self.assertEqual(len(result[0][0]["elements"]), 3)
 
@@ -211,7 +243,7 @@ math: 1
   op + - /
   float 5.0 7.0
 """
-        result = _parse_blueprint_from_text(blueprint)
+        result = parse_blueprint_from_text(blueprint)
         self.assertEqual(result[0][0]["elements"][1]["value"], ["+", "-", "/"])
 
 

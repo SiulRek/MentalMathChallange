@@ -47,6 +47,30 @@ class TestGenerateQuiz(BaseTestCase):
             self.assertEqual(q["answer"], "5")
             self.assertEqual(q["category"], "math")
 
+    def test_generate_math_quiz_with_brackets(self):
+        blueprint = [
+            (
+                {
+                    "category": "math",
+                    "elements": [
+                        {"type": "int", "start": 1, "end": 1},
+                        {"type": "operator", "value": "+"},
+                        {"type": "bracket", "value": "("},
+                        {"type": "int", "start": 2, "end": 2},
+                        {"type": "operator", "value": "-"},
+                        {"type": "int", "start": 3, "end": 3},
+                        {"type": "bracket", "value": ")"},
+                    ],
+                },
+                1,
+            )
+        ]
+        quiz = generate_quiz(blueprint)
+        self.assertEqual(len(quiz), 1)
+        self.assertEqual(quiz[0]["category"], "math")
+        self.assertEqual(quiz[0]["question"], "1 + (2 - 3)")
+        self.assertEqual(quiz[0]["answer"], "0")
+
     def test_generate_date_question(self):
         blueprint = [
             (

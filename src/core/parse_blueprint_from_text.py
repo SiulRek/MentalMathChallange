@@ -22,26 +22,32 @@ def _assert_valid_operators(ops):
     assert not reminder, f"Invalid operator(s): {reminder}"
 
 
-def _assert_valid_math_expression_elements(elements):
+def _assert_valid_math_expression_elements(elements, position):
     def _is_numeric_type(type_):
         return type_ in ["int", "float"] or re.match(r"float\.(\d+)", type_)
-    
+
     assert len(elements) > 0, "At least one element must be defined"
-    assert _is_numeric_type(elements[0]["type"]), (
-        "First element must be of type int or float, but got "
-        f"{elements[0]['type']}"
-    )
-    assert _is_numeric_type(elements[-1]["type"]), (
-        "Last element must be of type int or float, but got "
-        f"{elements[-1]['type']}"
-    )
-    for i in range(1, len(elements) - 1):
-        i_is_numeric = _is_numeric_type(elements[i]["type"])
-        i_plus_1_is_numeric = _is_numeric_type(elements[i + 1]["type"])
-        assert i_is_numeric != i_plus_1_is_numeric, (
-            f"Element {i} and {i + 1} must be of different types, but both are "
-            f"{elements[i]['type']}"
-        )
+
+    # Build an example expression
+    expr = ""
+    for elem in elements:
+        if _is_numeric_type(elem["type"]):
+            expr += "1"
+        elif elem["type"] == "operator":
+            expr += "*"
+        elif elem["type"] == "bracket":
+            expr += elem["value"]
+        expr += " "
+
+    try:
+        eval(expr)
+    except ZeroDivisionError:
+        pass
+    except Exception as e:
+        raise UserConfigError(
+            "Unable to construct a valid math expression for the blueprint "
+            f"at position {position}."
+        ) from e
 
 
 def _parse_blueprint_from_text(blueprint_text):
@@ -83,7 +89,10 @@ def _parse_blueprint_from_text(blueprint_text):
             key = tokens[0]
 
             if expr_cat == "math":
-                if key == "int":
+                if key in ["(", ")"]:
+                    assert len(tokens) == 1, f"{key} must have no arguments"
+                    elements.append({"type": "bracket", "value": key})
+                elif key == "int":
                     assert (
                         1 < len(tokens) <= 3
                     ), "int must have between 2 and 3 arguments"
@@ -136,7 +145,8 @@ def _parse_blueprint_from_text(blueprint_text):
             i += 1
 
         if expr_cat == "math":
-            _assert_valid_math_expression_elements(elements)
+            position = len(blueprints) + 1
+            _assert_valid_math_expression_elements(elements, position)
             expr_blueprint["elements"] = elements
 
         blueprints.append((expr_blueprint, count))
@@ -146,61 +156,73 @@ def _parse_blueprint_from_text(blueprint_text):
 
 def parse_blueprint_from_text(blueprint_text):
     """
-    Parses human-friendly blueprinturation text into structured expression
+    Parses a human-friendly blueprint text into structured expression
     blueprints.
 
-    Supported Syntax:
-    - Each block starts with a header line in the form: '<type>: <count>'
-        - <type>: 'math' or 'date'
-        - <count>: number of expressions to generate
-    - The lines that follow (indented) define the blueprinturation parameters:
-        For math:
-          - int <start> <end>
-          - float <start> <end>
-          - op <+ - * / // %>
-        For date:
-          - start <year>
-          - end <year>
-    - Blocks are separated by empty lines.
+    The input text defines one or more blocks. Each block starts with a
+    header line of the form:
 
-    Example:
-        math: 3
-          int 1 10
-          op + -
-          int 5 15
+        <category>: <count>
 
-        date: 2
-          start 2000
-          end 2020
+    - <category>: 'math' or 'date'
+    - <count>: number of expressions to generate
+
+    For 'math', the block must include indented lines specifying elements:
+        - int [<start>] <end>       # Default start = 0
+        - float [<start>] <end>     # Default start = 0.0, precision = 10
+        - float.<precision> [<start>] <end>
+                                    # Default start = 0.0, e.g., float.2
+        - op <operator1> [<...>]    # Valid: + - * / // %
+        - (                         # Open bracket
+        - )                         # Close bracket
+
+    For 'date', valid indented lines include:
+        - start <year>              # Optional, default = 1900
+        - end <year>                # Optional, default = 2050
+
+    Lines may be indented using spaces or tabs. Blank lines are allowed.
+    Malformed input will raise a UserConfigError.
 
     Parameters
     ----------
     blueprint_text : str
-        A string representation of the blueprinturation written in a concise,
-        human-friendly format, as described above.
+        A string containing one or more indented blueprint blocks. Each
+        block describes how to generate expressions of a specified type.
 
     Returns
     -------
-    list of tuple
-        A list of (expression_blueprint, count) pairs, where:
+    list of tuple[dict, int]
+        A list of (expression_blueprint, count) pairs.
+
         expression_blueprint : dict
-            Specifies the expression generation rules. Must include:
-            - "category" : {"date", "math"}
-              - If "category" == "date":
-                      - "start_year" : int (optional, default=1900)
-                      - "end_year" : int (optional, default=2050)
-              - If "category" == "math":
-                  - "elements" : list of dict
-                      - "type" : {"int", "float", "operator"}
-                          - If "int" or "float":
-                              - "start" : int or float (optional, default 0)
-                              - "end" : int or float
-                          - If "operator":
-                              - "value" : str or list of str, one or more of
-                                {"+", "-", "*", "/", "//", "%"}
+            Specifies how expressions are generated
+            (Keys for optional arguments are allowed to be omitted.):
+
+            - "category": str, one of {"math", "date"}
+
+            If "category" == "math":
+                - "elements": list of dicts, each with:
+                    - {"type": "int", "start": int, "end": int}
+                    - {"type": "float", "start": float, "end": float}
+                    - {"type": "float.<precision>", "start": float,
+                       "end": float}
+                    - {"type": "operator", "value": str or list of str}
+                    - {"type": "bracket", "value": "(" or ")"}
+
+            If "category" == "date":
+                    - "start_year": int
+                    - "end_year": int
+
         count : int
-            The number of expressions to generate with the given blueprint.
+            Number of expressions to generate with the given blueprint.
+
+
+    Raises
+    ------
+    UserConfigError
+        If the input blueprint text is invalid or unsupported.
     """
+
     try:
         return _parse_blueprint_from_text(blueprint_text)
     except AssertionError as e:

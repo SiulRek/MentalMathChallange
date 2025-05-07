@@ -34,7 +34,9 @@ def _generate_expression(expr_blueprint):
         for elem in elements:
             type_ = elem["type"]
             float_precision_match = re.match(r"float\.(\d+)", type_)
-            if elem["type"] in ["int", "float"] or float_precision_match:
+            if elem["type"] == "bracket":
+                expr += elem["value"]
+            elif elem["type"] in ["int", "float"] or float_precision_match:
                 start = elem.get("start", 0)
                 end = elem.get("end", None)
                 assert (
@@ -93,6 +95,9 @@ def _prettify_expression(expr, category):
         year, month, day = expr.split("-")
         month = month_names[int(month) - 1]
         return f"{month} {day}, {year}"
+    elif category == "math":
+        expr = re.sub(r"\(\s+", "(", expr)
+        expr = re.sub(r"\s+\)", ")", expr)
     return expr
 
 def _evaluate_expression(expr, category=False):
@@ -119,31 +124,7 @@ def generate_quiz(blueprint):
     Parameters
     ----------
     blueprint : list of tuple (dict, int)
-        A list of (expression_blueprint, count) pairs, where:
-        - expression_blueprint : dict
-            Specifies the expression generation rules. Must include:
-            - "category": str, one of {"date", "math"}.
-              - If "category" == "date":
-                  Optional:
-                    - "start_year": int (default=1900)
-                    - "end_year": int (default=2050)
-              - If "category" == "math":
-                  - "elements": list of dicts, each with:
-                      - "type": str, one of:
-                        {"int", "float", "float.<precision>", "operator"}
-                          - If "int" or "float":
-                              - "start": int or float
-                              - "end": int or float
-                          - If "float.<precision>":
-                              - Precision can be set manually after "float."
-                                (e.g., "float.3" for 3 decimal places).
-                              - "start": float
-                              - "end": float
-                          - If "operator":
-                              - "value": str or list of str, one or more of
-                                {"+", "-", "*", "/", "//", "%"}
-        - count : int
-            The number of expressions to generate with the given blueprint.
+        Defined in src/core/parse_blueprint_from_text.py.
 
     Returns
     -------

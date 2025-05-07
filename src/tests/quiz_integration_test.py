@@ -5,7 +5,10 @@ from src.core.compute_quiz_results import (
     UserResponseError,
 )
 from src.core.generate_quiz import generate_quiz
-from src.core.parse_blueprint_from_text import _parse_blueprint_from_text
+from src.core.parse_blueprint_from_text import (
+    _parse_blueprint_from_text,
+    UserConfigError,
+)
 from src.tests.utils.base_test_case import BaseTestCase
 
 
@@ -150,7 +153,7 @@ date: 1
         user_answers = {"answer_0": truncated}
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
-    
+
     def test_intagration_float_precision_setting(self):
         blueprint_text = """math: 1
   float.2 1.123456789 1.123456789
@@ -171,7 +174,7 @@ date: 1
   op -
   op *
 """
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(UserConfigError):
             _parse_blueprint_from_text(blueprint_text)
 
 
