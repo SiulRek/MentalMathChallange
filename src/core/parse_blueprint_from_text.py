@@ -25,7 +25,12 @@ def _parse_tokens_to_kwargs(tokens, keys, type_map):
         kwargs[keys[i]] = type_map[i](token)
     return kwargs
 
-def _map_to_np_function_str(func):
+
+def _assert_valid_operators(ops):
+    reminder = set(ops) - SUPPORTED_OPERATORS
+    assert not reminder, f"Invalid operator(s): {reminder}"
+
+def _assert_function(func):
     supported = [
         "abs",
         "ceil",
@@ -39,13 +44,9 @@ def _map_to_np_function_str(func):
         "cos",
         "tan",
     ]
-    if func not in supported:
-        raise UserConfigError(
-            f"Unsupported function '{func}'"
-        )
-    return f"{func}"
-
-def _map_to_scipy_constant_str(const):
+    assert func in supported, f"Unsupported function '{func}'"
+    
+def _assert_constant(const):
     supported = [
         "c",                # speed of light
         "h",                # Planck constant
@@ -68,18 +69,7 @@ def _map_to_scipy_constant_str(const):
         "elementary_charge",# synonym for e
         "gravitational_constant" # synonym for G
     ]
-    if const not in supported:
-        raise UserConfigError(
-            f"Unsupported constant '{const}'"
-        )
-    value = eval(const)
-    return f"{value}"
-
-
-def _assert_valid_operators(ops):
-    reminder = set(ops) - SUPPORTED_OPERATORS
-    assert not reminder, f"Invalid operator(s): {reminder}"
-
+    assert const in supported, f"Unsupported constant '{const}'"
 
 def _assert_valid_math_expression_elements(elements, position):
     def _is_numeric_type(type_):
@@ -179,15 +169,16 @@ def _parse_blueprint_from_text(blueprint_text):
                     elements.append({"type": "operator", "value": val})
                 elif key == "func":
                     assert len(tokens) == 2, "func must have exactly 1 argument"
-                    name = tokens[1]
-                    func_str = _map_to_np_function_str(name)
-                    elements.append({"type": "function", "value": func_str})
+                    func = tokens[1]
+                    _assert_function(func)
+                    elements.append({"type": "function", "value": func})
                 elif key == "const":
                     msg = "const must have exactly 1 argument"
                     assert len(tokens) == 2, msg
                     const = tokens[1]
-                    const_str = _map_to_scipy_constant_str(const)
-                    elements.append({"type": "constant", "value": const_str})
+                    _assert_constant(const)
+                    const = str(eval(const))
+                    elements.append({"type": "constant", "value": const})
                 else:
                     raise UserConfigError(
                         f"Unknown math sub-key: '{key}'"

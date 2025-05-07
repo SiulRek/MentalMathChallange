@@ -77,7 +77,7 @@ class TestGenerateQuiz(BaseTestCase):
                 {
                     "category": "math",
                     "elements": [
-                        {"type": "function", "value": "np.sin"},
+                        {"type": "function", "value": "sin"},
                         {"type": "bracket", "value": "("},
                         {"type": "int", "start": 2, "end": 2},
                         {"type": "bracket", "value": ")"},
@@ -89,7 +89,7 @@ class TestGenerateQuiz(BaseTestCase):
         quiz = generate_quiz(blueprint)
         self.assertEqual(len(quiz), 1)
         self.assertEqual(quiz[0]["category"], "math")
-        self.assertEqual(quiz[0]["question"], "np.sin(2)")
+        self.assertEqual(quiz[0]["question"], "sin(2)")
         self.assertEqual(quiz[0]["answer"], "0.9092974268256817")
 
     def test_generate_math_quiz_with_constant(self):
