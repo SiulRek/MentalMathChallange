@@ -26,9 +26,6 @@ def _collect_user_answers(submitted_answers, total_expected_answers):
 
     sorted_form = dict(sorted(submitted_answers.items(), key=_get_index))
     sorted_answers = list(sorted_form.values())
-    sorted_answers = [
-        str(answer) for answer in sorted_answers
-    ]  # XXX: Is this required?
     return sorted_answers
 
 
