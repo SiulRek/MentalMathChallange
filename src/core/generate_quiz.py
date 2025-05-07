@@ -1,6 +1,8 @@
 import random
 import re
 
+import numpy as np
+
 from src.core.date_utils import random_date, derive_weekday
 from src.core.parse_blueprint_from_text import (
     UserConfigError,
@@ -32,11 +34,11 @@ def _generate_expression(expr_blueprint):
         elements = expr_blueprint["elements"]
         expr = ""
         for elem in elements:
-            type_ = elem["type"]
-            float_precision_match = re.match(r"float\.(\d+)", type_)
-            if elem["type"] == "bracket":
+            elem_type = elem["type"]
+            float_precision_match = re.match(r"float\.(\d+)", elem_type)
+            if elem_type == "bracket":
                 expr += elem["value"]
-            elif elem["type"] in ["int", "float"] or float_precision_match:
+            elif elem_type in ["int", "float"] or float_precision_match:
                 start = elem.get("start", 0)
                 end = elem.get("end", None)
                 assert (
@@ -46,7 +48,7 @@ def _generate_expression(expr_blueprint):
                     end >= start
                 ), "End must be greater or equal to start in int/float"
 
-                if elem["type"] == "int":
+                if elem_type == "int":
                     expr += str(random.randint(start, end))
                 else:
                     prec = (
@@ -57,22 +59,25 @@ def _generate_expression(expr_blueprint):
                     d = random.uniform(start, end)
                     d = f"{d:.{prec}f}"
                     expr += d.rstrip("0").rstrip(".") if "." in d else d
-            elif elem["type"] == "operator":
+            elif elem_type == "operator":
                 op = elem["value"]
                 if isinstance(op, list):
                     op = random.choice(op)
                 _assert_valid_operators(op)
                 expr += op
+            elif elem_type == "function":
+                func_str = elem["value"]
+                expr += func_str
             else:
                 raise ValueError(
                     f"Invalid element type '{elem['type']}'. Expected "
                     "'int', 'float', or 'operator'."
                 )
-            expr += " "
+            expr += " " if elem_type != "function" else ""
         return expr.rstrip(), "math"
     raise ValueError(
-        f"Invalid expression category '{expr_blueprint['category']}'. Expected" 
-        " 'date' or 'math'."
+        f"Invalid expression category '{expr_blueprint['category']}'. "
+        "Expected 'date' or 'math'."
     )
 
 
@@ -95,10 +100,11 @@ def _prettify_expression(expr, category):
         year, month, day = expr.split("-")
         month = month_names[int(month) - 1]
         return f"{month} {day}, {year}"
-    elif category == "math":
+    if category == "math":
         expr = re.sub(r"\(\s+", "(", expr)
         expr = re.sub(r"\s+\)", ")", expr)
     return expr
+
 
 def _evaluate_expression(expr, category=False):
     if category == "date":
@@ -111,8 +117,8 @@ def _evaluate_expression(expr, category=False):
         res = float("inf")
     except (ValueError, TypeError, SyntaxError) as e:
         raise ValueError(
-            f"Invalid expression '{expr}'. Error: {e}. "
-            "Expression must be numeric."
+            f"Invalid expression '{expr}'. Error: {e}. Expression must be "
+            "numeric."
         ) from e
     return str(res)
 
@@ -143,7 +149,9 @@ def generate_quiz(blueprint):
             try:
                 expr, category = _generate_expression(expr_blueprint)
             except AssertionError as e:
-                raise UserConfigError(f"Invalid blueprinturation: {e}")
+                raise UserConfigError(
+                    f"Invalid blueprinturation: {e}"
+                )
             answer = _evaluate_expression(expr, category=category)
             expr = _prettify_expression(expr, category=category)
             quiz.append(

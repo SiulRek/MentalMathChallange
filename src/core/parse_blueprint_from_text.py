@@ -1,7 +1,7 @@
 import re
 
-SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%", "**"}
 
+SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%", "**"}
 
 class UserConfigError(Exception):
     """Base class for user blueprinturation errors."""
@@ -16,6 +16,25 @@ def _parse_tokens_to_kwargs(tokens, keys, type_map):
         kwargs[keys[i]] = type_map[i](token)
     return kwargs
 
+def _map_to_np_function_str(func):
+    supported = [
+        "abs",
+        "ceil",
+        "floor",
+        "round",
+        "exp",
+        "log",
+        "log10",
+        "sqrt",
+        "sin",
+        "cos",
+        "tan",
+    ]
+    if func not in supported:
+        raise UserConfigError(
+            f"Unsupported function '{func}'"
+        )
+    return f"np.{func}"
 
 def _assert_valid_operators(ops):
     reminder = set(ops) - SUPPORTED_OPERATORS
@@ -116,6 +135,11 @@ def _parse_blueprint_from_text(blueprint_text):
                     _assert_valid_operators(ops)
                     val = ops[0] if len(ops) == 1 else ops
                     elements.append({"type": "operator", "value": val})
+                elif key == "func":
+                    assert len(tokens) == 2, "func must have exactly 1 argument"
+                    name = tokens[1]
+                    func_str = _map_to_np_function_str(name)
+                    elements.append({"type": "function", "value": func_str})
                 else:
                     raise UserConfigError(
                         f"Unknown math sub-key: '{key}'"
@@ -175,6 +199,9 @@ def parse_blueprint_from_text(blueprint_text):
         - op <operator1> [<...>]    # Valid: + - * / // % **
         - (                         # Open bracket
         - )                         # Close bracket
+        - func <function_name>      # Valid: abs, ceil, floor, round,
+                                    # exp, log, log10, sqrt, sin, cos,
+                                    # tan
 
     For 'date', valid indented lines include:
         - start <year>              # Optional, default = 1900
@@ -208,6 +235,7 @@ def parse_blueprint_from_text(blueprint_text):
                        "end": float}
                     - {"type": "operator", "value": str or list of str}
                     - {"type": "bracket", "value": "(" or ")"}
+                    - {"type": "function", "value": str}
 
             If "category" == "date":
                     - "start_year": int

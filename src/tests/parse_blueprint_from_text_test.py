@@ -97,6 +97,21 @@ class TestParseBlueprintFromText(BaseTestCase):
         self.assertEqual(len(elements), 7)
         self.assertEqual(elements[0]["value"], "(")
         self.assertEqual(elements[4]["value"], ")")
+    
+    def test_valid_math_with_function(self):
+        blueprint = """math: 1
+    func sin
+    (
+    int 1 5
+    )
+    op +
+    float 2.0 4.0
+"""
+        result = parse_blueprint_from_text(blueprint)
+        elements = result[0][0]["elements"]
+        self.assertEqual(len(elements), 6)
+        self.assertEqual(elements[0]["type"], "function")
+        self.assertEqual(elements[0]["value"], "np.sin")
 
     def test_valid_date_blueprint(self):
         blueprint = """date: 1

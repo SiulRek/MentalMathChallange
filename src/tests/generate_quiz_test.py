@@ -71,6 +71,27 @@ class TestGenerateQuiz(BaseTestCase):
         self.assertEqual(quiz[0]["question"], "1 + (2 - 3)")
         self.assertEqual(quiz[0]["answer"], "0")
 
+    def test_generate_math_quiz_with_function(self):
+        blueprint = [
+            (
+                {
+                    "category": "math",
+                    "elements": [
+                        {"type": "function", "value": "np.sin"},
+                        {"type": "bracket", "value": "("},
+                        {"type": "int", "start": 2, "end": 2},
+                        {"type": "bracket", "value": ")"},
+                    ],
+                },
+                1,
+            )
+        ]
+        quiz = generate_quiz(blueprint)
+        self.assertEqual(len(quiz), 1)
+        self.assertEqual(quiz[0]["category"], "math")
+        self.assertEqual(quiz[0]["question"], "np.sin(2)")
+        self.assertEqual(quiz[0]["answer"], "0.9092974268256817")
+
     def test_generate_date_question(self):
         blueprint = [
             (
