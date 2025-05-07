@@ -102,11 +102,11 @@ def _assert_valid_math_expression_elements(elements, position):
         eval(expr)
     except ZeroDivisionError:
         pass
-    except Exception as e:
+    except Exception as exp:
         raise UserConfigError(
             "Unable to construct a valid math expression for the blueprint "
             f"at position {position}."
-        ) from e
+        ) from exp
 
 
 def _parse_blueprint_from_text(blueprint_text):
@@ -130,10 +130,10 @@ def _parse_blueprint_from_text(blueprint_text):
             category_element, count_element = line.split(":")
             expr_cat = category_element.strip()
             count = int(count_element.strip())
-        except ValueError as e:
+        except ValueError as exp:
             raise UserConfigError(
                 f"Invalid blueprint block start: '{line}'"
-            ) from e
+            ) from exp
         expr_blueprint = {"category": expr_cat}
         i += 1
 
@@ -307,7 +307,7 @@ def parse_blueprint_from_text(blueprint_text):
 
     try:
         return _parse_blueprint_from_text(blueprint_text)
-    except AssertionError as e:
+    except AssertionError as exp:
         raise UserConfigError(
-            f"Invalid blueprinturation: {e}"
-        ) from e
+            f"Invalid blueprinturation: {exp}"
+        ) from exp
