@@ -65,9 +65,9 @@ def _generate_expression(expr_blueprint):
                     op = random.choice(op)
                 _assert_valid_operators(op)
                 expr += op
-            elif elem_type == "function":
-                func_str = elem["value"]
-                expr += func_str
+            elif elem_type in ["function", "constant"]:
+                specifier = elem["value"]
+                expr += specifier
             else:
                 raise ValueError(
                     f"Invalid element type '{elem['type']}'. Expected "

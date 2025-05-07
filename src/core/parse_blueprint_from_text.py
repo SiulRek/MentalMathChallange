@@ -1,6 +1,13 @@
 import re
 
 
+import numpy as np    # noqa: F401
+from scipy.constants import (
+    c, h, hbar, G, e, k, N_A, R, alpha, mu_0, epsilon_0,    # noqa: F401
+    sigma, zero_Celsius, pi, Avogadro, Boltzmann, Planck,   # noqa: F401
+    speed_of_light, elementary_charge, gravitational_constant   # noqa: F401
+)
+
 SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%", "**"}
 
 class UserConfigError(Exception):
@@ -36,6 +43,37 @@ def _map_to_np_function_str(func):
         )
     return f"np.{func}"
 
+def _map_to_scipy_constant_str(const):
+    supported = [
+        "c",                # speed of light
+        "h",                # Planck constant
+        "hbar",             # reduced Planck constant
+        "G",                # gravitational constant
+        "e",                # elementary charge
+        "k",                # Boltzmann constant
+        "N_A",              # Avogadro's number
+        "R",                # gas constant
+        "alpha",            # fine-structure constant
+        "mu_0",             # vacuum permeability
+        "epsilon_0",        # vacuum permittivity
+        "sigma",            # Stefan-Boltzmann constant
+        "zero_Celsius",     # zero Celsius in Kelvin
+        "pi",               # pi
+        "Avogadro",         # synonym for N_A
+        "Boltzmann",        # synonym for k
+        "Planck",           # synonym for h
+        "speed_of_light",   # synonym for c
+        "elementary_charge",# synonym for e
+        "gravitational_constant" # synonym for G
+    ]
+    if const not in supported:
+        raise UserConfigError(
+            f"Unsupported constant '{const}'"
+        )
+    value = eval(const)
+    return f"{value}"
+
+
 def _assert_valid_operators(ops):
     reminder = set(ops) - SUPPORTED_OPERATORS
     assert not reminder, f"Invalid operator(s): {reminder}"
@@ -55,6 +93,8 @@ def _assert_valid_math_expression_elements(elements, position):
         elif elem["type"] == "operator":
             expr += "*"
         elif elem["type"] == "bracket":
+            expr += elem["value"]
+        elif elem["type"] == "constant":
             expr += elem["value"]
         expr += " "
 
@@ -140,6 +180,12 @@ def _parse_blueprint_from_text(blueprint_text):
                     name = tokens[1]
                     func_str = _map_to_np_function_str(name)
                     elements.append({"type": "function", "value": func_str})
+                elif key == "const":
+                    msg = "const must have exactly 1 argument"
+                    assert len(tokens) == 2, msg
+                    const = tokens[1]
+                    const_str = _map_to_scipy_constant_str(const)
+                    elements.append({"type": "constant", "value": const_str})
                 else:
                     raise UserConfigError(
                         f"Unknown math sub-key: '{key}'"
@@ -201,7 +247,14 @@ def parse_blueprint_from_text(blueprint_text):
         - )                         # Close bracket
         - func <function_name>      # Valid: abs, ceil, floor, round,
                                     # exp, log, log10, sqrt, sin, cos,
-                                    # tan
+                                    # tan (uses numpy functions)
+        - const <constant_name>     # Valid: c, h, hbar, G, e, k, N_A,
+                                    # R, alpha, mu_0, epsilon_0,
+                                    # sigma, zero_Celsius, pi,
+                                    # Avogadro, Boltzmann, Planck,
+                                    # speed_of_light, elementary_charge,
+                                    # gravitational_constant 
+                                    # (uses scipy constants)
 
     For 'date', valid indented lines include:
         - start <year>              # Optional, default = 1900
@@ -236,6 +289,7 @@ def parse_blueprint_from_text(blueprint_text):
                     - {"type": "operator", "value": str or list of str}
                     - {"type": "bracket", "value": "(" or ")"}
                     - {"type": "function", "value": str}
+                    - {"type": "constant", "value": str}
 
             If "category" == "date":
                     - "start_year": int
@@ -256,4 +310,4 @@ def parse_blueprint_from_text(blueprint_text):
     except AssertionError as e:
         raise UserConfigError(
             f"Invalid blueprinturation: {e}"
-        )
+        ) from e

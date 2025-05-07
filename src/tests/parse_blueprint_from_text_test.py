@@ -113,6 +113,20 @@ class TestParseBlueprintFromText(BaseTestCase):
         self.assertEqual(elements[0]["type"], "function")
         self.assertEqual(elements[0]["value"], "np.sin")
 
+    def test_valid_math_with_constants(self):
+        blueprint = """math: 1
+    const pi
+    op +
+    const mu_0
+    """
+        result = parse_blueprint_from_text(blueprint)
+        elements = result[0][0]["elements"]
+        self.assertEqual(len(elements), 3)
+        self.assertEqual(elements[0]["type"], "constant")
+        self.assertEqual(elements[0]["value"], "3.141592653589793")
+        self.assertEqual(elements[2]["type"], "constant")
+        self.assertEqual(elements[2]["value"], "1.25663706127e-06")
+        
     def test_valid_date_blueprint(self):
         blueprint = """date: 1
   start 1990
