@@ -1,7 +1,9 @@
 import re
 
 
-import numpy as np    # noqa: F401
+from numpy import (
+    abs, ceil, floor, round, exp, log, log10, sqrt, sin, cos, tan  # noqa: F401
+)
 from scipy.constants import (
     c, h, hbar, G, e, k, N_A, R, alpha, mu_0, epsilon_0,    # noqa: F401
     sigma, zero_Celsius, pi, Avogadro, Boltzmann, Planck,   # noqa: F401
@@ -41,7 +43,7 @@ def _map_to_np_function_str(func):
         raise UserConfigError(
             f"Unsupported function '{func}'"
         )
-    return f"np.{func}"
+    return f"{func}"
 
 def _map_to_scipy_constant_str(const):
     supported = [

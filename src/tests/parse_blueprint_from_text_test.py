@@ -111,7 +111,7 @@ class TestParseBlueprintFromText(BaseTestCase):
         elements = result[0][0]["elements"]
         self.assertEqual(len(elements), 6)
         self.assertEqual(elements[0]["type"], "function")
-        self.assertEqual(elements[0]["value"], "np.sin")
+        self.assertEqual(elements[0]["value"], "sin")
 
     def test_valid_math_with_constants(self):
         blueprint = """math: 1
