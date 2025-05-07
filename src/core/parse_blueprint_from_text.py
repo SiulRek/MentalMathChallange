@@ -1,6 +1,6 @@
 import re
 
-SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%"}
+SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%", "**"}
 
 
 class UserConfigError(Exception):
@@ -172,7 +172,7 @@ def parse_blueprint_from_text(blueprint_text):
         - float [<start>] <end>     # Default start = 0.0, precision = 10
         - float.<precision> [<start>] <end>
                                     # Default start = 0.0, e.g., float.2
-        - op <operator1> [<...>]    # Valid: + - * / // %
+        - op <operator1> [<...>]    # Valid: + - * / // % **
         - (                         # Open bracket
         - )                         # Close bracket
 
