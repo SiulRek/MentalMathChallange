@@ -92,7 +92,7 @@ def _truncate_decimal_with_rounding(number_string, decimal_target_length):
 
 
 def _compare_numeric_strings(user_answer, correct_answer):
-    if not "." in user_answer + correct_answer:
+    if "." not in user_answer + correct_answer:
         return user_answer == correct_answer
     if len(user_answer) < len(correct_answer):
         decimal_length = (

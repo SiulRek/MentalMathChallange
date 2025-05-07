@@ -1,7 +1,7 @@
 import random
 import re
 
-import numpy as np
+import numpy as np    # noqa: F401
 
 from src.core.date_utils import random_date, derive_weekday
 from src.core.parse_blueprint_from_text import (

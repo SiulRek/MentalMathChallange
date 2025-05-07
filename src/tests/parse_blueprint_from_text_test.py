@@ -211,7 +211,7 @@ date: 2
   float 2.0 3.0
   op -
 """
-        with self.assertRaises(UserConfigError) as cm:
+        with self.assertRaises(UserConfigError):
             parse_blueprint_from_text(blueprint)
         
     def test_invalid_math_two_consecutive_numeric_elements(self):
@@ -220,7 +220,7 @@ date: 2
   float 2.0 3.0
   int 4 6
 """
-        with self.assertRaises(UserConfigError) as cm:
+        with self.assertRaises(UserConfigError):
             parse_blueprint_from_text(blueprint)
 
     def test_date_with_non_numeric_start(self):
