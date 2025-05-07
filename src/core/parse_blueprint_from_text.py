@@ -1,8 +1,8 @@
 import re
 
-
 from numpy import (
-    abs, ceil, floor, round, exp, log, log10, sqrt, sin, cos, tan  # noqa: F401
+    abs, ceil, floor, round, exp,   # noqa: F401
+    log, log10, sqrt, sin, cos, tan  # noqa: F401
 )
 from scipy.constants import (
     c, h, hbar, G, e, k, N_A, R, alpha, mu_0, epsilon_0,    # noqa: F401
@@ -92,11 +92,11 @@ def _assert_valid_math_expression_elements(elements, position):
         eval(expr)
     except ZeroDivisionError:
         pass
-    except Exception as exp:
+    except Exception as exc:
         raise UserConfigError(
             "Unable to construct a valid math expression for the blueprint "
             f"at position {position}."
-        ) from exp
+        ) from exc
 
 
 def _parse_blueprint_from_text(blueprint_text):
@@ -120,10 +120,10 @@ def _parse_blueprint_from_text(blueprint_text):
             category_element, count_element = line.split(":")
             expr_cat = category_element.strip()
             count = int(count_element.strip())
-        except ValueError as exp:
+        except ValueError as exc:
             raise UserConfigError(
                 f"Invalid blueprint block start: '{line}'"
-            ) from exp
+            ) from exc
         expr_blueprint = {"category": expr_cat}
         i += 1
 
@@ -297,7 +297,7 @@ def parse_blueprint_from_text(blueprint_text):
 
     try:
         return _parse_blueprint_from_text(blueprint_text)
-    except AssertionError as exp:
+    except AssertionError as exc:
         raise UserConfigError(
-            f"Invalid blueprinturation: {exp}"
-        ) from exp
+            f"Invalid blueprinturation: {exc}"
+        ) from exc

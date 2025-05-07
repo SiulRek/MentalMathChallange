@@ -2,7 +2,8 @@ import random
 import re
 
 from numpy import (
-    abs, ceil, floor, round, exp, log, log10, sqrt, sin, cos, tan  # noqa: F401
+    abs, ceil, floor, round, exp,   # noqa: F401
+    log, log10, sqrt, sin, cos, tan  # noqa: F401
 )
 from scipy.constants import (
     c, h, hbar, G, e, k, N_A, R, alpha, mu_0, epsilon_0,    # noqa: F401
@@ -122,11 +123,11 @@ def _evaluate_expression(expr, category=False):
         float(res)
     except ZeroDivisionError:
         res = float("inf")
-    except (ValueError, TypeError, SyntaxError) as e:
+    except (ValueError, TypeError, SyntaxError) as exc:
         raise ValueError(
-            f"Invalid expression '{expr}'. Error: {e}. Expression must be "
+            f"Invalid expression '{expr}'. Error: {exc}. Expression must be "
             "numeric."
-        ) from e
+        ) from exc
     return str(res)
 
 
@@ -155,9 +156,9 @@ def generate_quiz(blueprint):
         for _ in range(n):
             try:
                 expr, category = _generate_expression(expr_blueprint)
-            except AssertionError as e:
+            except AssertionError as exc:
                 raise UserConfigError(
-                    f"Invalid blueprinturation: {e}"
+                    f"Invalid blueprinturation: {exc}"
                 )
             answer = _evaluate_expression(expr, category=category)
             expr = _prettify_expression(expr, category=category)
