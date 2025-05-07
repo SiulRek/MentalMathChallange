@@ -84,11 +84,9 @@ def _assert_valid_math_expression_elements(elements, position):
             expr += "1"
         elif elem["type"] == "operator":
             expr += "*"
-        elif elem["type"] == "bracket":
+        elif elem["type"] in ["bracket", "function", "constant"]:
             expr += elem["value"]
-        elif elem["type"] == "constant":
-            expr += elem["value"]
-        expr += " "
+        expr += " " if elem["type"] != "function" else ""
 
     try:
         eval(expr)
@@ -177,7 +175,6 @@ def _parse_blueprint_from_text(blueprint_text):
                     assert len(tokens) == 2, msg
                     const = tokens[1]
                     _assert_constant(const)
-                    const = str(eval(const))
                     elements.append({"type": "constant", "value": const})
                 else:
                     raise UserConfigError(

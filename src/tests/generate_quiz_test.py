@@ -98,7 +98,7 @@ class TestGenerateQuiz(BaseTestCase):
                 {
                     "category": "math",
                     "elements": [
-                        {"type": "constant", "value": "3.141592653589793"},
+                        {"type": "constant", "value": "pi"},
                         {"type": "operator", "value": "+"},
                         {"type": "int", "start": 1, "end": 1},
                     ],
@@ -109,7 +109,7 @@ class TestGenerateQuiz(BaseTestCase):
         quiz = generate_quiz(blueprint)
         self.assertEqual(len(quiz), 1)
         self.assertEqual(quiz[0]["category"], "math")
-        self.assertEqual(quiz[0]["question"], "3.141592653589793 + 1")
+        self.assertEqual(quiz[0]["question"], "pi + 1")
         self.assertEqual(quiz[0]["answer"], "4.141592653589793")
 
     def test_generate_date_question(self):

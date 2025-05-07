@@ -123,9 +123,9 @@ class TestParseBlueprintFromText(BaseTestCase):
         elements = result[0][0]["elements"]
         self.assertEqual(len(elements), 3)
         self.assertEqual(elements[0]["type"], "constant")
-        self.assertEqual(elements[0]["value"], "3.141592653589793")
+        self.assertEqual(elements[0]["value"], "pi")
         self.assertEqual(elements[2]["type"], "constant")
-        self.assertEqual(elements[2]["value"], "1.25663706127e-06")
+        self.assertEqual(elements[2]["value"], "mu_0")
         
     def test_valid_date_blueprint(self):
         blueprint = """date: 1

@@ -4,6 +4,11 @@ import re
 from numpy import (
     abs, ceil, floor, round, exp, log, log10, sqrt, sin, cos, tan  # noqa: F401
 )
+from scipy.constants import (
+    c, h, hbar, G, e, k, N_A, R, alpha, mu_0, epsilon_0,    # noqa: F401
+    sigma, zero_Celsius, pi, Avogadro, Boltzmann, Planck,   # noqa: F401
+    speed_of_light, elementary_charge, gravitational_constant   # noqa: F401
+)
 
 from src.core.date_utils import random_date, derive_weekday
 from src.core.parse_blueprint_from_text import (
