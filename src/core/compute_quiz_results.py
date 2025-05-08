@@ -36,7 +36,7 @@ def _parse_user_answer(user_answer, category):
     if category == "date":
         try:
             return sanitize_weekday_string(user_answer)
-        except ValueError as e:
+        except (AssertionError, ValueError) as e:
             raise UserResponseError(
                 f"Invalid weekday string '{user_answer}'. Error: {e}. "
                 "Expected one of ['monday', 'tuesday', 'wednesday', "

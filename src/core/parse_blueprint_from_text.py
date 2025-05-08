@@ -22,7 +22,12 @@ def _parse_tokens_to_kwargs(tokens, keys, type_map):
     assert len(tokens) <= len(keys), "Too many tokens for the provided keys"
     kwargs = {}
     for i, token in enumerate(tokens):
-        kwargs[keys[i]] = type_map[i](token)
+        try:
+            kwargs[keys[i]] = type_map[i](token)
+        except (ValueError, TypeError) as exc:
+            raise UserConfigError(
+                f"Invalid token '{token}' for key '{keys[i]}'"
+            ) from exc
     return kwargs
 
 
@@ -101,14 +106,18 @@ def _assert_valid_math_expression_elements(elements, position):
 
 def _parse_blueprint_from_text(blueprint_text):
     blueprints = []
-    lines = blueprint_text.strip().splitlines()
+    lines = blueprint_text.splitlines()
     i = 0
 
     while i < len(lines):
-        line = lines[i].strip()
-        if not line:
+        line = lines[i].rstrip()
+        if not line.lstrip():
             i += 1
             continue
+        if line.startswith(" "):
+            raise UserConfigError(
+                f"Unexpected indentation in blueprint block: '{line}'"
+            )
 
         # Parse the block header
         if ":" not in line:
