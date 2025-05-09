@@ -1,7 +1,14 @@
 import unittest
 
-from src.core.compute_quiz_results import compute_quiz_results, UserResponseError   # noqa: E501
+from src.core.compute_quiz_results import (
+    compute_quiz_results,
+    UserResponseError,
+)
+from src.core.compute_quiz_results import (
+    _tolerant_comparison_of_numeric_strings,
+)
 from src.tests.utils.base_test_case import BaseTestCase
+
 
 class TestComputeQuizResults(BaseTestCase):
 
@@ -33,14 +40,14 @@ class TestComputeQuizResults(BaseTestCase):
     def test_all_correct_weekdays(self):
         quiz = [
             {
-            "question": "Day of 2023-05-04",
-            "answer": "thursday",
-            "category":  "date",
+                "question": "Day of 2023-05-04",
+                "answer": "thursday",
+                "category": "date",
             },
             {
-            "question": "Day of 2023-12-25",
-            "answer": "monday",
-            "category":  "date",
+                "question": "Day of 2023-12-25",
+                "answer": "monday",
+                "category": "date",
             },
         ]
         submission = {"answer_0": "Thu", "answer_1": "  MON  "}
@@ -50,14 +57,14 @@ class TestComputeQuizResults(BaseTestCase):
     def test_all_incorrect_weekdays(self):
         quiz = [
             {
-            "question": "Day of 2023-05-04",
-            "answer": "thursday",
-            "category":  "date",
+                "question": "Day of 2023-05-04",
+                "answer": "thursday",
+                "category": "date",
             },
             {
-            "question": "Day of 2023-12-25",
-            "answer": "monday",
-            "category":  "date",
+                "question": "Day of 2023-12-25",
+                "answer": "monday",
+                "category": "date",
             },
         ]
         submission = {"answer_0": "Fri", "answer_1": "Tue"}
@@ -67,9 +74,9 @@ class TestComputeQuizResults(BaseTestCase):
     def test_invalid_weekday_format(self):
         quiz = [
             {
-            "question": "Day of 2023-05-04",
-            "answer": "thursday",
-            "category":  "date",
+                "question": "Day of 2023-05-04",
+                "answer": "thursday",
+                "category": "date",
             }
         ]
         submission = {"answer_0": "Thursi"}
@@ -82,9 +89,9 @@ class TestComputeQuizResults(BaseTestCase):
     def test_invalid_weekday_submission(self):
         quiz = [
             {
-            "question": "Day of 2023-05-04",
-            "answer": "thursday",
-            "category":  "date",
+                "question": "Day of 2023-05-04",
+                "answer": "thursday",
+                "category": "date",
             }
         ]
         submission = {"answer_0": "noday"}
@@ -107,21 +114,21 @@ class TestComputeQuizResults(BaseTestCase):
     def test_float_precision_tolerance_rounding_required(self):
         quiz = [
             {
-            "question": "Pi value",
-            "answer": "3.1415926536",
-            "category": "math",
+                "question": "Pi value",
+                "answer": "3.1415926536",
+                "category": "math",
             }
         ]
         submission = {"answer_0": "3.1416"}
         result = compute_quiz_results(quiz, submission)
         self.assertTrue(result[0]["is_correct"])
-    
+
     def test_float_precision_tolerance_rounding_not_required(self):
         quiz = [
             {
-            "question": "Pi value",
-            "answer": "3.1415926536",
-            "category": "math",
+                "question": "Pi value",
+                "answer": "3.1415926536",
+                "category": "math",
             }
         ]
         submission = {"answer_0": "3.14159"}
@@ -131,9 +138,9 @@ class TestComputeQuizResults(BaseTestCase):
     def test_float_precision_exceeded_rounding_required(self):
         quiz = [
             {
-            "question": "Pi value",
-            "answer": "3.1415926536",
-            "category": "math",
+                "question": "Pi value",
+                "answer": "3.1415926536",
+                "category": "math",
             }
         ]
         submission = {"answer_0": "3.1415926535897"}
@@ -143,9 +150,9 @@ class TestComputeQuizResults(BaseTestCase):
     def test_float_precision_exceeded_non_rounding_required(self):
         quiz = [
             {
-            "question": "Pi value",
-            "answer": "3.14159265",
-            "category": "math",
+                "question": "Pi value",
+                "answer": "3.14159265",
+                "category": "math",
             }
         ]
         submission = {"answer_0": "3.1415926535897"}
@@ -158,6 +165,52 @@ class TestComputeQuizResults(BaseTestCase):
         result = compute_quiz_results(quiz, submission)
         self.assertEqual(len(result), 1)
         self.assertTrue(result[0]["is_correct"])
+
+
+class TestTolerantComparisonOfNumericStrings(unittest.TestCase):
+    def _get_equal_numbers_list(self):
+        return [
+            ("1.0", "1.00"),
+            ("1", "0.9"),
+            ("1.5", "1.50"),
+            ("1.5", "1.51"),
+            ("1.6", "1.59"),
+            ("2", "1.9"),
+            ("0.0001", "1e-4"),
+            ("0.00011", "1e-4"),
+            ("0.00009", "1e-4"),
+            ("0.0001", "9e-5"),
+            ("0.0001", "0.9e-4"),
+            ("1000", "1e3"),
+            ("999", "1e3"),
+        ]
+
+    def test_equal_numbers(self):
+        equal_numbers = self._get_equal_numbers_list()
+        for a, b in equal_numbers:
+            with self.subTest(a=a, b=b):
+                self.assertTrue(_tolerant_comparison_of_numeric_strings(a, b))
+        reversed_equal_numbers = [(b, a) for a, b in equal_numbers]
+        for a, b in reversed_equal_numbers:
+            with self.subTest(a=a, b=b):
+                self.assertTrue(_tolerant_comparison_of_numeric_strings(a, b))
+
+    def _get_not_equal_numbers_list(self):
+        return [
+            ("1.1", "1.0001"),
+            ("1.5", "1.59"),
+            ("1.5e-15", "1.5e-16"),
+        ]
+
+    def test_not_equal_numbers(self):
+        not_equal_numbers = self._get_not_equal_numbers_list()
+        for a, b in not_equal_numbers:
+            with self.subTest(a=a, b=b):
+                self.assertFalse(_tolerant_comparison_of_numeric_strings(a, b))
+        reversed_not_equal_numbers = [(b, a) for a, b in not_equal_numbers]
+        for a, b in reversed_not_equal_numbers:
+            with self.subTest(a=a, b=b):
+                self.assertFalse(_tolerant_comparison_of_numeric_strings(a, b))
 
 
 if __name__ == "__main__":
