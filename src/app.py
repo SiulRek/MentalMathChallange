@@ -13,11 +13,13 @@ from src.core.parse_blueprint_from_text import (
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-
 @app.route("/")
 def index():
     return render_template("index.html")
 
+@app.route("/help")
+def help_page():
+    return render_template("help.html")
 
 @app.route("/start", methods=["POST"])
 def start():
@@ -32,7 +34,6 @@ def start():
     session["quiz"] = quiz
     return render_template("quiz.html", quiz=quiz)
 
-
 @app.route("/submit", methods=["POST"])
 def submit():
     quiz = session.get("quiz", [])
@@ -41,7 +42,6 @@ def submit():
     except UserResponseError as e:
         return render_template("quiz.html", quiz=quiz, error=str(e))
     return render_template("result.html", results=results)
-
 
 if __name__ == "__main__":
     app.run(debug=True)

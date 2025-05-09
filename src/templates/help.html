@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Help - Blueprint Format</title>
+</head>
+<body>
+  <h1>Blueprint Format Instructions</h1>
+
+  <p>Each section defines a type of problem to include, either <code>math</code> or <code>date</code>, followed by how many of those problems to generate.</p>
+
+  <pre>
+&lt;category&gt;: &lt;count&gt;
+    &lt;option 1&gt;
+    &lt;option 2&gt;
+    ...
+  </pre>
+
+  <ul>
+    <li><strong>&lt;category&gt;</strong>: Either <code>math</code> or <code>date</code></li>
+    <li><strong>&lt;count&gt;</strong>: Number of problems to generate in this block</li>
+  </ul>
+
+  <h3>Math Category Options</h3>
+  <ul>
+    <li><code>int [start] end</code> — Random integers (default start = 0)</li>
+    <li><code>float [start] end</code> — Random floats (default start = 0.0)</li>
+    <li><code>float.precision [start] end</code> — Set precision (e.g., <code>float.2</code>)</li>
+    <li><code>op + - * / // % **</code> — Allowed operators</li>
+    <li><code>func</code> — Valid functions:
+      <ul>
+        <li>abs, ceil, floor, round, exp, log, log10, sqrt, sin, cos, tan</li>
+      </ul>
+    </li>
+    <li><code>const</code> — Valid constants:
+      <ul>
+        <li>c, h, hbar, G, e, k, N_A, R, alpha, mu_0, epsilon_0, sigma, zero_Celsius, pi, Avogadro, Boltzmann, Planck, speed_of_light, elementary_charge, gravitational_constant</li>
+      </ul>
+    </li>
+    <li><code>(</code> or <code>)</code> — Use brackets</li>
+  </ul>
+
+  <h3>Date Category Options</h3>
+  <ul>
+    <li><code>start &lt;year&gt;</code> — Optional, default 1900</li>
+    <li><code>end &lt;year&gt;</code> — Optional, default 2050</li>
+  </ul>
+
+  <p><strong>Note:</strong> Indent lines inside blocks. Use spaces or tabs. Blank lines are allowed. Errors in structure will trigger configuration errors.</p>
+
+  <a href="{{ url_for('index') }}">← Back to Quiz</a>
+</body>
+</html>

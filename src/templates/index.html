@@ -1,15 +1,37 @@
 <!DOCTYPE html>
 <html>
-<head><title>Calculator Play</title></head>
+<head>
+  <title>Calculator Play</title>
+</head>
 <body>
   <h1>Mental Math Challenge</h1>
+
+  <p>
+    Welcome to <strong>Mental Math Challenge</strong>, an interactive calculation game where you solve
+    automatically generated math or date-based problems. Customize your quiz by providing a <em>blueprint</em>
+    that defines the number, type, and structure of the questions.
+  </p>
+
+  <p>
+    You can create both <strong>math quizzes</strong> with expressions involving numbers, operators, functions,
+    and scientific constants, or <strong>date quizzes</strong> tat test your ability to determine calendar weekdays.
+  </p>
+
+  <p>
+    To get started, enter a valid blueprint below and click <strong>Start</strong>. You will be presented with a quiz. 
+    After submitting your answers, you will see which ones were correct.
+  </p>
+
+  <p>
+    Unsure how to write a blueprint? <a href="{{ url_for('help_page') }}">View Blueprint Help</a>
+  </p>
 
   {% if error %}
     <p style="color:red;"><strong>Error:</strong> {{ error }}</p>
   {% endif %}
 
   <form action="{{ url_for('start') }}" method="post">
-    <label for="blueprint">Blueprint:</label>
+    <label for="blueprint"><strong>Blueprint:</strong></label>
     <br>
     <textarea id="blueprint" name="blueprint" rows="15" cols="50" style="display: block; margin: 10px 0;">{{ blueprint_text or "" }}</textarea>
     <br>
