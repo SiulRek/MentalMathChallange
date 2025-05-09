@@ -70,7 +70,7 @@ def _adjust_numeric_precision(correct_answer, precision):
     return correct_answer
 
 
-def _derive_tolerance_range(number_string):
+def _derive_tolerance_range(numeric_string):
     # Derive a tolerance range based on the least significant decimal digit,
     # scaled by the exponent (if in scientific notation).
     # Examples:
@@ -80,10 +80,10 @@ def _derive_tolerance_range(number_string):
     #   "1000"        → 1
 
     exponent = 0
-    if "e" in number_string:
-        number_string, exponent = number_string.split("e")
+    if "e" in numeric_string:
+        numeric_string, exponent = numeric_string.split("e")
     tolerance_mask = "".join(
-        ["0" if c.isdigit() else c for c in number_string]
+        ["0" if c.isdigit() else c for c in numeric_string]
     )
     tolerance_mask = tolerance_mask[:-1] + "1"
     range = float(tolerance_mask) * 10 ** int(exponent)
