@@ -3,7 +3,9 @@ from src.core.generate_quiz import MAX_PRECISION
 
 
 class UserResponseError(Exception):
-    """Base class for user answer processing errors."""
+    """
+    Base class for user answer processing errors.
+    """
 
     pass
 
@@ -49,14 +51,10 @@ def _parse_user_answer(user_answer, category):
             f"Invalid answer '{user_answer}'. Answer must be numeric."
         ) from e
     user_answer = str(user_answer)
-    return (
-        user_answer.rstrip("0").rstrip(".")
-        if "." in user_answer
-        else user_answer
-    )
+    return user_answer
 
 
-def _format_answer_with_precision(correct_answer, precision):
+def _adjust_numeric_precision(correct_answer, precision):
     correct_answer = f"{float(correct_answer):.{precision}f}"
     if "." in correct_answer:
         exponent = 0
@@ -93,7 +91,7 @@ def _derive_tolerance_range(number_string):
 
 
 def _tolerant_comparison_of_numeric_strings(a, b):
-    if a == "inf" or b == "inf":
+    if a == "in" or b == "inf":
         return a == b
     tol_range_a = _derive_tolerance_range(a)
     tol_range_b = _derive_tolerance_range(b)
@@ -101,6 +99,16 @@ def _tolerant_comparison_of_numeric_strings(a, b):
     if tol_range_a == tol_range_b:
         return diff == 0
     return diff < max(tol_range_a, tol_range_b) / 2
+
+
+def _remove_trailing_zeros(numeric_string):
+    numeric_string = (
+        numeric_string.rstrip("0").rstrip(".")
+        if "." in numeric_string
+        else numeric_string
+    )
+
+    return numeric_string
 
 
 def compute_quiz_results(quiz, submission):
@@ -148,17 +156,15 @@ def compute_quiz_results(quiz, submission):
         elif category == "date":
             correct = user_answer == correct_answer
         else:
-            correct_answer = _format_answer_with_precision(
+            correct_answer = _adjust_numeric_precision(
                 correct_answer, MAX_PRECISION
             )
+            user_answer = _adjust_numeric_precision(user_answer, MAX_PRECISION)
             correct = _tolerant_comparison_of_numeric_strings(
                 user_answer, correct_answer
             )
-            correct_answer = (
-                correct_answer.rstrip("0").rstrip(".")
-                if "." in correct_answer
-                else correct_answer
-            )
+            correct_answer = _remove_trailing_zeros(correct_answer)
+            user_answer = _remove_trailing_zeros(user_answer)
         results.append(
             {
                 "question": question,
