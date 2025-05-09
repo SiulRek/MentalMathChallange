@@ -78,6 +78,23 @@ def _generate_expression(expr_blueprint):
     )
 
 
+def _evaluate_expression(expr, category=False):
+    if category == "date":
+        return derive_weekday(expr)
+    # Else category == "math"
+    try:
+        res = eval(expr)
+        float(res)
+    except ZeroDivisionError:
+        res = float("inf")
+    except (ValueError, TypeError, SyntaxError) as exc:
+        raise ValueError(
+            f"Invalid expression '{expr}'. Error: {exc}. Expression must be "
+            "numeric."
+        ) from exc
+    return str(res)
+
+
 def _prettify_expression(expr, category):
     month_names = [
         "January",
@@ -101,23 +118,6 @@ def _prettify_expression(expr, category):
         expr = re.sub(r"\(\s+", "(", expr)
         expr = re.sub(r"\s+\)", ")", expr)
     return expr
-
-
-def _evaluate_expression(expr, category=False):
-    if category == "date":
-        return derive_weekday(expr)
-    # Else category == "math"
-    try:
-        res = eval(expr)
-        float(res)
-    except ZeroDivisionError:
-        res = float("inf")
-    except (ValueError, TypeError, SyntaxError) as exc:
-        raise ValueError(
-            f"Invalid expression '{expr}'. Error: {exc}. Expression must be "
-            "numeric."
-        ) from exc
-    return str(res)
 
 
 def generate_quiz(blueprint):
