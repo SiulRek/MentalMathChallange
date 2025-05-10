@@ -5,12 +5,12 @@ import sys
 import unittest
 from unittest import defaultTestLoader as Loader
 
-from src.tests.utils.generate_test_results_message import (
+from tests.utils.generate_test_results_message import (
     generate_test_results_message,
 )
-from src.tests.utils.test_result_logger import TestResultLogger
+from tests.utils.test_result_logger import TestResultLogger
 
-TEST_DIR = os.path.join("src", "tests")
+TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class _TestRunnerBase(ABC):
@@ -63,9 +63,7 @@ class _TestRunnerBase(ABC):
         self.test_suite.addTest(Loader.loadTestsFromTestCase(test_case))
 
     def load_test_module(self, test_module):
-        self.test_suite.addTests(
-            Loader.loadTestsFromModule(test_module)
-        )
+        self.test_suite.addTests(Loader.loadTestsFromModule(test_module))
 
     def run_tests(self):
         self.load_tests()
@@ -96,6 +94,7 @@ class TestRunner(_TestRunnerBase):
 
     def load_tests(self):
         test_files = []
+        print(os.listdir(TEST_DIR))
         for root, _, files in os.walk(TEST_DIR):
             for file in files:
                 if file.endswith("_test.py"):
@@ -103,6 +102,10 @@ class TestRunner(_TestRunnerBase):
         test_import_paths = [
             os.path.splitext(os.path.relpath(file))[0].replace(os.sep, ".")
             for file in test_files
+        ]
+        test_import_paths = [
+            test_import_path.removeprefix("src.")
+            for test_import_path in test_import_paths
         ]
         test_modules = [
             importlib.import_module(test_import_path)

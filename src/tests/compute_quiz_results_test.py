@@ -1,13 +1,13 @@
 import unittest
 
-from src.core.compute_quiz_results import (
+from core.compute_quiz_results import (
     compute_quiz_results,
     UserResponseError,
 )
-from src.core.compute_quiz_results import (
+from core.compute_quiz_results import (
     _tolerant_comparison_of_numeric_strings,
 )
-from src.tests.utils.base_test_case import BaseTestCase
+from tests.utils.base_test_case import BaseTestCase
 
 
 class TestComputeQuizResults(BaseTestCase):

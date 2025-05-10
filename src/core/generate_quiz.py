@@ -11,8 +11,8 @@ from scipy.constants import (
     speed_of_light, elementary_charge, gravitational_constant   # noqa: F401
 )
 
-from src.core.date_utils import random_date, derive_weekday
-from src.core.parse_blueprint_from_text import UserConfigError
+from core.date_utils import random_date, derive_weekday
+from core.parse_blueprint_from_text import UserConfigError
 
 MAX_PRECISION = 10  # Max number of decimal places to retain in the result
 

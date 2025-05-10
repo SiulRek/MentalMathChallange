@@ -1,8 +1,8 @@
 import unittest
 
-from src.core.parse_blueprint_from_text import UserConfigError
-from src.core.generate_quiz import generate_quiz
-from src.tests.utils.base_test_case import BaseTestCase
+from core.parse_blueprint_from_text import UserConfigError
+from core.generate_quiz import generate_quiz
+from tests.utils.base_test_case import BaseTestCase
 
 
 class TestGenerateQuiz(BaseTestCase):

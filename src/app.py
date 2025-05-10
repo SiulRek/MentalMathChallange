@@ -2,12 +2,12 @@ from datetime import datetime
 
 from flask import Flask, render_template, request, session
 
-from src.core.compute_quiz_results import (
+from core.compute_quiz_results import (
     compute_quiz_results,
     UserResponseError,
 )
-from src.core.generate_quiz import generate_quiz
-from src.core.parse_blueprint_from_text import (
+from core.generate_quiz import generate_quiz
+from core.parse_blueprint_from_text import (
     parse_blueprint_from_text,
     UserConfigError,
 )

@@ -3,13 +3,10 @@ import shutil
 import sys
 import unittest
 
-from src.tests.utils.test_result_logger import TestResultLogger
+from tests.utils.test_result_logger import TestResultLogger
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.join(FILE_DIR, "..", "..", "..", "..")
-DATA_DIR = os.path.join(
-    ROOT_DIR, "imlresearch", "src", "testing", "image_data"
-)
 
 
 class BaseTestCase(unittest.TestCase):
@@ -112,7 +109,6 @@ class BaseTestCase(unittest.TestCase):
         Class-level setup: create necessary directories and initialize logging.
         """
         cls.root_dir = os.path.normpath(ROOT_DIR)
-        cls.data_dir = DATA_DIR
         cls.output_dir = cls._compute_output_dir()
         cls.results_dir = os.path.join(
             cls.output_dir, cls._get_test_case_folder_name()

@@ -1,5 +1,5 @@
-from src.core.date_utils import sanitize_weekday_string
-from src.core.generate_quiz import MAX_PRECISION
+from core.date_utils import sanitize_weekday_string
+from core.generate_quiz import MAX_PRECISION
 
 
 class UserResponseError(Exception):

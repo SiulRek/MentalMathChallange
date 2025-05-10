@@ -1,10 +1,10 @@
 import unittest
 
-from src.core.parse_blueprint_from_text import (
+from core.parse_blueprint_from_text import (
     parse_blueprint_from_text,
     UserConfigError,
 )
-from src.tests.utils.base_test_case import BaseTestCase
+from tests.utils.base_test_case import BaseTestCase
 
 
 class TestParseBlueprintFromText(BaseTestCase):

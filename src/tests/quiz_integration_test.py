@@ -1,15 +1,15 @@
 import unittest
 
-from src.core.compute_quiz_results import (
+from core.compute_quiz_results import (
     compute_quiz_results,
     UserResponseError,
 )
-from src.core.generate_quiz import generate_quiz
-from src.core.parse_blueprint_from_text import (
+from core.generate_quiz import generate_quiz
+from core.parse_blueprint_from_text import (
     _parse_blueprint_from_text,
     UserConfigError,
 )
-from src.tests.utils.base_test_case import BaseTestCase
+from tests.utils.base_test_case import BaseTestCase
 
 
 class TestQuizIntegration(BaseTestCase):
