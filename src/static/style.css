@@ -36,11 +36,10 @@ p, ul, li {
 
 pre, code {
   font-family: 'Courier New', monospace;
-  font-size: 1.02em;
-  background-color: #292929;
+  background-color: #2a2a2a;
   padding: 4px 8px;
   border-radius: 4px;
-  color: #9288ea;
+  color: #b8e994;
 }
 
 /* Links */
@@ -95,7 +94,95 @@ button:active {
   transform: scale(0.98);
 }
 
-/* Correct/Incorrect Feedback */
+/* Result Cards */
+.results-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.result-card {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background-color: #2a2a2a;
+  border-left: 5px solid;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.result-card.correct {
+  border-color: #4caf50;
+}
+
+.result-card.incorrect {
+  border-color: #f44336;
+}
+
+.result-icon {
+  font-size: 24px;
+  margin-right: 16px;
+  line-height: 1;
+  padding-top: 4px;
+}
+
+.result-content {
+  flex: 1;
+}
+
+.result-question {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.result-answer {
+  margin: 0;
+}
+
+.correct-answer {
+  display: block;
+  margin-top: 4px;
+  color: #f44336;
+  font-size: 0.95em;
+}
+
+/* Time Taken Display */
+.result-time {
+  text-align: left;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  font-size: 1em;
+  color: #c0c0c0;
+}
+
+.result-time span {
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* Play Again Button */
+.play-again-wrapper {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.play-again-link {
+  display: inline-block;
+  background-color: #3a86ff;
+  color: #fff;
+  padding: 10px 18px;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.play-again-link:hover {
+  background-color: #2f70cc;
+}
+
+/* Answer Feedback Text (Inline use) */
 .correct {
   color: #4caf50;
   font-weight: bold;
@@ -106,7 +193,7 @@ button:active {
   font-weight: bold;
 }
 
-/* Responsive Tweaks */
+/* Responsive Design */
 @media (max-width: 600px) {
   body {
     padding: 10px;
@@ -116,7 +203,9 @@ button:active {
     padding: 10px;
   }
 
-  button {
+  button,
+  .play-again-link {
     width: 100%;
+    text-align: center;
   }
 }
