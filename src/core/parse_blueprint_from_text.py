@@ -164,8 +164,17 @@ def _identify_math_expression_problems(elements):
         type_ = elements[-1]["type"]
         type_ = "an operator" if type_ == "operator" else "a function"
         return f"Expression ends with {type_}"
-    return None
 
+    # 7. Check for function preceded by a numeric type
+    for i in range(len(elements) - 1):
+        i = i + 1
+        if (
+            elements[i]["type"] == "function"
+            and _is_numeric_type(elements[i - 1]["type"])
+        ):
+            return "Function preceded by a numeric type"
+
+    return None
 
 def _assert_valid_math_expression_elements(elements, position):
 

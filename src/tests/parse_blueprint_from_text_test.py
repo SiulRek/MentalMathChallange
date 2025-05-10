@@ -520,6 +520,23 @@ int 1 5
             str(exc.exception),
         )
 
+    def test_plus_or_minus_allowed_at_the_beginning(self):
+        blueprint_ref = """math: 1
+    op OPERATOR
+    function sin
+    (
+    )
+"""     
+        for operator in ["+", "-"]:
+            with self.subTest(operator=operator):
+                blueprint = blueprint_ref.replace("OPERATOR", operator)
+                with self.assertRaises(UserConfigError) as exc:
+                    parse_blueprint_from_text(blueprint)
+                self.assertNotIn(
+                    "Expression starts with an operator",
+                    str(exc.exception),
+                )
+
     def test_operator_at_the_end(self):
         blueprint = """math: 1
     int 1 5
@@ -541,6 +558,21 @@ int 1 5
             parse_blueprint_from_text(blueprint)
         self.assertIn(
             "Expression ends with a function",
+            str(exc.exception),
+        )
+
+    def test_function_preceded_by_numeric(self):
+        blueprint = """math: 1
+    int 1 5
+    func sin
+    (
+    int 2 5
+    )
+"""
+        with self.assertRaises(UserConfigError) as exc:
+            parse_blueprint_from_text(blueprint)
+        self.assertIn(
+            "Function preceded by a numeric type",
             str(exc.exception),
         )
 
