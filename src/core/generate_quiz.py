@@ -78,7 +78,7 @@ def _generate_expression(expr_blueprint):
     )
 
 
-def _evaluate_expression(expr, category=False):
+def _evaluate_expression(expr, category):
     if category == "date":
         return derive_weekday(expr)
     # Else category == "math"
@@ -88,6 +88,7 @@ def _evaluate_expression(expr, category=False):
     except ZeroDivisionError:
         res = float("inf")
     except (ValueError, TypeError, SyntaxError) as exc:
+
         raise ValueError(
             f"Invalid expression '{expr}'. Error: {exc}. Expression must be "
             "numeric."

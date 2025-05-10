@@ -1,19 +1,49 @@
 import re
 
 from numpy import (
-    abs, ceil, floor, round, exp,   # noqa: F401
-    log, log10, sqrt, sin, cos, tan  # noqa: F401
+    abs,
+    ceil,
+    floor,
+    round,
+    exp,  # noqa: F401
+    log,
+    log10,
+    sqrt,
+    sin,
+    cos,
+    tan,  # noqa: F401
 )
+
 from scipy.constants import (
-    c, h, hbar, G, e, k, N_A, R, alpha, mu_0, epsilon_0,    # noqa: F401
-    sigma, zero_Celsius, pi, Avogadro, Boltzmann, Planck,   # noqa: F401
-    speed_of_light, elementary_charge, gravitational_constant   # noqa: F401
+    c,
+    h,
+    hbar,
+    G,
+    e,
+    k,
+    N_A,
+    R,
+    alpha,
+    mu_0,
+    epsilon_0,  # noqa: F401
+    sigma,
+    zero_Celsius,
+    pi,
+    Avogadro,
+    Boltzmann,
+    Planck,  # noqa: F401
+    speed_of_light,
+    elementary_charge,
+    gravitational_constant,  # noqa: F401
 )
 
 SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%", "**"}
 
+
 class UserConfigError(Exception):
-    """Base class for user blueprinturation errors."""
+    """
+    Base class for user blueprinturation errors.
+    """
 
     pass
 
@@ -35,6 +65,7 @@ def _assert_valid_operators(ops):
     reminder = set(ops) - SUPPORTED_OPERATORS
     assert not reminder, f"Invalid operator(s): {reminder}"
 
+
 def _assert_function(func):
     supported = [
         "abs",
@@ -50,42 +81,100 @@ def _assert_function(func):
         "tan",
     ]
     assert func in supported, f"Unsupported function '{func}'"
-    
+
+
 def _assert_constant(const):
     supported = [
-        "c",                # speed of light
-        "h",                # Planck constant
-        "hbar",             # reduced Planck constant
-        "G",                # gravitational constant
-        "e",                # elementary charge
-        "k",                # Boltzmann constant
-        "N_A",              # Avogadro's number
-        "R",                # gas constant
-        "alpha",            # fine-structure constant
-        "mu_0",             # vacuum permeability
-        "epsilon_0",        # vacuum permittivity
-        "sigma",            # Stefan-Boltzmann constant
-        "zero_Celsius",     # zero Celsius in Kelvin
-        "pi",               # pi
-        "Avogadro",         # synonym for N_A
-        "Boltzmann",        # synonym for k
-        "Planck",           # synonym for h
-        "speed_of_light",   # synonym for c
-        "elementary_charge",# synonym for e
-        "gravitational_constant" # synonym for G
+        "c",  # speed of light
+        "h",  # Planck constant
+        "hbar",  # reduced Planck constant
+        "G",  # gravitational constant
+        "e",  # elementary charge
+        "k",  # Boltzmann constant
+        "N_A",  # Avogadro's number
+        "R",  # gas constant
+        "alpha",  # fine-structure constant
+        "mu_0",  # vacuum permeability
+        "epsilon_0",  # vacuum permittivity
+        "sigma",  # Stefan-Boltzmann constant
+        "zero_Celsius",  # zero Celsius in Kelvin
+        "pi",  # pi
+        "Avogadro",  # synonym for N_A
+        "Boltzmann",  # synonym for k
+        "Planck",  # synonym for h
+        "speed_of_light",  # synonym for c
+        "elementary_charge",  # synonym for e
+        "gravitational_constant",  # synonym for G
     ]
     assert const in supported, f"Unsupported constant '{const}'"
 
+
+def _is_numeric_type(type_, ignore_constants=False):
+    numeric_types = ["int", "float"]
+    if ignore_constants:
+        numeric_types += ["constant"]
+    return type_ in numeric_types or re.match(r"float\.(\d+)", type_)
+
+
+def _identify_math_expression_problems(elements):
+    # 1. Check for consecutive numeric types
+    for i in range(len(elements) - 1):
+        if _is_numeric_type(elements[i]["type"]) and _is_numeric_type(
+            elements[i + 1]["type"]
+        ):
+            return "Two consecutive numeric types"
+
+    # 2. Check for consecutive operators
+    for i in range(len(elements) - 1):
+        if (
+            elements[i]["type"] == "operator"
+            and elements[i + 1]["type"] == "operator"
+        ):
+            return "Two consecutive operators"
+
+    # 3. Check for function not followed by a bracket
+    for i in range(len(elements) - 1):
+        if elements[i]["type"] == "function":
+            if (
+                elements[i + 1]["type"] != "bracket"
+                or elements[i + 1]["value"] != "("
+            ):
+                return "Function not followed by an opening bracket"
+
+    # 4. Check for bracket never closed or opened
+    brackets_counter = 0
+    for elem in elements:
+        if elem["type"] == "bracket":
+            if elem["value"] == "(":
+                brackets_counter += 1
+            elif elem["value"] == ")":
+                brackets_counter -= 1
+    if brackets_counter != 0:
+        return "Unmatched brackets"
+
+    # 5. Check for operator at the beginning
+    if elements[0]["type"] == "operator" and elements[0]["value"] not in [
+        "-",
+        "+",
+    ]:
+        return "Expression starts with an operator"
+
+    # 6. Check for operator or function at the end
+    if elements[-1]["type"] in ["operator", "function"]:
+        type_ = elements[-1]["type"]
+        type_ = "an operator" if type_ == "operator" else "a function"
+        return f"Expression ends with {type_}"
+    return None
+
+
 def _assert_valid_math_expression_elements(elements, position):
-    def _is_numeric_type(type_):
-        return type_ in ["int", "float"] or re.match(r"float\.(\d+)", type_)
 
     assert len(elements) > 0, "At least one element must be defined"
 
     # Build an example expression
     expr = ""
     for elem in elements:
-        if _is_numeric_type(elem["type"]):
+        if _is_numeric_type(elem["type"], ignore_constants=True):
             expr += "1"
         elif elem["type"] == "operator":
             expr += "*"
@@ -98,10 +187,13 @@ def _assert_valid_math_expression_elements(elements, position):
     except ZeroDivisionError:
         pass
     except Exception as exc:
-        raise UserConfigError(
-            "Unable to construct a valid math expression for the blueprint "
-            f"at position {position}."
-        ) from exc
+        problem = _identify_math_expression_problems(elements)
+        msg = f"Invalid math expression at position {position}"
+        if problem:
+            msg += ": " + problem
+        else:
+            msg += ": " + str(exc)
+        raise UserConfigError(msg) from exc
 
 
 def _parse_blueprint_from_text(blueprint_text):
@@ -121,9 +213,7 @@ def _parse_blueprint_from_text(blueprint_text):
 
         # Parse the block header
         if ":" not in line:
-            raise UserConfigError(
-                f"Invalid blueprint block start: '{line}'"
-            )
+            raise UserConfigError(f"Invalid blueprint block start: '{line}'")
 
         try:
             category_element, count_element = line.split(":")
@@ -175,7 +265,9 @@ def _parse_blueprint_from_text(blueprint_text):
                     val = ops[0] if len(ops) == 1 else ops
                     elements.append({"type": "operator", "value": val})
                 elif key == "func":
-                    assert len(tokens) == 2, "func must have exactly 1 argument"
+                    assert (
+                        len(tokens) == 2
+                    ), "func must have exactly 1 argument"
                     func = tokens[1]
                     _assert_function(func)
                     elements.append({"type": "function", "value": func})
@@ -186,9 +278,7 @@ def _parse_blueprint_from_text(blueprint_text):
                     _assert_constant(const)
                     elements.append({"type": "constant", "value": const})
                 else:
-                    raise UserConfigError(
-                        f"Unknown math sub-key: '{key}'"
-                    )
+                    raise UserConfigError(f"Unknown math sub-key: '{key}'")
 
             elif expr_cat == "date":
                 if key == "start":
@@ -202,14 +292,10 @@ def _parse_blueprint_from_text(blueprint_text):
                     assert tokens[1].isdigit(), "end must be a number"
                     expr_blueprint["end_year"] = int(tokens[1])
                 else:
-                    raise UserConfigError(
-                        f"Unknown date sub-key: '{key}'"
-                    )
+                    raise UserConfigError(f"Unknown date sub-key: '{key}'")
 
             else:
-                raise UserConfigError(
-                    f"Unknown expression type: '{expr_cat}'"
-                )
+                raise UserConfigError(f"Unknown expression type: '{expr_cat}'")
 
             i += 1
 
@@ -228,10 +314,10 @@ def parse_blueprint_from_text(blueprint_text):
     Parses a human-friendly blueprint text into structured expression
     blueprints.
 
-    The input text defines one or more blocks. Each block starts with a
-    header line of the form:
+    The input text defines one or more blocks. Each block starts with a header
+    line of the form:
 
-        <category>: <count>
+    <category>: <count>
 
     - <category>: 'math' or 'date'
     - <count>: number of expressions to generate
@@ -252,7 +338,7 @@ def parse_blueprint_from_text(blueprint_text):
                                     # sigma, zero_Celsius, pi,
                                     # Avogadro, Boltzmann, Planck,
                                     # speed_of_light, elementary_charge,
-                                    # gravitational_constant 
+                                    # gravitational_constant
                                     # (uses scipy constants)
 
     For 'date', valid indented lines include:
@@ -265,17 +351,16 @@ def parse_blueprint_from_text(blueprint_text):
     Parameters
     ----------
     blueprint_text : str
-        A string containing one or more indented blueprint blocks. Each
-        block describes how to generate expressions of a specified type.
+        A string containing one or more indented blueprint blocks. Each block
+        describes how to generate expressions of a specified type.
 
     Returns
     -------
     list of tuple[dict, int]
         A list of (expression_blueprint, count) pairs.
 
-        expression_blueprint : dict
-            Specifies how expressions are generated
-            (Keys for optional arguments are allowed to be omitted.):
+    expression_blueprint : dict Specifies how expressions are generated (Keys
+    for optional arguments are allowed to be omitted.):
 
             - "category": str, one of {"math", "date"}
 
@@ -294,19 +379,13 @@ def parse_blueprint_from_text(blueprint_text):
                     - "start_year": int
                     - "end_year": int
 
-        count : int
-            Number of expressions to generate with the given blueprint.
+    count : int Number of expressions to generate with the given blueprint.
 
-
-    Raises
-    ------
-    UserConfigError
-        If the input blueprint text is invalid or unsupported.
+    Raises ------ UserConfigError If the input blueprint text is invalid or
+    unsupported.
     """
 
     try:
         return _parse_blueprint_from_text(blueprint_text)
     except AssertionError as exc:
-        raise UserConfigError(
-            f"Invalid blueprinturation: {exc}"
-        ) from exc
+        raise UserConfigError(f"Invalid blueprinturation: {exc}") from exc
