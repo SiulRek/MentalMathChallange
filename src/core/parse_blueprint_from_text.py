@@ -63,7 +63,11 @@ def _parse_tokens_to_kwargs(tokens, keys, type_map):
 
 def _assert_valid_operators(ops):
     reminder = set(ops) - SUPPORTED_OPERATORS
-    assert not reminder, f"Invalid operator(s): {reminder}"
+    if len(ops) == 1:
+        msg = f"invalid operator '{ops[0]}'"
+    elif len(ops) > 1:
+        msg = f"invalid operators '{', '.join(ops)}'"
+    assert not reminder, msg
 
 
 def _assert_function(func):
@@ -178,7 +182,7 @@ def _identify_math_expression_problem(elements):
 
 def _assert_valid_math_expression_elements(elements, position):
 
-    assert len(elements) > 0, "At least one element must be defined"
+    assert len(elements) > 0, "at least one math element must be defined"
 
     # Build an example expression
     expr = ""
