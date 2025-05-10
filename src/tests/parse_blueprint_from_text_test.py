@@ -381,6 +381,23 @@ int 1 5
         with self.assertRaises(UserConfigError):
             parse_blueprint_from_text(blueprint)
 
+    def test_invalid_function(self):
+        blueprint = """math: 1
+    func invalid_function
+    (
+    int 1 5
+    )
+"""
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
+
+    def test_invalid_constant(self):
+        blueprint = """math: 1
+    const invalid_constant
+"""
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
+
     def test_invalid_token_count_for_int(self):
         blueprint = """math: 1
     int
@@ -404,6 +421,14 @@ int 1 5
         with self.assertRaises(UserConfigError):
             parse_blueprint_from_text(blueprint)
 
+    def test_invalid_token_count_for_func(self):
+        blueprint = """math: 1
+    func
+    int 1 5
+"""
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
+
     def test_extra_token_in_block_header(self):
         blueprint = """math: 1 extra
     int 1 5
@@ -423,6 +448,41 @@ int 1 5
     def test_extra_token_in_float(self):
         blueprint = """math: 1
     float 2.0 3.0 extra
+"""
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
+
+    def test_extra_token_in_const(self):
+        blueprint = """math: 1
+    const pi extra
+"""
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
+
+    def test_extra_token_in_func(self):
+        blueprint = """math: 1
+    func sin extra
+    (
+    int 1 5
+    )
+"""
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
+
+    def test_extra_token_in_opening_bracket(self):
+        blueprint = """math: 1
+    ( extra
+    int 1 5
+    )
+"""
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
+
+    def test_extra_token_in_closing_bracket(self):
+        blueprint = """math: 1
+    (
+    int 1 5
+    ) extra
 """
         with self.assertRaises(UserConfigError):
             parse_blueprint_from_text(blueprint)
@@ -454,8 +514,19 @@ int 1 5
         with self.assertRaises(UserConfigError):
             parse_blueprint_from_text(blueprint)
 
-    # ---------- Test Cases for Invalid Math Expressions ----------
+    def test_one_line_math_block(self):
+        blueprint = "Invalid: 1"
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
 
+    def test_only_function_in_math_block(self):
+        blueprint = """math: 1
+    func sin
+"""
+        with self.assertRaises(UserConfigError):
+            parse_blueprint_from_text(blueprint)
+
+    # ---------- Test Cases for Invalid Math Expressions ----------
     def test_two_consecutive_numeric_elements(self):
         blueprint = """math: 1
     int 1 5
@@ -464,7 +535,7 @@ int 1 5
         with self.assertRaises(UserConfigError) as exc:
             parse_blueprint_from_text(blueprint)
         self.assertIn(
-            "Two consecutive numeric types",
+            "two consecutive numeric types",
             str(exc.exception),
         )
 
@@ -478,7 +549,7 @@ int 1 5
         with self.assertRaises(UserConfigError) as exc:
             parse_blueprint_from_text(blueprint)
         self.assertIn(
-            "Two consecutive operators",
+            "two consecutive operators",
             str(exc.exception),
         )
 
@@ -490,7 +561,7 @@ int 1 5
         with self.assertRaises(UserConfigError) as exc:
             parse_blueprint_from_text(blueprint)
         self.assertIn(
-            "Function not followed by an opening bracket",
+            "function not followed by an opening bracket",
             str(exc.exception),
         )
 
@@ -504,7 +575,7 @@ int 1 5
         with self.assertRaises(UserConfigError) as exc:
             parse_blueprint_from_text(blueprint)
         self.assertIn(
-            "Unmatched brackets",
+            "unmatched brackets",
             str(exc.exception),
         )
 
@@ -516,7 +587,7 @@ int 1 5
         with self.assertRaises(UserConfigError) as exc:
             parse_blueprint_from_text(blueprint)
         self.assertIn(
-            "Expression starts with an operator",
+            "expression starts with an operator",
             str(exc.exception),
         )
 
@@ -526,14 +597,14 @@ int 1 5
     function sin
     (
     )
-"""     
+"""
         for operator in ["+", "-"]:
             with self.subTest(operator=operator):
                 blueprint = blueprint_ref.replace("OPERATOR", operator)
                 with self.assertRaises(UserConfigError) as exc:
                     parse_blueprint_from_text(blueprint)
                 self.assertNotIn(
-                    "Expression starts with an operator",
+                    "expression starts with an operator",
                     str(exc.exception),
                 )
 
@@ -545,7 +616,7 @@ int 1 5
         with self.assertRaises(UserConfigError) as exc:
             parse_blueprint_from_text(blueprint)
         self.assertIn(
-            "Expression ends with an operator",
+            "expression ends with an operator",
             str(exc.exception),
         )
 
@@ -557,7 +628,7 @@ int 1 5
         with self.assertRaises(UserConfigError) as exc:
             parse_blueprint_from_text(blueprint)
         self.assertIn(
-            "Expression ends with a function",
+            "expression ends with a function",
             str(exc.exception),
         )
 
@@ -572,7 +643,7 @@ int 1 5
         with self.assertRaises(UserConfigError) as exc:
             parse_blueprint_from_text(blueprint)
         self.assertIn(
-            "Function preceded by a numeric type",
+            "function preceded by a numeric type",
             str(exc.exception),
         )
 

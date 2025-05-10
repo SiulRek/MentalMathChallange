@@ -122,7 +122,7 @@ def _identify_math_expression_problem(elements):
         if _is_numeric_type(elements[i]["type"]) and _is_numeric_type(
             elements[i + 1]["type"]
         ):
-            return "Two consecutive numeric types"
+            return "two consecutive numeric types"
 
     # 2. Check for consecutive operators
     for i in range(len(elements) - 1):
@@ -130,7 +130,7 @@ def _identify_math_expression_problem(elements):
             elements[i]["type"] == "operator"
             and elements[i + 1]["type"] == "operator"
         ):
-            return "Two consecutive operators"
+            return "two consecutive operators"
 
     # 3. Check for function not followed by a bracket
     for i in range(len(elements) - 1):
@@ -139,7 +139,7 @@ def _identify_math_expression_problem(elements):
                 elements[i + 1]["type"] != "bracket"
                 or elements[i + 1]["value"] != "("
             ):
-                return "Function not followed by an opening bracket"
+                return "function not followed by an opening bracket"
 
     # 4. Check for bracket never closed or opened
     brackets_counter = 0
@@ -150,31 +150,31 @@ def _identify_math_expression_problem(elements):
             elif elem["value"] == ")":
                 brackets_counter -= 1
     if brackets_counter != 0:
-        return "Unmatched brackets"
+        return "unmatched brackets"
 
     # 5. Check for operator at the beginning (not + or -)
     if elements[0]["type"] == "operator" and elements[0]["value"] not in [
         "-",
         "+",
     ]:
-        return "Expression starts with an operator"
+        return "expression starts with an operator"
 
     # 6. Check for operator or function at the end
     if elements[-1]["type"] in ["operator", "function"]:
         type_ = elements[-1]["type"]
         type_ = "an operator" if type_ == "operator" else "a function"
-        return f"Expression ends with {type_}"
+        return f"expression ends with {type_}"
 
     # 7. Check for function preceded by a numeric type
     for i in range(len(elements) - 1):
         i = i + 1
-        if (
-            elements[i]["type"] == "function"
-            and _is_numeric_type(elements[i - 1]["type"])
+        if elements[i]["type"] == "function" and _is_numeric_type(
+            elements[i - 1]["type"]
         ):
-            return "Function preceded by a numeric type"
+            return "function preceded by a numeric type"
 
     return None
+
 
 def _assert_valid_math_expression_elements(elements, position):
 
@@ -192,12 +192,16 @@ def _assert_valid_math_expression_elements(elements, position):
         expr += " " if elem["type"] != "function" else ""
 
     try:
-        eval(expr)
+        float(eval(expr))
     except ZeroDivisionError:
         pass
     except Exception as exc:
         problem = _identify_math_expression_problem(elements)
-        msg = f"Invalid math expression at position {position}"
+        msg = (
+            f"Invalid math expression at position {position}"
+            if position != 1
+            else "Invalid math expression"
+        )
         if problem:
             msg += ": " + problem
         else:
@@ -232,6 +236,10 @@ def _parse_blueprint_from_text(blueprint_text):
             raise UserConfigError(
                 f"Invalid blueprint block start: '{line}'"
             ) from exc
+
+        if expr_cat not in ["math", "date"]:
+            raise UserConfigError(f"Invalid blueprint category: '{expr_cat}'")
+
         expr_blueprint = {"category": expr_cat}
         i += 1
 
@@ -252,7 +260,7 @@ def _parse_blueprint_from_text(blueprint_text):
                 elif key == "int":
                     assert (
                         1 < len(tokens) <= 3
-                    ), "int must have between 2 and 3 arguments"
+                    ), "int must have between 1 or 2 arguments"
                     tokens[1:] = tokens[1:][::-1]
                     kwargs = _parse_tokens_to_kwargs(
                         tokens, ["type", "end", "start"], [str, int, int]
@@ -261,7 +269,7 @@ def _parse_blueprint_from_text(blueprint_text):
                 elif key == "float" or re.match(r"float\.(\d+)", key):
                     assert (
                         1 < len(tokens) <= 3
-                    ), "float must have 2 or 3 arguments"
+                    ), "float must have 1 or 2 arguments"
                     tokens[1:] = tokens[1:][::-1]
                     kwargs = _parse_tokens_to_kwargs(
                         tokens, ["type", "end", "start"], [str, float, float]
@@ -302,9 +310,6 @@ def _parse_blueprint_from_text(blueprint_text):
                     expr_blueprint["end_year"] = int(tokens[1])
                 else:
                     raise UserConfigError(f"Unknown date sub-key: '{key}'")
-
-            else:
-                raise UserConfigError(f"Unknown expression type: '{expr_cat}'")
 
             i += 1
 
@@ -390,11 +395,14 @@ def parse_blueprint_from_text(blueprint_text):
 
     count : int Number of expressions to generate with the given blueprint.
 
-    Raises ------ UserConfigError If the input blueprint text is invalid or
+    Raises
+    ------
+    UserConfigError If the input blueprint text is invalid or
     unsupported.
+
     """
 
     try:
         return _parse_blueprint_from_text(blueprint_text)
     except AssertionError as exc:
-        raise UserConfigError(f"Invalid blueprinturation: {exc}") from exc
+        raise UserConfigError(f"Invalid blueprint: {exc}") from exc
