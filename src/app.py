@@ -57,7 +57,20 @@ def submit():
         start_time = datetime.fromisoformat(start_time_str)
         duration = datetime.utcnow() - start_time
 
-    return render_template("result.html", results=results, duration=duration)
+    total = len(results)
+    correct = sum(1 for r in results if r["is_correct"])
+    incorrect = total - correct
+    percentage = round((correct / total) * 100) if total > 0 else 0
+
+    return render_template(
+        "result.html",
+        results=results,
+        duration=duration,
+        correct=correct,
+        incorrect=incorrect,
+        percentage=percentage
+    )
+
 
 
 if __name__ == "__main__":

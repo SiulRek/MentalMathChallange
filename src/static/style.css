@@ -154,6 +154,10 @@ button:active {
 /* ──────────────────────────────── */
 /* Results Display Cards           */
 /* ──────────────────────────────── */
+.result-title {
+  text-align: center;
+}
+
 .results-wrapper {
   display: flex;
   flex-direction: column;
@@ -205,6 +209,22 @@ button:active {
   color: #f44336;
   font-size: 0.95em;
 }
+
+.result-summary {
+  text-align: center;
+  background-color: #222;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 30px;
+  font-size: 1.1em;
+  color: #dddddd;
+}
+
+.result-summary strong {
+  color: #ffffff;
+}
+
 
 /* ──────────────────────────────── */
 /* Time Taken Display              */

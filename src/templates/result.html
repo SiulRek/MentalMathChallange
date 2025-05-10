@@ -7,13 +7,19 @@
 </head>
 <body>
   <div class="container">
-    <h2>Your Results</h2>
+    <h2 class="result-title">Your Results</h2>
 
     {% if duration %}
-      <div class="result-time">
+      <div class="result-time-centered">
         ⏱️ <span>Time taken:</span> {{ duration.total_seconds() | round(2) }} seconds
       </div>
     {% endif %}
+
+    <div class="result-summary">
+      ✅ <strong>{{ correct }}</strong> correct &nbsp;&nbsp;
+      ❌ <strong>{{ incorrect }}</strong> incorrect &nbsp;&nbsp;
+      📊 <strong>{{ percentage }}%</strong> accuracy
+    </div>
 
     <div class="results-wrapper">
       {% for res in results %}
