@@ -7,7 +7,10 @@
 </head>
 <body>
   <div class="container">
-    <h2>Solve the following problems:</h2>
+    <div class="quiz-header">
+      <h2>Solve the following problems:</h2>
+      <div id="live-timer">⏱️ <span>0:00</span></div>
+    </div>
 
     {% if error %}
       <p class="incorrect"><strong>Error:</strong> {{ error }}</p>
@@ -15,13 +18,20 @@
 
     <form action="{{ url_for('submit') }}" method="post">
       {% for i in range(quiz|length) %}
-        <p>
-          {{ i + 1 }}. {{ quiz[i].question }} =
+        <div class="quiz-question-block">
+          <div class="quiz-question">
+            <span class="question-number">{{ i + 1 }}.</span>
+            <span class="question-text">{{ quiz[i].question }} =</span>
+          </div>
           <input type="text" name="answer_{{ i }}">
-        </p>
+        </div>
       {% endfor %}
       <button type="submit">Submit</button>
     </form>
+    
+    
   </div>
+
+  <script src="{{ url_for('static', filename='timer.js') }}"></script>
 </body>
 </html>
