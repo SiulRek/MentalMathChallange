@@ -116,7 +116,7 @@ def _is_numeric_type(type_, ignore_constants=False):
     return type_ in numeric_types or re.match(r"float\.(\d+)", type_)
 
 
-def _identify_math_expression_problems(elements):
+def _identify_math_expression_problem(elements):
     # 1. Check for consecutive numeric types
     for i in range(len(elements) - 1):
         if _is_numeric_type(elements[i]["type"]) and _is_numeric_type(
@@ -152,7 +152,7 @@ def _identify_math_expression_problems(elements):
     if brackets_counter != 0:
         return "Unmatched brackets"
 
-    # 5. Check for operator at the beginning
+    # 5. Check for operator at the beginning (not + or -)
     if elements[0]["type"] == "operator" and elements[0]["value"] not in [
         "-",
         "+",
@@ -196,7 +196,7 @@ def _assert_valid_math_expression_elements(elements, position):
     except ZeroDivisionError:
         pass
     except Exception as exc:
-        problem = _identify_math_expression_problems(elements)
+        problem = _identify_math_expression_problem(elements)
         msg = f"Invalid math expression at position {position}"
         if problem:
             msg += ": " + problem
