@@ -1,4 +1,4 @@
-/* General Reset and Font Setup */
+/* Base Reset & Font Setup */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -8,8 +8,9 @@
 body {
   background-color: #1e1e1e;
   color: #e0e0e0;
-  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
   line-height: 1.6;
+  font-size: 16px;
   padding: 20px;
 }
 
@@ -20,15 +21,26 @@ body {
   padding: 20px;
 }
 
-/* Headings */
+/* Typography */
 h1, h2, h3 {
   color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   margin-bottom: 20px;
 }
 
-/* Paragraphs and Lists */
 p, ul, li {
   margin-bottom: 12px;
+  font-weight: 400;
+}
+
+pre, code {
+  font-family: 'Courier New', monospace;
+  font-size: 1.02em;
+  background-color: #292929;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #9288ea;
 }
 
 /* Links */
@@ -42,7 +54,8 @@ a:hover {
 }
 
 /* Forms */
-textarea, input[type="text"] {
+textarea,
+input[type="text"] {
   width: 100%;
   background-color: #2a2a2a;
   color: #e0e0e0;
@@ -54,7 +67,8 @@ textarea, input[type="text"] {
   margin-bottom: 15px;
 }
 
-textarea:focus, input[type="text"]:focus {
+textarea:focus,
+input[type="text"]:focus {
   border-color: #3a86ff;
   outline: none;
 }
@@ -62,27 +76,33 @@ textarea:focus, input[type="text"]:focus {
 /* Buttons */
 button {
   background-color: #3a86ff;
-  color: #fff;
+  color: #ffffff;
   border: none;
-  padding: 10px 18px;
+  padding: 12px 20px;
   font-size: 1em;
+  font-weight: 500;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 button:hover {
   background-color: #2f70cc;
 }
 
-/* Highlight Correct and Incorrect */
+button:active {
+  transform: scale(0.98);
+}
+
+/* Correct/Incorrect Feedback */
 .correct {
-  color: #4caf50; /* green */
+  color: #4caf50;
   font-weight: bold;
 }
 
 .incorrect {
-  color: #f44336; /* red */
+  color: #f44336;
   font-weight: bold;
 }
 
@@ -94,5 +114,9 @@ button:hover {
 
   .container {
     padding: 10px;
+  }
+
+  button {
+    width: 100%;
   }
 }
