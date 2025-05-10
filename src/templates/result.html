@@ -1,26 +1,36 @@
 <!DOCTYPE html>
-<html>
-<head><title>Results</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Results - Mental Math Challenge</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
 <body>
-  <h2>Your Results</h2>
+  <div class="container">
+    <h2>Your Results</h2>
 
-  {% if duration %}
-    <p><strong>Time taken:</strong> {{ duration.total_seconds() | round(2) }} seconds</p>
-  {% endif %}
+    {% if duration %}
+      <p><strong>Time taken:</strong> {{ duration.total_seconds() | round(2) }} seconds</p>
+    {% endif %}
 
-  <ul>
-    {% for res in results %}
-      <li>
-        {{ res.question }} = {{ res.correct_answer }} |
-        Your answer:
-        {% if res.is_correct %}
-          <b style="color:green">{{ res.user_answer }}</b>
-        {% else %}
-          <b style="color:red">{{ res.user_answer }}</b> (Correct: {{ res.correct_answer }})
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-  <a href="{{ url_for('index') }}">Play Again</a>
+    <ul>
+      {% for res in results %}
+        <li>
+          {{ res.question }} = {{ res.correct_answer }} |
+          Your answer:
+          {% if res.is_correct %}
+            <span class="correct">{{ res.user_answer }}</span>
+          {% else %}
+            <span class="incorrect">{{ res.user_answer }}</span>
+            (Correct: {{ res.correct_answer }})
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+
+    <p>
+      <a href="{{ url_for('index') }}">Play Again</a>
+    </p>
+  </div>
 </body>
 </html>

@@ -1,20 +1,27 @@
 <!DOCTYPE html>
-<html>
-<head><title>Quiz</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz - Mental Math Challenge</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
 <body>
-  <h2>Solve the following problems:</h2>
+  <div class="container">
+    <h2>Solve the following problems:</h2>
 
-  {% if error %}
-    <p style="color:red;"><strong>Error:</strong> {{ error }}</p>
-  {% endif %}
+    {% if error %}
+      <p class="incorrect"><strong>Error:</strong> {{ error }}</p>
+    {% endif %}
 
-  <form action="{{ url_for('submit') }}" method="post">
-    {% for i in range(quiz|length) %}
-      <p>{{ i+1 }}. {{ quiz[i].question }} =
-        <input type="text" name="answer_{{ i }}">
-      </p>
-    {% endfor %}
-    <button type="submit">Submit</button>
-  </form>
+    <form action="{{ url_for('submit') }}" method="post">
+      {% for i in range(quiz|length) %}
+        <p>
+          {{ i + 1 }}. {{ quiz[i].question }} =
+          <input type="text" name="answer_{{ i }}">
+        </p>
+      {% endfor %}
+      <button type="submit">Submit</button>
+    </form>
+  </div>
 </body>
 </html>
