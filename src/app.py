@@ -1,11 +1,9 @@
 from datetime import datetime
+import os
 
 from flask import Flask, render_template, request, session
 
-from core.compute_quiz_results import (
-    compute_quiz_results,
-    UserResponseError,
-)
+from core.compute_quiz_results import compute_quiz_results, UserResponseError
 from core.generate_quiz import generate_quiz
 from core.parse_blueprint_from_text import (
     parse_blueprint_from_text,
@@ -13,7 +11,7 @@ from core.parse_blueprint_from_text import (
 )
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
 
 
 @app.route("/")
@@ -68,9 +66,8 @@ def submit():
         duration=duration,
         correct=correct,
         incorrect=incorrect,
-        percentage=percentage
+        percentage=percentage,
     )
-
 
 
 if __name__ == "__main__":
