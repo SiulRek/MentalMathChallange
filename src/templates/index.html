@@ -10,9 +10,20 @@
   <div class="container">
     <div class="header-bar">
       <h1>Mental Math Challenge</h1>
+      <div class="auth-status">
+        <span>👤 {{ session.username }}</span>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      </div>
       <img src="{{ url_for('static', filename='icon.png') }}" alt="Logo" class="app-logo">
     </div>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
     <p>
       Welcome to <strong>Mental Math Challenge</strong>, an interactive calculation game where you solve
