@@ -4,7 +4,7 @@ from flask import Flask
 
 from app import db
 from app.auth_service import AuthService
-from app.models import User  # Import from app.models, not core.models
+from app.models import User
 
 
 class TestAuthService(unittest.TestCase):
@@ -37,8 +37,8 @@ class TestAuthService(unittest.TestCase):
         self.assertIn("user_id", result)
 
     def test_duplicate_registration(self):
-        self.auth.register_user("bob", "pw1")
-        success, msg = self.auth.register_user("bob", "pw2")
+        self.auth.register_user("bob", "password1")
+        success, msg = self.auth.register_user("bob", "password2")
         self.assertFalse(success)
         self.assertEqual(msg, "Username already exists.")
 
@@ -73,6 +73,31 @@ class TestAuthService(unittest.TestCase):
         past = datetime.utcnow() - timedelta(minutes=5)
         self.assertTrue(self.auth._is_locked(future))
         self.assertFalse(self.auth._is_locked(past))
+
+    def test_register_empty_username(self):
+        success, msg = self.auth.register_user("", "validpass")
+        self.assertFalse(success)
+        self.assertEqual(msg, "Username cannot be empty.")
+
+    def test_register_empty_password(self):
+        success, msg = self.auth.register_user("validuser", "")
+        self.assertFalse(success)
+        self.assertEqual(msg, "Password cannot be empty.")
+
+    def test_register_too_short_username(self):
+        success, msg = self.auth.register_user("ab", "validpass")
+        self.assertFalse(success)
+        self.assertEqual(msg, "Username must be at least 3 characters long.")
+
+    def test_register_too_short_password(self):
+        success, msg = self.auth.register_user("validuser", "123")
+        self.assertFalse(success)
+        self.assertEqual(msg, "Password must be at least 6 characters long.")
+
+    def test_register_non_alphanumeric_username(self):
+        success, msg = self.auth.register_user("user@name", "validpass")
+        self.assertFalse(success)
+        self.assertEqual(msg, "Username must be alphanumeric.")
 
 
 if __name__ == "__main__":

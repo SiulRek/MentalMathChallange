@@ -15,6 +15,20 @@ class AuthService:
     def _create_user_table(self):
         self.db.create_all()
 
+    def _assert_username(self, username):
+        if not username:
+            raise AssertionError("Username cannot be empty.")
+        if len(username) < 3:
+            raise AssertionError("Username must be at least 3 characters long.")
+        if not username.isalnum():
+            raise AssertionError("Username must be alphanumeric.")
+    
+    def _assert_password(self, password):
+        if not password:
+            raise AssertionError("Password cannot be empty.")
+        if len(password) < 6:
+            raise AssertionError("Password must be at least 6 characters long.")
+
     def _hash_password(self, password):
         return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
@@ -25,6 +39,12 @@ class AuthService:
         return lock_until and datetime.utcnow() < lock_until
 
     def register_user(self, username, password):
+        try:
+            self._assert_username(username)
+            self._assert_password(password)
+        except AssertionError as e:
+            return False, str(e)
+        
         hashed_pw = self._hash_password(password)
         user = User(username=username, password_hash=hashed_pw)
 
