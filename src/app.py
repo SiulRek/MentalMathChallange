@@ -20,9 +20,10 @@ from core.parse_blueprint_from_text import (
     UserConfigError,
 )
 
-DB_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "data", "users.db"
-)
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+os.makedirs(DATA_DIR, exist_ok=True)
+DB_PATH = os.path.join(DATA_DIR, "users.db")
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
 
@@ -45,7 +46,6 @@ def index():
     if "user_id" not in session:
         return redirect(url_for("login"))
     return render_template("index.html")
-
 
 
 @app.route("/help")
