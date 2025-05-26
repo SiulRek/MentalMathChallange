@@ -13,3 +13,4 @@ __pycache__/
 **/test.*
 src/tests/outputs/*
 src/data/users.db
+src/instance/*
