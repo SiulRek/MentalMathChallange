@@ -1,14 +1,9 @@
 from datetime import datetime
 from functools import wraps
-from flask import (
-    render_template,
-    request,
-    session,
-    redirect,
-    url_for,
-    flash,
-)
 
+from flask import render_template, request, session, redirect, url_for, flash
+
+from app.email_utils import send_confirmation_email, decode_email_token
 from core.compute_quiz_results import compute_quiz_results, UserResponseError
 from core.generate_quiz import generate_quiz
 from core.parse_blueprint_from_text import (
@@ -25,6 +20,7 @@ def register_routes(app):
                 flash("Please log in to continue.", "info")
                 return redirect(url_for("login"))
             return f(*args, **kwargs)
+
         return decorated
 
     @app.route("/")
@@ -41,13 +37,64 @@ def register_routes(app):
     def register():
         if request.method == "POST":
             username = request.form.get("username", "")
+            email = request.form.get("email", "")
             password = request.form.get("password", "")
-            success, message = app.auth.register_user(username, password)
+
+            success, message = app.auth.add_pending_user(
+                email, username, password
+            )
             if success:
-                flash("Registration successful. Please login.", "success")
-                return redirect(url_for("login"))
+                send_confirmation_email(email)
+                session["pending_email"] = email
+                return redirect(url_for("request_email_confirmation"))
             flash(message, "error")
         return render_template("register.html")
+
+    @app.route("/request-email-confirmation")
+    def request_email_confirmation():
+        pending_email = session.get("pending_email", None)
+        if not pending_email:
+            flash(
+                "No email with pending confirmation found in this session.",
+                "error",
+            )
+            return redirect(url_for("register"))
+        confirmed = app.auth.is_user_email_confirmed(pending_email)
+        if confirmed:
+            return redirect(url_for("login"))
+        message = (
+            "A confirmation email has been sent to your email address. "
+            "Please check your inbox and click the link to confirm your email."
+        )
+        return render_template(
+            "message.html", message=message, type="request_email_confirmation"
+        )
+
+    @app.route("/confirm/<token>")
+    def confirm_email(token):
+        email = decode_email_token(token)
+        if not email:
+            return render_template(
+                "message.html",
+                message="Invalid or expired confirmation link.",
+                type="email_confirmation_error",
+            )
+
+        success, message = app.auth.register_pending_user_by_email(email)
+        if not success:
+            success = app.auth.is_user_email_confirmed(email)
+        if success:
+            return render_template(
+                "message.html",
+                message="Email confirmed successfully! You can now log in.",
+                type="email_confirmation_success",
+            )
+        else:
+            return render_template(
+                "message.html",
+                message=message,
+                type="email_confirmation_error",
+            )
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
