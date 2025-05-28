@@ -16,6 +16,7 @@ body {
   padding: 20px;
 }
 
+
 /* ──────────────────────────────── */
 /* Layout Container                */
 /* ──────────────────────────────── */
@@ -24,6 +25,7 @@ body {
   margin: 0 auto;
   padding: 20px;
 }
+
 
 /* ──────────────────────────────── */
 /* Header                          */
@@ -46,6 +48,7 @@ body {
 }
 
 
+/* ──────────────────────────────── */
 /* Typography                      */
 /* ──────────────────────────────── */
 h1, h2, h3 {
@@ -68,6 +71,7 @@ pre, code {
   color: #83a5e7;
 }
 
+
 /* ──────────────────────────────── */
 /* Links                           */
 /* ──────────────────────────────── */
@@ -79,6 +83,7 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
 
 /* ──────────────────────────────── */
 /* Forms                           */
@@ -101,6 +106,7 @@ input[type="text"]:focus {
   border-color: #3a86ff;
   outline: none;
 }
+
 
 /* ──────────────────────────────── */
 /* Buttons                         */
@@ -126,6 +132,7 @@ button:active {
   transform: scale(0.98);
 }
 
+
 /* ──────────────────────────────── */
 /* Quiz Header & Timer             */
 /* ──────────────────────────────── */
@@ -145,8 +152,10 @@ button:active {
   border: 1px solid #61d523;
   font-weight: 500;
 }
+
+
 /* ──────────────────────────────── */
-/* Register Form Alignment & Sizing*/
+/* Register Form Layout            */
 /* ──────────────────────────────── */
 .form-vertical {
   background-color: #2a2a2a;
@@ -205,12 +214,14 @@ button[type="submit"] {
   font-weight: 500;
 }
 
+
 /* ──────────────────────────────── */
-/* User Settings                */
+/* User Settings Page              */
 /* ──────────────────────────────── */
 .delete-account-form {
   margin-top: 20px;
 }
+
 
 /* ──────────────────────────────── */
 /* Quiz Questions Layout           */
@@ -236,6 +247,7 @@ button[type="submit"] {
   flex-grow: 1;
   margin-right: 10px;
 }
+
 
 /* ──────────────────────────────── */
 /* Results Display Cards           */
@@ -328,6 +340,7 @@ button[type="submit"] {
   color: #ffffff;
 }
 
+
 /* ──────────────────────────────── */
 /* Play Again Button               */
 /* ──────────────────────────────── */
@@ -351,8 +364,9 @@ button[type="submit"] {
   background-color: #2f70cc;
 }
 
+
 /* ──────────────────────────────── */
-/* Inline Answer Feedback Colors   */
+/* Inline Answer Feedback          */
 /* ──────────────────────────────── */
 .correct {
   color: #4caf50;
@@ -364,8 +378,9 @@ button[type="submit"] {
   font-weight: bold;
 }
 
+
 /* ──────────────────────────────── */
-/* Blueprint Instruction & Error   */
+/* Blueprint & Error Display       */
 /* ──────────────────────────────── */
 .blueprint-instruction {
   margin-bottom: 10px;
@@ -384,7 +399,6 @@ button[type="submit"] {
   font-weight: 500;
 }
 
-/* Help link below Start button */
 .blueprint-help-link {
   margin-top: 16px;
   font-size: 0.95em;
@@ -410,6 +424,7 @@ button[type="submit"] {
     text-align: center;
   }
 }
+
 
 /* ──────────────────────────────── */
 /* Message Page Styles             */
@@ -458,8 +473,9 @@ button[type="submit"] {
   border-left: 6px solid #888888;
 }
 
+
 /* ──────────────────────────────── */
-/* Flashcard Styles                */
+/* Flash Messages                  */
 /* ──────────────────────────────── */
 .flash {
   padding: 12px 16px;
