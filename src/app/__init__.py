@@ -1,13 +1,15 @@
 import os
 
 from flask import Flask
-
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 
-mail = Mail()
+from flask_migrate import Migrate
 
+mail = Mail()
 db = SQLAlchemy()
+migrate = Migrate()  
+
 
 
 def create_app():
@@ -20,9 +22,13 @@ def create_app():
     )
 
     app.config["SECRET_KEY"] = "dev-secret"
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-        "DATABASE_URL", "sqlite:///app_database.db"
-    )
+
+    default_db = "sqlite:///app_database.db"
+    url = os.getenv("DATABASE_URL", default_db)
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = url
+
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     app.config["MAIL_SERVER"] = "smtp.gmail.com"
@@ -32,10 +38,12 @@ def create_app():
     app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
 
     db.init_app(app)
+    migrate.init_app(app, db)  
+
     mail.init_app(app)
 
     with app.app_context():
-        from app.models import User
+        from app.models import User, PendingUser
         from app.auth_service import AuthService
 
         app.auth = AuthService(db=db)
