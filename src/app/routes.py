@@ -119,10 +119,24 @@ def register_routes(app):
 
         return render_template("login.html")
 
-    @app.route("/logout")
+    @app.route("/user-settings")
+    @login_required
+    def user_settings():
+        return render_template("user_settings.html")
+
+    @app.route("/logout", methods=["POST"])
+    @login_required
     def logout():
         session.clear()
         flash("You have been logged out.", "info")
+        return redirect(url_for("login"))
+
+    @app.route("/delete-account", methods=["POST"])
+    @login_required
+    def delete_account():
+        app.auth.delete_user(session["user_id"])
+        session.clear()
+        flash("Your account has been deleted.", "info")
         return redirect(url_for("login"))
 
     @app.route("/start", methods=["POST"])

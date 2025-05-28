@@ -12,8 +12,9 @@
       <h1>Mental Math Challenge</h1>
       <div class="auth-status">
         <span>👤 {{ session.username }}</span>
-        <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('user_settings') }}">Settings</a>
       </div>
+
       <img src="{{ url_for('static', filename='icon.png') }}" alt="Logo" class="app-logo">
     </div>
 

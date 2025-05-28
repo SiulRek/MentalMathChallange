@@ -113,3 +113,12 @@ class AuthService:
 
         self.db.session.commit()
         return False, msg
+
+    def delete_user(self, user_id):
+        user = User.query.get(user_id)
+        if not user:
+            return False, "User not found."
+
+        self.db.session.delete(user)
+        self.db.session.commit()
+        return True, "User deleted successfully."

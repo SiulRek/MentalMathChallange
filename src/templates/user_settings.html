@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Settings</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <div class="header-bar">
+      <h1>User Settings</h1>
+      <div class="auth-status">
+        <span>👤 {{ session.username }}</span>
+        <a href="{{ url_for('index') }}">Home</a>
+      </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <h2>Account Options</h2>
+
+    <form action="{{ url_for('logout') }}" method="post">
+      <button type="submit">Logout</button>
+    </form>
+
+    <form action="{{ url_for('delete_account') }}" method="post" class="delete-account-form">
+      <button type="submit">Delete Account</button>
+    </form>
+  </div>
+</body>
+</html>

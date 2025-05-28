@@ -1,5 +1,6 @@
-import unittest
 from datetime import datetime, timedelta
+import unittest
+
 from flask import Flask
 
 from app import db
@@ -28,7 +29,9 @@ class TestAuthService(unittest.TestCase):
         self.ctx.pop()
 
     def _register_user(self, username, password):
-        """Helper to simulate full registration via pending user flow."""
+        """
+        Helper to simulate full registration via pending user flow.
+        """
         email = f"{username}@example.com"
         success, msg = self.auth.add_pending_user(email, username, password)
         self.assertTrue(success, msg)
@@ -44,7 +47,9 @@ class TestAuthService(unittest.TestCase):
     def test_duplicate_registration(self):
         self._register_user("bob", "Valid1!")
         # Attempt to register same username/email again
-        success, msg = self.auth.add_pending_user("bob@example.com", "bob", "Another1!")
+        success, msg = self.auth.add_pending_user(
+            "bob@example.com", "bob", "Another1!"
+        )
         self.assertFalse(success)
         self.assertIn("already exists", msg)
 
@@ -79,6 +84,19 @@ class TestAuthService(unittest.TestCase):
         past = datetime.utcnow() - timedelta(minutes=5)
         self.assertTrue(self.auth._is_locked(future))
         self.assertFalse(self.auth._is_locked(past))
+
+    def test_delete_user(self):
+        self._register_user("eve", "RemoveMe1@")
+
+        user = User.query.filter_by(username="eve").first()
+        self.assertIsNotNone(user)
+
+        success, message = self.auth.delete_user(user.id)
+        self.assertTrue(success)
+        self.assertEqual(message, "User deleted successfully.")
+
+        user_after = User.query.get(user.id)
+        self.assertIsNone(user_after)
 
 
 if __name__ == "__main__":
