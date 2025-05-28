@@ -39,6 +39,11 @@ def register_routes(app):
             username = request.form.get("username", "")
             email = request.form.get("email", "")
             password = request.form.get("password", "")
+            confirm_password = request.form.get("confirm_password", "")
+
+            if password != confirm_password:
+                flash("Passwords do not match.", "error")
+                return render_template("register.html")
 
             success, message = app.auth.add_pending_user(
                 email, username, password
@@ -48,6 +53,7 @@ def register_routes(app):
                 session["pending_email"] = email
                 return redirect(url_for("request_email_confirmation"))
             flash(message, "error")
+
         return render_template("register.html")
 
     @app.route("/request-email-confirmation")
