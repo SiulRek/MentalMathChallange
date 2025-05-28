@@ -3,13 +3,11 @@ import os
 from flask import Flask
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
-
 from flask_migrate import Migrate
 
 mail = Mail()
 db = SQLAlchemy()
-migrate = Migrate()  
-
+migrate = Migrate()
 
 
 def create_app():
@@ -38,7 +36,7 @@ def create_app():
     app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
 
     db.init_app(app)
-    migrate.init_app(app, db)  
+    migrate.init_app(app, db)
 
     mail.init_app(app)
 
