@@ -131,13 +131,19 @@ def register_routes(app):
         flash("You have been logged out.", "info")
         return redirect(url_for("login"))
 
-    @app.route("/delete-account", methods=["POST"])
+    @app.route("/delete-account", methods=["GET", "POST"])
     @login_required
     def delete_account():
-        app.auth.delete_user(session["user_id"])
-        session.clear()
-        flash("Your account has been deleted.", "info")
-        return redirect(url_for("login"))
+        if request.method == "POST":
+            if request.form.get("confirm") == "yes":
+                app.auth.delete_user(session["user_id"])
+                session.clear()
+                flash("Your account has been deleted.", "info")
+                return redirect(url_for("login"))
+            flash("Account deletion cancelled.", "info")
+            return redirect(url_for("user_settings"))
+
+        return render_template("confirm_delete.html")
 
     @app.route("/start", methods=["POST"])
     @login_required
