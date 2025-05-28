@@ -70,13 +70,13 @@ class TestValidators(BaseTestCase):
         with self.assertRaisesRegex(
             AssertionError, "Password must be at least 6 characters long."
         ):
-            assert_password("a2#")
+            assert_password("A2#")
 
     def test_assert_password_no_digit(self):
         with self.assertRaisesRegex(
             AssertionError, "Password must contain at least one digit."
         ):
-            assert_password("abcdef!")
+            assert_password("Abcdef!")
 
     def test_assert_password_no_letter(self):
         with self.assertRaisesRegex(
@@ -89,7 +89,7 @@ class TestValidators(BaseTestCase):
             AssertionError,
             "Password must contain at least one special character.",
         ):
-            assert_password("abc123")
+            assert_password("Abc123")
 
     def test_assert_password_too_long(self):
         long_pwd = "a2#" + "x" * 126
@@ -97,6 +97,12 @@ class TestValidators(BaseTestCase):
             AssertionError, "Password cannot be longer than 128 characters."
         ):
             assert_password(long_pwd)
+    
+    def test_assert_password_no_uppercase(self):
+        with self.assertRaisesRegex(
+            AssertionError, "Password must contain at least one uppercase letter."
+        ):
+            assert_password("abc123!@#")
 
     def test_assert_password_valid(self):
         assert_password("Abc123!@#")  # Should not raise

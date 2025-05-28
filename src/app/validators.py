@@ -54,7 +54,10 @@ def assert_password(password):
         )
     if len(password) > 128:
         raise AssertionError("Password cannot be longer than 128 characters.")
-
+    if not any(char.isupper() for char in password):
+        raise AssertionError(
+            "Password must contain at least one uppercase letter."
+        )
 
 def assert_unique_username_and_email(username, email):
     existing_user = User.query.filter(
