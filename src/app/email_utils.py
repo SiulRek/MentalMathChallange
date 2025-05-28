@@ -1,14 +1,21 @@
+import os
+
 from flask import current_app
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 from app import mail
 
+if os.getenv("RUNNING_LOCALLY", "false") == "true":
+    INDEX_URL = "http://localhost:5000/"
+else:
+    INDEX_URL = "https://mentalmathchallange-1.onrender.com/"
+
 
 def send_confirmation_email(user_email):
     serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
     token = serializer.dumps(user_email, salt="email-confirm")
-    link = f"http://localhost:5000/confirm/{token}"
+    link = f"{INDEX_URL}confirm/{token}"
 
     msg = Message(
         subject="Confirm your Email",
