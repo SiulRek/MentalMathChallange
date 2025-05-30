@@ -166,6 +166,8 @@ button:active {
   background-color: #444;
 }
 
+
+
 button[type="submit"] {
   width: 100%;
   margin-top: 10px;
@@ -481,6 +483,11 @@ input:focus {
   font-size: 0.95em;
 }
 
+.blueprint-card .danger-button {
+  align-self: flex-start;
+  padding: 5px 16px;
+  font-size: 0.8em;
+}
 
 /* ──────────────────────────────── */
 /* Responsive Design               */

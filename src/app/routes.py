@@ -20,11 +20,19 @@ def register_routes(app):
 
         return decorated
 
-    @app.route("/", methods=["GET"])
+    @app.route("/", methods=["GET", "POST"])
     def index():
         if "user_id" not in session:
             return redirect(url_for("login"))
         user_id = session["user_id"]
+        if request.method == "POST":
+            blueprint_name = request.form.get("blueprint_name", "").strip()
+            success, message = app.bp_service.delete_user_blueprint(
+                user_id=user_id, name=blueprint_name
+            )
+            if not success:
+                flash(message, "error")
+            return redirect(url_for("index"))
         blueprints = app.bp_service.get_user_blueprints_list(user_id)
         blueprints.sort(key=lambda x: x["name"].lower())
         return render_template("index.html", blueprints=blueprints)

@@ -28,21 +28,21 @@
     {% endwith %}
 
     {% if blueprints %}
-      <form method="post" action="{{ url_for('start') }}">
-        <div class="blueprint-grid">
-          {% for blueprint in blueprints %}
-            <div class="blueprint-card">
-              <h3>{{ blueprint.name }}</h3>
-              <p>{{ blueprint.description or "No description provided." }}</p>
-              <button type="submit" name="blueprint" value="{{ blueprint.blueprint }}">
-                Start Quiz
-              </button>
-            </div>
-          {% endfor %}
-        </div>
-      </form>
+      <div class="blueprint-grid">
+        {% for blueprint in blueprints %}
+          <form method="post" action="{{ url_for('index') }}" class="blueprint-card">
+            <input type="hidden" name="blueprint_name" value="{{ blueprint.name }}">
+            <h3>{{ blueprint.name }}</h3>
+            <p>{{ blueprint.description or "No description provided." }}</p>
+            <button type="submit" name="blueprint" value="{{ blueprint.blueprint }}">Start Quiz</button>
+            <div class="button-space"></div>
+            <button type="submit" name="action" value="delete" class="danger-button" title="Delete Blueprint">🗑</button>
+          </form>
+
+        {% endfor %}
+      </div>
     {% endif %}
-    
+
     <p><a href="{{ url_for('create_blueprint') }}">Create New Blueprint</a></p>
   </div>
 </body>
