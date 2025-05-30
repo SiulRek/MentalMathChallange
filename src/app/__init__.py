@@ -46,8 +46,10 @@ def create_app():
 
     with app.app_context():
         from app.auth_service import AuthService
+        from app.blueprint_service import BlueprintService
 
         app.auth = AuthService(db=db)
+        app.bp_service = BlueprintService(db=db)
 
         from app.routes import register_routes
 

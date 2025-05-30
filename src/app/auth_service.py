@@ -115,6 +115,7 @@ class AuthService:
         return False, msg
 
     def delete_user(self, user_id):
+        print(f"Attempting to delete user with ID: {user_id}")
         user = User.query.get(user_id)
         if not user:
             return False, "User not found."

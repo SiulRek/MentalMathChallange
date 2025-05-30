@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mental Math Challenge</title>
+  <title>Your Blueprints</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
 </head>
@@ -14,9 +14,10 @@
         <span>👤 {{ session.username }}</span>
         <a href="{{ url_for('user_settings') }}">Settings</a>
       </div>
-
       <img src="{{ url_for('static', filename='icon.png') }}" alt="Logo" class="app-logo">
     </div>
+
+    <h2>Your Blueprints</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -26,32 +27,25 @@
       {% endif %}
     {% endwith %}
 
-    <p>
-      Welcome to <strong>Mental Math Challenge</strong>, an interactive calculation game where you solve
-      automatically generated math or date-based problems. Customize your quiz by providing a <em>blueprint</em>
-      that defines the number, type, and structure of the questions. You can create both <strong>math quizzes</strong>
-      with expressions involving numbers, operators, functions, and scientific constants, or <strong>date quizzes</strong>
-      that test your ability to determine calendar weekdays.
-    </p>
-
-    {% if error %}
-      <div class="blueprint-error">
-        {{ error }}
-      </div>
+    {% if blueprints %}
+      <form method="post" action="{{ url_for('start') }}">
+        <div class="blueprint-grid">
+          {% for blueprint in blueprints %}
+            <div class="blueprint-card">
+              <h3>{{ blueprint.name }}</h3>
+              <p>{{ blueprint.description or "No description provided." }}</p>
+              <button type="submit" name="blueprint" value="{{ blueprint.blueprint }}">
+                Start Quiz
+              </button>
+            </div>
+          {% endfor %}
+        </div>
+      </form>
+    {% else %}
+      <p>No blueprints available.</p>
     {% endif %}
 
-    <form action="{{ url_for('start') }}" method="post">
-      <p class="blueprint-instruction">Paste your blueprint here:</p>
-      <textarea id="blueprint" name="blueprint" rows="15">{{
-        blueprint_text or
-        'math: 3\n int 11 99\n op *\n int 11 99\n\ndate: 2\n start 2020\n end 2024'
-      }}</textarea>
-
-      <button type="submit">Start</button>
-      <p class="blueprint-help-link">
-        Unsure how to write a blueprint? <a href="{{ url_for('help_page') }}">View Blueprint Help</a>
-      </p>
-    </form>
+    <p><a href="{{ url_for('create_blueprint') }}">Create New Blueprint</a></p>
   </div>
 </body>
 </html>

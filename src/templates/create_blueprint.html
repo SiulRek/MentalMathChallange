@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Blueprint</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
+</head>
+<body>
+  <div class="container">
+    <div class="header-bar">
+      <h1>Mental Math Challenge</h1>
+      <div class="auth-status">
+        <span>👤 {{ session.username }}</span>
+        <a href="{{ url_for('user_settings') }}">Settings</a>
+      </div>
+      <img src="{{ url_for('static', filename='icon.png') }}" alt="Logo" class="app-logo">
+    </div>
+
+    <h2>Create New Blueprint</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" action="{{ url_for('create_blueprint') }}">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" value="{{ name|default('') }}">
+
+      <label for="description">Description (optional):</label>
+      <input type="text" id="description" name="description" value="{{ description|default('') }}">
+
+      <label for="blueprint">Blueprint:</label>
+      <textarea id="blueprint" name="blueprint" rows="10" cols="50">{{ blueprint|default('') }}</textarea>
+
+      <div style="display: flex; gap: 12px; margin-top: 10px;">
+        <button type="submit">Save Blueprint</button>
+        <a href="{{ url_for('index') }}" class="play-again-link" style="text-align: center;">Cancel</a>
+      </div>
+    </form>
+
+    <p class="blueprint-help-link">
+      Need help? <a href="{{ url_for('help_page') }}">View Blueprint Help</a>
+    </p>
+  </div>
+</body>
+</html>

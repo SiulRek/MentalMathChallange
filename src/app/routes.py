@@ -1,15 +1,12 @@
 from datetime import datetime
 from functools import wraps
+import json
 
 from flask import render_template, request, session, redirect, url_for, flash
 
 from app.email_utils import send_confirmation_email, decode_email_token
 from core.compute_quiz_results import compute_quiz_results, UserResponseError
 from core.generate_quiz import generate_quiz
-from core.parse_blueprint_from_text import (
-    parse_blueprint_from_text,
-    UserConfigError,
-)
 
 
 def register_routes(app):
@@ -23,11 +20,51 @@ def register_routes(app):
 
         return decorated
 
-    @app.route("/")
+    @app.route("/", methods=["GET"])
     def index():
         if "user_id" not in session:
             return redirect(url_for("login"))
-        return render_template("index.html")
+        user_id = session["user_id"]
+        blueprints = app.bp_service.get_user_blueprints_list(user_id)
+        blueprints.sort(key=lambda x: x["name"].lower())
+        return render_template("index.html", blueprints=blueprints)
+
+    @app.route("/create_blueprint", methods=["GET", "POST"])
+    @login_required
+    def create_blueprint():
+        if request.method == "POST":
+            name = request.form.get("name", "").strip()
+            description = request.form.get("description", "").strip()
+            blueprint_text = request.form.get("blueprint", "").strip()
+
+            if not name or not blueprint_text:
+                flash("Name and blueprint text cannot be empty.", "error")
+                return render_template(
+                    "create_blueprint.html",
+                    name=name,
+                    description=description,
+                    blueprint=blueprint_text,
+                )
+
+            success, message = app.bp_service.add_user_blueprint(
+                user_id=session["user_id"],
+                name=name,
+                description=description,
+                blueprint_text=blueprint_text,
+            )
+            if success:
+                return redirect(url_for("index"))
+            flash(message, "error")
+            return render_template(
+                "create_blueprint.html",
+                name=name,
+                description=description,
+                blueprint=blueprint_text,
+            )
+
+        return render_template(
+            "create_blueprint.html", name="", description="", blueprint=""
+        )
 
     @app.route("/help")
     def help_page():
@@ -46,7 +83,9 @@ def register_routes(app):
                 return render_template("register.html")
 
             success, message = app.auth.add_pending_user(
-                email, username, password
+                email=email,
+                username=username,
+                password=password,
             )
             if success:
                 send_confirmation_email(email)
@@ -136,7 +175,8 @@ def register_routes(app):
     def delete_account():
         if request.method == "POST":
             if request.form.get("confirm") == "yes":
-                app.auth.delete_user(session["user_id"])
+                user_id = session["user_id"]
+                app.auth.delete_user(user_id)
                 session.clear()
                 flash("Your account has been deleted.", "info")
                 return redirect(url_for("login"))
@@ -148,14 +188,9 @@ def register_routes(app):
     @app.route("/start", methods=["POST"])
     @login_required
     def start():
-        blueprint_text = request.form.get("blueprint", "")
-        try:
-            blueprint = parse_blueprint_from_text(blueprint_text)
-            quiz = generate_quiz(blueprint)
-        except UserConfigError as e:
-            return render_template(
-                "index.html", blueprint_text=blueprint_text, error=str(e)
-            )
+        blueprint = request.form.get("blueprint", "")
+        blueprint = json.loads(blueprint)
+        quiz = generate_quiz(blueprint)
 
         user_id = session["user_id"]
         session[f"quiz_{user_id}"] = quiz
