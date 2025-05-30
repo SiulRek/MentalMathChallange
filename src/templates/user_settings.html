@@ -28,9 +28,9 @@
     <form action="{{ url_for('logout') }}" method="post">
       <button type="submit">Logout</button>
     </form>
-
-    <form action="{{ url_for('delete_account') }}" method="get" class="delete-account-form">
-      <button type="submit">Delete Account</button>
+    <div class="button-spacer"></div>
+    <form action="{{ url_for('delete_account') }}" method="get">
+      <button type="submit" class="danger-button">Delete Account</button>
     </form>
 
   </div>

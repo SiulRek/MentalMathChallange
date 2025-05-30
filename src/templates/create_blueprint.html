@@ -37,15 +37,20 @@
       <label for="blueprint">Blueprint:</label>
       <textarea id="blueprint" name="blueprint" rows="10" cols="50">{{ blueprint|default('') }}</textarea>
 
-      <div style="display: flex; gap: 12px; margin-top: 10px;">
-        <button type="submit">Save Blueprint</button>
-        <a href="{{ url_for('index') }}" class="play-again-link" style="text-align: center;">Cancel</a>
-      </div>
+      <button type="submit" class="button">Save Blueprint</button>
+      <div class="button-spacer"></div>
+      <button type="button" class="danger-button" onclick="goToIndex()">Cancel</button>
     </form>
 
     <p class="blueprint-help-link">
       Need help? <a href="{{ url_for('help_page') }}">View Blueprint Help</a>
     </p>
   </div>
+
+  <script>
+    function goToIndex() {
+      window.location.href = "{{ url_for('index') }}";
+    }
+  </script>
 </body>
 </html>

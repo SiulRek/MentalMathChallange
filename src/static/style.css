@@ -111,25 +111,69 @@ input[type="text"]:focus {
 /* ──────────────────────────────── */
 /* Buttons                         */
 /* ──────────────────────────────── */
-button {
-  background-color: #3a86ff;
-  color: #ffffff;
-  border: none;
+
+/* Apply common button styles to both <button> and <a class="button"> */
+.button,
+button,
+.button:link,
+.button:visited {
+  display: inline-block;
+  min-width: 150px;
   padding: 12px 20px;
   font-size: 1em;
   font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  color: #ffffff;
+  background-color: #3a86ff;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   transition: background-color 0.2s ease, transform 0.1s ease;
+  box-sizing: border-box;
 }
 
+/* Hover and active states */
+.button:hover,
 button:hover {
   background-color: #2f70cc;
 }
 
+.button:active,
 button:active {
   transform: scale(0.98);
+}
+
+/* Layout for grouped buttons */
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* Optional spacer (if still used elsewhere) */
+.button-spacer {
+  margin-top: 10px;
+}
+
+.danger-button {
+  background-color: #565151;
+}
+
+.danger-button:hover {
+  background-color: #444;
+}
+
+button[type="submit"] {
+  width: 100%;
+  margin-top: 10px;
+}
+
+button[type="button"] {
+  width: 100%;
+  margin-top: 10px;
 }
 
 
@@ -199,11 +243,6 @@ input:focus {
   outline: none;
 }
 
-button[type="submit"] {
-  width: 100%;
-  margin-top: 10px;
-}
-
 .container p {
   text-align: left;
   font-size: 0.95em;
@@ -214,13 +253,6 @@ button[type="submit"] {
   font-weight: 500;
 }
 
-
-/* ──────────────────────────────── */
-/* User Settings Page              */
-/* ──────────────────────────────── */
-.delete-account-form {
-  margin-top: 20px;
-}
 
 
 /* ──────────────────────────────── */
@@ -405,6 +437,7 @@ button[type="submit"] {
   color: #cccccc;
 }
 
+
 /* ──────────────────────────────── */
 /* Blueprint Cards Grid            */
 /* ──────────────────────────────── */
@@ -448,6 +481,7 @@ button[type="submit"] {
   font-size: 0.95em;
 }
 
+
 /* ──────────────────────────────── */
 /* Responsive Design               */
 /* ──────────────────────────────── */
@@ -461,7 +495,8 @@ button[type="submit"] {
   }
 
   button,
-  .play-again-link {
+  .play-again-link,
+  .button {
     width: 100%;
     text-align: center;
   }
