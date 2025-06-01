@@ -17,6 +17,15 @@
       <img src="{{ url_for('static', filename='icon.png') }}" alt="Logo" class="app-logo">
     </div>
 
+    <!-- App Intro Section -->
+    <div class="app-info">
+      <p>
+        <strong>Mental Math Challenge</strong> is a personalized quiz app that lets you design and take your own math or date-based quizzes. 
+        Use plain-text blueprints to build question logic, test yourself, and improve your mental agility.
+      </p>
+    </div>
+
+
     <h2>Your Blueprints</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -38,7 +47,6 @@
             <div class="button-space"></div>
             <button type="submit" name="action" value="delete" class="danger-button" title="Delete Blueprint">🗑</button>
           </form>
-
         {% endfor %}
       </div>
     {% endif %}

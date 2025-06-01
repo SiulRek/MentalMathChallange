@@ -63,6 +63,14 @@ p, ul, li {
   font-weight: 400;
 }
 
+.app-info {
+  font-size: 1.15em;
+  line-height: 1.8;
+  color: #dddddd;
+  margin-bottom: 30px;
+}
+
+
 pre, code {
   font-family: 'Courier New', monospace;
   background-color: #282828;
