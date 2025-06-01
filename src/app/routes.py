@@ -25,17 +25,33 @@ def register_routes(app):
         if "user_id" not in session:
             return redirect(url_for("login"))
         user_id = session["user_id"]
+
         if request.method == "POST":
             blueprint_name = request.form.get("blueprint_name", "").strip()
-            success, message = app.bp_service.delete_user_blueprint(
-                user_id=user_id, name=blueprint_name
-            )
-            if not success:
-                flash(message, "error")
-            return redirect(url_for("index"))
+            action = request.form.get("action")
+            blueprint_raw = request.form.get("blueprint")
+
+            if action == "delete":
+                success, message = app.bp_service.delete_user_blueprint(
+                    user_id=user_id, name=blueprint_name
+                )
+                if not success:
+                    flash(message, "error")
+                return redirect(url_for("index"))
+
+            elif blueprint_raw:  # This means "Start Quiz" was clicked
+                from flask import json
+                blueprint = json.loads(blueprint_raw)
+                quiz = generate_quiz(blueprint)
+
+                session[f"quiz_{user_id}"] = quiz
+                session["start_time"] = datetime.utcnow().isoformat()
+                return render_template("quiz.html", quiz=quiz)
+
         blueprints = app.bp_service.get_user_blueprints_list(user_id)
         blueprints.sort(key=lambda x: x["name"].lower())
         return render_template("index.html", blueprints=blueprints)
+
 
     @app.route("/create_blueprint", methods=["GET", "POST"])
     @login_required
