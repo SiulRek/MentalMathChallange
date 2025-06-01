@@ -34,8 +34,10 @@
       <label for="description">Description (optional):</label>
       <input type="text" id="description" name="description" value="{{ description|default('') }}">
 
-      <label for="blueprint">Blueprint:</label>
-      <textarea id="blueprint" name="blueprint" rows="10" cols="50">{{ blueprint|default('') }}</textarea>
+    <label for="blueprint">Blueprint:</label>
+    <textarea id="blueprint" name="blueprint" rows="10" cols="50"
+              onfocus="clearDefault(this)" onblur="restoreDefault(this)">{{ blueprint|default('e.g.\nmath: 2\n int 1 10\n op +\n int 1 10\n\ndate: 2\n start 1950\n end 2050', true) }}</textarea>
+
 
       <button type="submit" class="button">Save Blueprint</button>
       <div class="button-spacer"></div>
@@ -47,6 +49,7 @@
     </p>
   </div>
 
+  <script src="{{ url_for('static', filename='blueprint_default.js') }}"></script>
   <script>
     function goToIndex() {
       window.location.href = "{{ url_for('index') }}";
