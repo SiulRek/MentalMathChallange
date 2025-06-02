@@ -447,7 +447,6 @@ input:focus {
   color: #cccccc;
 }
 
-
 /* ──────────────────────────────── */
 /* Blueprint Cards Grid            */
 /* ──────────────────────────────── */
@@ -458,18 +457,50 @@ input:focus {
   margin-top: 20px;
 }
 
+.blueprint-card-wrapper {
+  position: relative;
+  max-width: 360px;
+  width: 100%;
+}
+
+/* Main visible card (contains everything) */
 .blueprint-card {
+  position: relative;
   background-color: #2a2a2a;
   border: 1px solid #444;
   border-left: 4px solid #3a86ff;
   padding: 20px;
   border-radius: 8px;
-  width: 100%;
-  max-width: 360px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.2s ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+/* Invisible clickable overlay for editing */
+.blueprint-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  z-index: 1;
+}
+
+/* Add hover effect to full box (not overlay) */
+.blueprint-card:hover {
+  background-color: #333;
+  cursor: pointer;
+}
+
+/* Text content is rendered above the overlay */
+.blueprint-card h3,
+.blueprint-card p,
+.blueprint-card-actions {
+  position: relative;
+  z-index: 2;
 }
 
 .blueprint-card h3 {
@@ -479,23 +510,43 @@ input:focus {
 }
 
 .blueprint-card p {
-  flex-grow: 1;
   font-size: 0.95em;
   color: #cccccc;
   margin-bottom: 15px;
 }
 
-.blueprint-card button {
-  align-self: flex-start;
-  padding: 10px 16px;
-  font-size: 0.95em;
+.blueprint-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.blueprint-card .danger-button {
-  align-self: flex-start;
-  padding: 5px 16px;
-  font-size: 0.8em;
+/* Buttons below text */
+.blueprint-card-actions button {
+  width: 100%;
 }
+
+/* Consistent danger button */
+.delete-button {
+  background-color: #565151;
+  color: #ffffff;
+  padding: 10px 16px;
+  font-size: 0.95em;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.delete-button:hover {
+  background-color: #444;
+}
+
+.delete-button:active {
+  transform: scale(0.98);
+}
+
 
 /* ──────────────────────────────── */
 /* Responsive Design               */

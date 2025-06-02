@@ -78,6 +78,47 @@ class TestBlueprintService(unittest.TestCase):
         self.assertIn("bp_one", names)
         self.assertIn("bp_two", names)
 
+    def test_update_existing_blueprint_with_new_name(self):
+        user = self._register_user("dave", "Strong1!")
+        blueprint_text = "math: 1\n int 1 10\n"
+        self.bp_service.add_user_blueprint(
+            user.id, "bp_to_update", "desc", blueprint_text
+        )
+
+        new_blueprint_text = "math: 2\n int 2 20\n"
+        success, msg = self.bp_service.update_user_blueprint(
+            user.id, "bp_to_update", "new desc", new_blueprint_text
+        )
+        self.assertTrue(success)
+        self.assertIn("updated successfully", msg)
+
+        updated_bp = UserBlueprint.query.filter_by(
+            user_id=user.id, name="bp_to_update"
+        ).first()
+        expected = json.dumps(parse_blueprint_from_text(new_blueprint_text))
+        self.assertEqual(updated_bp.blueprint, expected)
+
+    
+    def test_update_existing_blueprint_with_new_name(self):
+        user = self._register_user("dave", "Strong1!")
+        blueprint_text = "math: 1\n int 1 10\n"
+        self.bp_service.add_user_blueprint(
+            user.id, "bp_to_update", "desc", blueprint_text
+        )
+
+        new_blueprint_text = "math: 2\n int 2 20\n"
+        success, msg = self.bp_service.update_user_blueprint(
+            user.id, "bp_to_update", "new desc", new_blueprint_text, "new_bp_name"
+        )
+        self.assertTrue(success)
+        self.assertIn("updated successfully", msg)
+
+        updated_bp = UserBlueprint.query.filter_by(
+            user_id=user.id, name="new_bp_name"
+        ).first()
+        expected = json.dumps(parse_blueprint_from_text(new_blueprint_text))
+        self.assertEqual(updated_bp.blueprint, expected)
+
     def test_delete_existing_blueprint(self):
         user = self._register_user("dave", "Strong1!")
         blueprint_text = "math: 1\n int 1 10\n"
@@ -95,7 +136,7 @@ class TestBlueprintService(unittest.TestCase):
         ).first()
         self.assertIsNone(bp)
 
-    def _test_delete_nonexistent_blueprint(self):
+    def test_delete_nonexistent_blueprint(self):
         user = self._register_user("eve", "Strong1!")
         success, msg = self.bp_service.delete_user_blueprint(user.id, "ghost")
         self.assertFalse(success)

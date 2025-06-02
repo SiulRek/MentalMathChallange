@@ -1,9 +1,12 @@
+import json
 import unittest
 
 from core.parse_blueprint_from_text import (
     parse_blueprint_from_text,
     UserConfigError,
 )
+from core.parse_blueprint_from_text import parse_blueprint_from_text
+from core.unparse_blueprint_to_text import unparse_blueprint_to_text
 from tests.utils.base_test_case import BaseTestCase
 
 
@@ -646,6 +649,63 @@ int 1 5
             "function preceded by a numeric type",
             str(exc.exception),
         )
+
+
+class TestUnparseBlueprintToText(unittest.TestCase):
+    def test_round_trip_basic(self):
+        blueprint = """math: 1
+  int 1 10
+  op +
+  float 3.0 7.5
+"""
+        parsed = parse_blueprint_from_text(blueprint)
+        reconstructed = unparse_blueprint_to_text(parsed)
+        reparsed = parse_blueprint_from_text(reconstructed)
+        self.assertEqual(reparsed, parsed)
+
+    def test_round_trip_with_brackets_and_func(self):
+        blueprint = """math: 1
+  func sin
+  (
+  int 1 10
+  )
+  op -
+  float.2 1.5 4.5
+"""
+        parsed = parse_blueprint_from_text(blueprint)
+        reconstructed = unparse_blueprint_to_text(parsed)
+        reparsed = parse_blueprint_from_text(reconstructed)
+        self.assertEqual(reparsed, parsed)
+
+    def test_round_trip_with_constants_and_date(self):
+        blueprint = """math: 2
+  const pi
+  op *
+  const mu_0
+
+date: 1
+  start 1990
+  end 2020
+"""
+        parsed = parse_blueprint_from_text(blueprint)
+        reconstructed = unparse_blueprint_to_text(parsed)
+        reparsed = parse_blueprint_from_text(reconstructed)
+        self.assertEqual(reparsed, parsed)
+
+    def test_round_trip_with_blueprint_data_as_string(self):
+        blueprint = """math: 1
+  int 1 5
+  op +
+  float 2.0 4.0
+date: 1
+    start 2000
+    end 2010
+    """
+        parsed = parse_blueprint_from_text(blueprint)
+        parsed_string = json.dumps(parsed)
+        reconstructed = unparse_blueprint_to_text(parsed)
+        reparsed = parse_blueprint_from_text(reconstructed)
+        self.assertEqual(reparsed, parsed)
 
 
 if __name__ == "__main__":

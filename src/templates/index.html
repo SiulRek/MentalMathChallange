@@ -25,7 +25,6 @@
       </p>
     </div>
 
-
     <h2>Your Blueprints</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -38,16 +37,23 @@
 
     {% if blueprints %}
       <div class="blueprint-grid">
-        {% for blueprint in blueprints %}
-          <form method="post" action="{{ url_for('index') }}" class="blueprint-card">
-            <input type="hidden" name="blueprint_name" value="{{ blueprint.name }}">
+      {% for blueprint in blueprints %}
+        <div class="blueprint-card-wrapper">
+          <div class="blueprint-card">
+            <a href="{{ url_for('edit_blueprint') }}?name={{ blueprint.name }}" class="blueprint-card-overlay" title="Edit Blueprint"></a>
+
             <h3>{{ blueprint.name }}</h3>
             <p>{{ blueprint.description or "No description provided." }}</p>
-            <button type="submit" name="blueprint" value="{{ blueprint.blueprint }}">Start Quiz</button>
-            <div class="button-space"></div>
-            <button type="submit" name="action" value="delete" class="danger-button" title="Delete Blueprint">🗑</button>
-          </form>
-        {% endfor %}
+
+            <form method="post" action="{{ url_for('index') }}" class="blueprint-card-actions">
+              <input type="hidden" name="blueprint_name" value="{{ blueprint.name }}">
+              <button type="submit" name="blueprint" value="{{ blueprint.blueprint }}">Start Quiz</button>
+              <button type="submit" name="action" value="delete" class="delete-button" title="Delete Blueprint">🗑</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+
       </div>
     {% endif %}
 

@@ -7,6 +7,7 @@ from flask import render_template, request, session, redirect, url_for, flash
 from app.email_utils import send_confirmation_email, decode_email_token
 from core.compute_quiz_results import compute_quiz_results, UserResponseError
 from core.generate_quiz import generate_quiz
+from core.unparse_blueprint_to_text import unparse_blueprint_to_text
 
 
 def register_routes(app):
@@ -88,6 +89,68 @@ def register_routes(app):
 
         return render_template(
             "create_blueprint.html", name="", description="", blueprint=""
+        )
+    
+    @app.route("/edit_blueprint", methods=["GET", "POST"])
+    @login_required
+    def edit_blueprint():
+        user_id = session["user_id"]
+
+        if request.method == "POST":
+            original_name = request.form.get("original_name", "").strip()
+            new_name = request.form.get("name", "").strip()
+            description = request.form.get("description", "").strip()
+            blueprint_text = request.form.get("blueprint", "").strip()
+
+            if not original_name:
+                flash("Original blueprint name is missing.", "error")
+                return redirect(url_for("index"))
+
+            if not new_name or not blueprint_text:
+                flash("Name and blueprint text cannot be empty.", "error")
+                return render_template(
+                    "edit_blueprint.html",
+                    name=new_name,
+                    description=description,
+                    blueprint=blueprint_text,
+                    original_name=original_name,
+                )
+
+            success, message = app.bp_service.update_user_blueprint(
+                user_id=user_id,
+                name=original_name,
+                new_name=new_name,
+                description=description,
+                blueprint_text=blueprint_text,
+            )
+            if success:
+                flash(f"Blueprint '{new_name}' updated successfully.", "success")
+                return redirect(url_for("index"))
+            flash(message, "error")
+            return render_template(
+                "edit_blueprint.html",
+                name=new_name,
+                description=description,
+                blueprint=blueprint_text,
+                original_name=original_name,
+            )
+
+        # GET method
+        name = request.args.get("name", "").strip()
+        blueprint_entry = next(
+            (b for b in app.bp_service.get_user_blueprints_list(user_id) if b["name"] == name), None
+        )
+
+        if not blueprint_entry:
+            flash(f"No blueprint named '{name}' found.", "error")
+            return redirect(url_for("index"))
+        blueprint = unparse_blueprint_to_text(blueprint_entry["blueprint"])
+        return render_template(
+            "edit_blueprint.html",
+            name=blueprint_entry["name"],
+            description=blueprint_entry["description"],
+            blueprint=blueprint,
+            original_name=blueprint_entry["name"],
         )
 
     @app.route("/help")
