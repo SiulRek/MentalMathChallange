@@ -23,7 +23,7 @@
             <span class="question-number">{{ i + 1 }}.</span>
             <span class="question-text">{{ quiz[i].question }} =</span>
           </div>
-          <input type="text" name="answer_{{ i }}">
+          <input type="text" name="answer_{{ i }}" value="{{ previous_answers['answer_' ~ i] if previous_answers and ('answer_' ~ i) in previous_answers else '' }}">
         </div>
       {% endfor %}
       <button type="submit">Submit</button>

@@ -42,6 +42,7 @@ def register_routes(app):
 
             elif blueprint_raw:  # This means "Start Quiz" was clicked
                 from flask import json
+
                 blueprint = json.loads(blueprint_raw)
                 quiz = generate_quiz(blueprint)
 
@@ -52,7 +53,6 @@ def register_routes(app):
         blueprints = app.bp_service.get_user_blueprints_list(user_id)
         blueprints.sort(key=lambda x: x["name"].lower())
         return render_template("index.html", blueprints=blueprints)
-
 
     @app.route("/create_blueprint", methods=["GET", "POST"])
     @login_required
@@ -90,7 +90,7 @@ def register_routes(app):
         return render_template(
             "create_blueprint.html", name="", description="", blueprint=""
         )
-    
+
     @app.route("/edit_blueprint", methods=["GET", "POST"])
     @login_required
     def edit_blueprint():
@@ -124,7 +124,9 @@ def register_routes(app):
                 blueprint_text=blueprint_text,
             )
             if success:
-                flash(f"Blueprint '{new_name}' updated successfully.", "success")
+                flash(
+                    f"Blueprint '{new_name}' updated successfully.", "success"
+                )
                 return redirect(url_for("index"))
             flash(message, "error")
             return render_template(
@@ -138,7 +140,12 @@ def register_routes(app):
         # GET method
         name = request.args.get("name", "").strip()
         blueprint_entry = next(
-            (b for b in app.bp_service.get_user_blueprints_list(user_id) if b["name"] == name), None
+            (
+                b
+                for b in app.bp_service.get_user_blueprints_list(user_id)
+                if b["name"] == name
+            ),
+            None,
         )
 
         if not blueprint_entry:
@@ -294,7 +301,17 @@ def register_routes(app):
         try:
             results = compute_quiz_results(quiz, submission=request.form)
         except UserResponseError as e:
-            return render_template("quiz.html", quiz=quiz, error=str(e))
+            previous_answers = {
+                key: value
+                for key, value in request.form.items()
+                if key.startswith("answer_")
+            }
+            return render_template(
+                "quiz.html",
+                quiz=quiz,
+                error=str(e),
+                previous_answers=previous_answers,
+            )
 
         duration = None
         if start_time_str:
