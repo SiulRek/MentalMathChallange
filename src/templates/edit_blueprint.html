@@ -27,7 +27,7 @@
       {% endif %}
     {% endwith %}
 
-    <form method="post" action="{{ url_for('edit_blueprint') + '?name=' + original_name }}">
+  <form method="post" action="{{ url_for('edit_blueprint') }}">
       <input type="hidden" name="original_name" value="{{ original_name|e }}">
 
       <label for="name">Name:</label>
