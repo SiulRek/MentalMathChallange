@@ -1,11 +1,9 @@
-import json
 import unittest
 
 from core.parse_blueprint_from_text import (
     parse_blueprint_from_text,
     UserConfigError,
 )
-from core.parse_blueprint_from_text import parse_blueprint_from_text
 from core.unparse_blueprint_to_text import unparse_blueprint_to_text
 from tests.utils.base_test_case import BaseTestCase
 
@@ -702,7 +700,6 @@ date: 1
     end 2010
     """
         parsed = parse_blueprint_from_text(blueprint)
-        parsed_string = json.dumps(parsed)
         reconstructed = unparse_blueprint_to_text(parsed)
         reparsed = parse_blueprint_from_text(reconstructed)
         self.assertEqual(reparsed, parsed)

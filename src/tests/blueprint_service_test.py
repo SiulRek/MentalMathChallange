@@ -78,7 +78,7 @@ class TestBlueprintService(unittest.TestCase):
         self.assertIn("bp_one", names)
         self.assertIn("bp_two", names)
 
-    def test_update_existing_blueprint_with_new_name(self):
+    def test_update_existing_blueprint(self):
         user = self._register_user("dave", "Strong1!")
         blueprint_text = "math: 1\n int 1 10\n"
         self.bp_service.add_user_blueprint(
@@ -108,7 +108,11 @@ class TestBlueprintService(unittest.TestCase):
 
         new_blueprint_text = "math: 2\n int 2 20\n"
         success, msg = self.bp_service.update_user_blueprint(
-            user.id, "bp_to_update", "new desc", new_blueprint_text, "new_bp_name"
+            user.id,
+            "bp_to_update",
+            "new desc",
+            new_blueprint_text,
+            "new_bp_name",
         )
         self.assertTrue(success)
         self.assertIn("updated successfully", msg)

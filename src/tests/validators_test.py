@@ -100,7 +100,10 @@ class TestValidators(BaseTestCase):
     
     def test_assert_password_no_uppercase(self):
         with self.assertRaisesRegex(
-            AssertionError, "Password must contain at least one uppercase letter."
+            AssertionError,
+            (
+                "Password must contain at least one uppercase letter."
+            ),
         ):
             assert_password("abc123!@#")
 

@@ -3,10 +3,19 @@ import json
 
 def unparse_blueprint_to_text(blueprint_data):
     """
-    Converts parsed blueprint data back to the original raw blueprint text format.
+    Converts parsed blueprint data back to the original raw blueprint text
+    format.
 
-    :param blueprint_data: list of (expression_blueprint: dict, count: int)
-    :returns: *(str)* Reconstructed blueprint as a human-readable string.
+    Parameters
+    ----------
+    blueprint_data : list of tuple(dict, int) or str
+        List of tuples where each tuple contains an expression blueprint
+        dictionary and a count, or a JSON string representing such a list.
+
+    Returns
+    -------
+    str
+        Reconstructed blueprint as a human-readable string.
     """
     lines = []
     if isinstance(blueprint_data, str):
