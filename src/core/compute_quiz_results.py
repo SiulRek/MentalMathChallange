@@ -155,6 +155,8 @@ def compute_quiz_results(quiz, submission):
             correct = False
         elif category == "date":
             correct = user_answer == correct_answer
+            user_answer = user_answer.capitalize()
+            correct_answer = correct_answer.capitalize()
         else:
             correct_answer = _adjust_numeric_precision(
                 correct_answer, MAX_PRECISION
