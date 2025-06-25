@@ -269,9 +269,6 @@ def register_routes(app):
             incorrect_results = [
                 res for res in results if not res["is_correct"]
             ]
-            if not incorrect_results:
-                flash("No incorrect questions to repeat!", "info")
-                return redirect(url_for("result"))
 
             quiz = [
                 {
