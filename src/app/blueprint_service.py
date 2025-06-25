@@ -84,6 +84,19 @@ class BlueprintService:
         self.db.session.commit()
         return True, f"Blueprint '{name}' deleted."
 
+    def get_user_blueprint(self, user_id, name):
+        blueprint = UserBlueprint.query.filter_by(
+            user_id=user_id, name=name
+        ).first()
+        if not blueprint:
+            return None
+        blueprint = {
+            "name": blueprint.name,
+            "description": blueprint.description,
+            "blueprint": blueprint.blueprint,
+        }
+        return blueprint
+
     def get_user_blueprints_list(self, user_id):
         blueprints = UserBlueprint.query.filter_by(user_id=user_id).all()
         blueprint_list = []

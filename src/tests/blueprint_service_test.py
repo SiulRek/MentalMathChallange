@@ -65,6 +65,22 @@ class TestBlueprintService(unittest.TestCase):
         self.assertFalse(success)
         self.assertIn("already exists", msg)
 
+    def test_get_user_blueprint(self):
+        user = self._register_user("carol", "Strong1!")
+        blueprint_text = "math: 1\n int 1 10\n"
+        self.bp_service.add_user_blueprint(
+            user.id, "bp1", "desc", blueprint_text
+        )
+
+        bp = self.bp_service.get_user_blueprint(user.id, "bp1")
+        self.assertIsNotNone(bp)
+        self.assertEqual(bp["name"], "bp1")
+        self.assertEqual(bp["description"], "desc")
+        expected_blueprint = json.dumps(
+            parse_blueprint_from_text(blueprint_text)
+        )
+        self.assertEqual(bp["blueprint"], expected_blueprint)
+
     def test_get_user_blueprints_list(self):
         user = self._register_user("carol", "Strong1!")
         bp1 = "math: 1\n int 1 10\n"
@@ -98,7 +114,6 @@ class TestBlueprintService(unittest.TestCase):
         expected = json.dumps(parse_blueprint_from_text(new_blueprint_text))
         self.assertEqual(updated_bp.blueprint, expected)
 
-    
     def test_update_existing_blueprint_with_new_name(self):
         user = self._register_user("dave", "Strong1!")
         blueprint_text = "math: 1\n int 1 10\n"
