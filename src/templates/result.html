@@ -11,7 +11,7 @@
 
     {% if duration %}
       <div class="result-time-centered">
-        ⏱️ <span>Time taken:</span> {{ duration.total_seconds() | round(2) }} seconds
+        ⏱️ <span>Time taken:</span> {{ duration | round(2) }} seconds
       </div>
     {% endif %}
 

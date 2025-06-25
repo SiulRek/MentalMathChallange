@@ -349,12 +349,7 @@ def register_routes(app):
     def result():
         # TODO: Consider session cleanup here
         results = session.get("results", [])
-        start_time = session.get("start_time", None)
-        duration = None
-        if start_time:
-            start_time = datetime.fromisoformat(start_time)
-            duration = datetime.utcnow() - start_time
-
+        duration = calculate_duration()
         total = len(results)
         correct = sum(1 for r in results if r["is_correct"])
         incorrect = total - correct
@@ -368,3 +363,14 @@ def register_routes(app):
             incorrect=incorrect,
             percentage=percentage,
         )
+
+    def calculate_duration():
+        start_time = session["start_time"]
+        start_time = datetime.fromisoformat(start_time)
+        stop_time = session.get("stop_time", None)
+        stop_time = datetime.fromisoformat(stop_time) if stop_time else None
+        if not stop_time or stop_time < start_time:
+            stop_time = datetime.utcnow()
+        duration = (stop_time - start_time).total_seconds()
+        session["stop_time"] = stop_time.isoformat()
+        return duration
