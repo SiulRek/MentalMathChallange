@@ -152,6 +152,7 @@ def compute_quiz_results(quiz, submission):
     results = []
     for quiz_elem, user_answer in zip(quiz, user_answers):
         question, correct_answer, category = quiz_elem
+        correct_answer = correct_answer.lower()
         user_answer = _parse_user_answer(user_answer, category)
         if user_answer is None:
             correct = False
