@@ -50,10 +50,10 @@
         <a class="play-again-button" href="{{ url_for('index') }}">Home</a>
         <a class="play-again-button" href="{{ url_for('quiz') }}">Play Again</a>
         {% if incorrect > 0 %}
-          <form action="{{ url_for('quiz') }}" method="post">
-            <input type="hidden" name="repeat_errors" value="1">
-            <button class="play-again-button" type="submit">Repeat Errors</button>
-          </form>
+            <form action="{{ url_for('quiz') }}" method="post">
+            <input type="hidden" name="retry_incorrect" value="1">
+            <button class="play-again-button" type="submit">Retry Incorrect</button>
+            </form>
         {% endif %}
       </div>
     </div>

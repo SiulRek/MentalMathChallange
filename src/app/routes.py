@@ -260,7 +260,7 @@ def register_routes(app):
     @app.route("/quiz", methods=["GET", "POST"])
     @login_required
     def quiz():
-        if request.method == "POST" and request.form.get("repeat_errors"):
+        if request.method == "POST" and request.form.get("retry_incorrect"):
             results = session.get("results", [])
             if not results:
                 flash("No previous results found.", "error")
