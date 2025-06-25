@@ -30,7 +30,7 @@ def register_routes(app):
         if request.method == "POST":
             blueprint_name = request.form.get("blueprint_name", "").strip()
             action = request.form.get("action")
-            blueprint_raw = request.form.get("blueprint")
+            blueprint = request.form.get("blueprint")
 
             if action == "delete":
                 success, message = app.bp_service.delete_user_blueprint(
@@ -40,11 +40,8 @@ def register_routes(app):
                     flash(message, "error")
                 return redirect(url_for("index"))
 
-            elif blueprint_raw:  # This means "Start Quiz" was clicked
-                blueprint = json.loads(blueprint_raw)
-                session["quiz"] = generate_quiz(blueprint)
-                session["start_time"] = datetime.utcnow().isoformat()
-
+            elif blueprint:  # This means "Start Quiz" was clicked
+                session["blueprint"] = blueprint
                 return redirect(url_for("quiz"))
 
         blueprints = app.bp_service.get_user_blueprints_list(user_id)
@@ -279,10 +276,16 @@ def register_routes(app):
     @app.route("/quiz")
     @login_required
     def quiz():
-        quiz = session.get("quiz")
-        if not quiz:
-            flash("No quiz found in session. Please start a new quiz.", "error")
+        if "blueprint" not in session:
+            flash("No blueprint found in session. Please select a blueprint.", "error")
             return redirect(url_for("index"))
+        blueprint_text = session["blueprint"]
+        blueprint = json.loads(blueprint_text)
+        quiz = generate_quiz(blueprint)
+
+        session["quiz"] = quiz
+        session["start_time"] = datetime.utcnow().isoformat()
+        
         return render_template("quiz.html", quiz=quiz)
 
     @app.route("/submit", methods=["POST"])
