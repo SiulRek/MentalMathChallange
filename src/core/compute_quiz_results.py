@@ -136,6 +136,8 @@ def compute_quiz_results(quiz, submission):
         A list of dictionaries, where each dictionary contains:
         - "question" : str
             The question text.
+        - "category" : str
+            The category of the question, either "date" or "math".
         - "correct_answer" : str
             The correct answer to the question.
         - "user_answer" : str
@@ -170,6 +172,7 @@ def compute_quiz_results(quiz, submission):
         results.append(
             {
                 "question": question,
+                "category": category,
                 "correct_answer": correct_answer,
                 "user_answer": user_answer or "Not answered",
                 "is_correct": correct,

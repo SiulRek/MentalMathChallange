@@ -12,6 +12,22 @@ from tests.utils.base_test_case import BaseTestCase
 
 class TestComputeQuizResults(BaseTestCase):
 
+    def test_correct_category_in_results(self):
+        quiz = [
+            {"question": "1 + 1", "answer": "2.0", "category": "math"},
+            {"question": "2 + 2", "answer": "4.0", "category": "math"},
+            {
+                "question": "Day of 2023-05-04",
+                "answer": "thursday",
+                "category": "date",
+            },
+        ]
+        submission = {"answer_0": "2", "answer_1": "4", "answer_2": "Thu"}
+        result = compute_quiz_results(quiz, submission)
+        self.assertEqual(result[0]["category"], "math")
+        self.assertEqual(result[1]["category"], "math")
+        self.assertEqual(result[2]["category"], "date")
+
     def test_all_correct_numeric(self):
         quiz = [
             {"question": "2 + 2", "answer": "4.0", "category": "math"},
