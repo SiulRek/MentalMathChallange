@@ -41,14 +41,11 @@ def register_routes(app):
                 return redirect(url_for("index"))
 
             elif blueprint_raw:  # This means "Start Quiz" was clicked
-                from flask import json
-
                 blueprint = json.loads(blueprint_raw)
-                quiz = generate_quiz(blueprint)
-
-                session[f"quiz_{user_id}"] = quiz
+                session["quiz"] = generate_quiz(blueprint)
                 session["start_time"] = datetime.utcnow().isoformat()
-                return render_template("quiz.html", quiz=quiz)
+
+                return redirect(url_for("quiz"))
 
         blueprints = app.bp_service.get_user_blueprints_list(user_id)
         blueprints.sort(key=lambda x: x["name"].lower())
@@ -279,24 +276,19 @@ def register_routes(app):
 
         return render_template("confirm_delete.html")
 
-    @app.route("/start", methods=["POST"])
+    @app.route("/quiz")
     @login_required
-    def start():
-        blueprint = request.form.get("blueprint", "")
-        blueprint = json.loads(blueprint)
-        quiz = generate_quiz(blueprint)
-
-        user_id = session["user_id"]
-        session[f"quiz_{user_id}"] = quiz
-        session["start_time"] = datetime.utcnow().isoformat()
+    def quiz():
+        quiz = session.get("quiz")
+        if not quiz:
+            flash("No quiz found in session. Please start a new quiz.", "error")
+            return redirect(url_for("index"))
         return render_template("quiz.html", quiz=quiz)
 
     @app.route("/submit", methods=["POST"])
     @login_required
     def submit():
-        user_id = session["user_id"]
-        quiz = session.get(f"quiz_{user_id}", [])
-        start_time_str = session.get("start_time")
+        quiz = session.get("quiz", [])
 
         try:
             results = compute_quiz_results(quiz, submission=request.form)
@@ -312,10 +304,20 @@ def register_routes(app):
                 error=str(e),
                 previous_answers=previous_answers,
             )
+        
+        session["results"] = results
+        return redirect(url_for("result"))
 
+
+    @app.route("/result")
+    @login_required
+    def result():
+        # TODO: Consider session cleanup here
+        results = session.get("results", [])
+        start_time = session.get("start_time")
         duration = None
-        if start_time_str:
-            start_time = datetime.fromisoformat(start_time_str)
+        if start_time:
+            start_time = datetime.fromisoformat(start_time)
             duration = datetime.utcnow() - start_time
 
         total = len(results)
