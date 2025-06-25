@@ -273,19 +273,52 @@ def register_routes(app):
 
         return render_template("confirm_delete.html")
 
-    @app.route("/quiz")
+    @app.route("/quiz", methods=["GET", "POST"])
     @login_required
     def quiz():
+        if request.method == "POST" and request.form.get("repeat_errors"):
+            results = session.get("results", [])
+            if not results:
+                flash(
+                    "No previous results found. Please complete a quiz first.",
+                    "error",
+                )
+                return redirect(url_for("index"))
+
+            incorrect_results = [
+                res for res in results if not res["is_correct"]
+            ]
+            if not incorrect_results:
+                flash("No incorrect questions to repeat!", "info")
+                return redirect(url_for("result"))
+            quiz = [
+                {
+                    "question": res["question"],
+                    "answer": res["correct_answer"],
+                    "category": res["category"],
+                }
+                for res in incorrect_results
+            ]
+
+            session["quiz"] = quiz
+            session["start_time"] = datetime.utcnow().isoformat()
+
+            return render_template("quiz.html", quiz=quiz)
+
         if "blueprint" not in session:
-            flash("No blueprint found in session. Please select a blueprint.", "error")
+            flash(
+                "No blueprint found in session. Please select a blueprint.",
+                "error",
+            )
             return redirect(url_for("index"))
+
         blueprint_text = session["blueprint"]
         blueprint = json.loads(blueprint_text)
         quiz = generate_quiz(blueprint)
 
         session["quiz"] = quiz
         session["start_time"] = datetime.utcnow().isoformat()
-        
+
         return render_template("quiz.html", quiz=quiz)
 
     @app.route("/submit", methods=["POST"])
@@ -307,17 +340,16 @@ def register_routes(app):
                 error=str(e),
                 previous_answers=previous_answers,
             )
-        
+
         session["results"] = results
         return redirect(url_for("result"))
 
-
-    @app.route("/result")
+    @app.route("/result", methods=["GET", "POST"])
     @login_required
     def result():
         # TODO: Consider session cleanup here
         results = session.get("results", [])
-        start_time = session.get("start_time")
+        start_time = session.get("start_time", None)
         duration = None
         if start_time:
             start_time = datetime.fromisoformat(start_time)

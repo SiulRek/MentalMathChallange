@@ -46,9 +46,16 @@
     </div>
 
     <div class="play-again-wrapper">
-      <a href="{{ url_for('index') }}" class="play-again-link">Home</a>
-      <a href="{{ url_for('quiz') }}" class="play-again-link">Play Again</a>
+      <div class="play-again-buttons">
+        <a class="play-again-button" href="{{ url_for('index') }}">Home</a>
+        <a class="play-again-button" href="{{ url_for('quiz') }}">Play Again</a>
+        <form action="{{ url_for('quiz') }}" method="post">
+          <input type="hidden" name="repeat_errors" value="1">
+          <button class="play-again-button" type="submit">Repeat Errors</button>
+        </form>
+      </div>
     </div>
+
   </div>
 </body>
 </html>
