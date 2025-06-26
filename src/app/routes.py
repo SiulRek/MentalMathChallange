@@ -126,6 +126,30 @@ def _register_authentication_and_user_management_routes(app):
             return redirect(url_for("user_settings"))
         return render_template("confirm_delete.html")
 
+    @app.route("/change-password", methods=["GET", "POST"])
+    @_login_required
+    def change_password():
+        if request.method == "POST":
+            old_password = request.form["old_password"]
+            new_password = request.form["new_password"]
+            confirm_password = request.form["confirm_password"]
+
+            if new_password != confirm_password:
+                flash("New passwords do not match.", "error")
+                return render_template("change_password.html")
+
+            success, msg = app.auth.change_user_password(
+                session["user_id"], old_password, new_password
+            )
+            if success:
+                flash("Password changed successfully.", "success")
+                return redirect(url_for("user_settings"))
+            else:
+                flash(msg, "error")
+
+        return render_template("change_password.html")
+
+
 
 def _register_blueprint_management_routes(app):
     @app.route("/", methods=["GET", "POST"])
@@ -230,7 +254,6 @@ def _register_blueprint_management_routes(app):
                 return redirect(url_for("index"))
             flash(message, "error")
 
-        # GET method
         name = request.args["name"]
         blueprint_entry = app.bp_service.get_user_blueprint(
             user_id=user_id, name=name

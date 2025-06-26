@@ -25,6 +25,10 @@
 
     <h2>Account Options</h2>
 
+    <form action="{{ url_for('change_password') }}" method="get">
+      <button type="submit">Change Password</button>
+    </form>
+    <div class="button-spacer"></div>
     <form action="{{ url_for('logout') }}" method="post">
       <button type="submit">Logout</button>
     </form>

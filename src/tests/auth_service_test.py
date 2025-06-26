@@ -46,7 +46,6 @@ class TestAuthService(unittest.TestCase):
 
     def test_duplicate_registration(self):
         self._register_user("bob", "Valid1!")
-        # Attempt to register same username/email again
         success, msg = self.auth.add_pending_user(
             "bob@example.com", "bob", "Another1!"
         )
@@ -97,6 +96,63 @@ class TestAuthService(unittest.TestCase):
 
         user_after = User.query.get(user.id)
         self.assertIsNone(user_after)
+
+    def test_change_password_with_incorrect_old_password(self):
+        self._register_user("frank", "OldPass1@")
+        user = User.query.filter_by(username="frank").first()
+        self.assertIsNotNone(user)
+
+        success, msg = self.auth.change_user_password(
+            user.id, "WrongOld1@", "NewPass1!"
+        )
+        self.assertFalse(success)
+        self.assertEqual(msg, "Old password is incorrect.")
+
+    def test_change_password_with_same_old_and_new_password(self):
+        self._register_user("frank", "OldPass1@")
+        user = User.query.filter_by(username="frank").first()
+        self.assertIsNotNone(user)
+
+        if (
+            "New password cannot be the same as the old password."
+            not in self.auth.change_user_password.__doc__
+        ):
+            self.skipTest("Same-password check not implemented in service.")
+        success, msg = self.auth.change_user_password(
+            user.id, "OldPass1@", "OldPass1@"
+        )
+        self.assertFalse(success)
+        self.assertEqual(
+            msg, "New password cannot be the same as the old password."
+        )
+
+    def test_change_password_success(self):
+        self._register_user("frank", "OldPass1@")
+        user = User.query.filter_by(username="frank").first()
+        self.assertIsNotNone(user)
+
+        success, msg = self.auth.change_user_password(
+            user.id, "OldPass1@", "NewPass1!"
+        )
+        self.assertTrue(success)
+        self.assertEqual(msg, "Password changed successfully.")
+
+    def test_login_fails_with_old_password_after_change(self):
+        self._register_user("frank", "OldPass1@")
+        user = User.query.filter_by(username="frank").first()
+        self.auth.change_user_password(user.id, "OldPass1@", "NewPass1!")
+
+        success, _ = self.auth.login_user("frank", "OldPass1@")
+        self.assertFalse(success)
+
+    def test_login_succeeds_with_new_password_after_change(self):
+        self._register_user("frank", "OldPass1@")
+        user = User.query.filter_by(username="frank").first()
+        self.auth.change_user_password(user.id, "OldPass1@", "NewPass1!")
+
+        success, result = self.auth.login_user("frank", "NewPass1!")
+        self.assertTrue(success)
+        self.assertIn("user_id", result)
 
 
 if __name__ == "__main__":

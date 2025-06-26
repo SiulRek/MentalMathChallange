@@ -123,3 +123,30 @@ class AuthService:
         self.db.session.delete(user)
         self.db.session.commit()
         return True, "User deleted successfully."
+    
+    def change_user_password(self, user_id, old_password, new_password):
+        """
+        Change the password for a user.
+        :param user_id: ID of the user whose password is to be changed.
+        :param old_password: Current password of the user.
+        :param new_password: New password to set for the user.
+        :return: Tuple (success: bool, message: str)
+        """
+        user = User.query.get(user_id)
+        if not user:
+            return False, "User not found."
+
+        if not self._verify_password(old_password, user.password_hash):
+            return False, "Old password is incorrect."
+
+        if old_password == new_password:
+            return False, "New password cannot be the same as the old password."
+        
+        try:
+            assert_password(new_password)
+        except AssertionError as e:
+            return False, str(e)
+
+        user.password_hash = self._hash_password(new_password)
+        self.db.session.commit()
+        return True, "Password changed successfully."
