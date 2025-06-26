@@ -85,31 +85,31 @@ class TestBlueprintService(unittest.TestCase):
         user = self._register_user("carol", "Strong1!")
         bp1 = "math: 1\n int 1 10\n"
         bp2 = "math: 1\n int 2 20\n"
-        self.bp_service.add_user_blueprint(user.id, "bp_one", "desc1", bp1)
-        self.bp_service.add_user_blueprint(user.id, "bp_two", "desc2", bp2)
+        self.bp_service.add_user_blueprint(user.id, "bp one", "desc1", bp1)
+        self.bp_service.add_user_blueprint(user.id, "bp two", "desc2", bp2)
 
         bp_list = self.bp_service.get_user_blueprints_list(user.id)
         names = [bp["name"] for bp in bp_list]
         self.assertEqual(len(bp_list), 2)
-        self.assertIn("bp_one", names)
-        self.assertIn("bp_two", names)
+        self.assertIn("bp one", names)
+        self.assertIn("bp two", names)
 
     def test_update_existing_blueprint(self):
         user = self._register_user("dave", "Strong1!")
         blueprint_text = "math: 1\n int 1 10\n"
         self.bp_service.add_user_blueprint(
-            user.id, "bp_to_update", "desc", blueprint_text
+            user.id, "bp to update", "desc", blueprint_text
         )
 
         new_blueprint_text = "math: 2\n int 2 20\n"
         success, msg = self.bp_service.update_user_blueprint(
-            user.id, "bp_to_update", "new desc", new_blueprint_text
+            user.id, "bp to update", "new desc", new_blueprint_text
         )
         self.assertTrue(success)
         self.assertIn("updated successfully", msg)
 
         updated_bp = UserBlueprint.query.filter_by(
-            user_id=user.id, name="bp_to_update"
+            user_id=user.id, name="bp to update"
         ).first()
         expected = json.dumps(parse_blueprint_from_text(new_blueprint_text))
         self.assertEqual(updated_bp.blueprint, expected)
@@ -118,22 +118,22 @@ class TestBlueprintService(unittest.TestCase):
         user = self._register_user("dave", "Strong1!")
         blueprint_text = "math: 1\n int 1 10\n"
         self.bp_service.add_user_blueprint(
-            user.id, "bp_to_update", "desc", blueprint_text
+            user.id, "bp to update", "desc", blueprint_text
         )
 
         new_blueprint_text = "math: 2\n int 2 20\n"
         success, msg = self.bp_service.update_user_blueprint(
             user.id,
-            "bp_to_update",
+            "bp to update",
             "new desc",
             new_blueprint_text,
-            "new_bp_name",
+            "new bp name",
         )
         self.assertTrue(success)
         self.assertIn("updated successfully", msg)
 
         updated_bp = UserBlueprint.query.filter_by(
-            user_id=user.id, name="new_bp_name"
+            user_id=user.id, name="new bp name"
         ).first()
         expected = json.dumps(parse_blueprint_from_text(new_blueprint_text))
         self.assertEqual(updated_bp.blueprint, expected)
@@ -142,16 +142,16 @@ class TestBlueprintService(unittest.TestCase):
         user = self._register_user("dave", "Strong1!")
         blueprint_text = "math: 1\n int 1 10\n"
         self.bp_service.add_user_blueprint(
-            user.id, "to_delete", "desc", blueprint_text
+            user.id, "to delete", "desc", blueprint_text
         )
         success, msg = self.bp_service.delete_user_blueprint(
-            user.id, "to_delete"
+            user.id, "to delete"
         )
         self.assertTrue(success)
         self.assertIn("deleted", msg)
 
         bp = UserBlueprint.query.filter_by(
-            user_id=user.id, name="to_delete"
+            user_id=user.id, name="to delete"
         ).first()
         self.assertIsNone(bp)
 
@@ -182,8 +182,8 @@ class TestBlueprintService(unittest.TestCase):
         bp1 = "math: 1\n int 1 10\n"
         bp2 = "math: 1\n int 1 10\n"
 
-        self.bp_service.add_user_blueprint(user1.id, "bp", "user1 bp", bp1)
-        self.bp_service.add_user_blueprint(user2.id, "bp", "user2 bp", bp2)
+        self.bp_service.add_user_blueprint(user1.id, "bp1", "user1 bp", bp1)
+        self.bp_service.add_user_blueprint(user2.id, "bp2", "user2 bp", bp2)
 
         bps1 = self.bp_service.get_user_blueprints_list(user1.id)
         bps2 = self.bp_service.get_user_blueprints_list(user2.id)
@@ -191,6 +191,37 @@ class TestBlueprintService(unittest.TestCase):
         self.assertEqual(len(bps1), 1)
         self.assertEqual(len(bps2), 1)
         self.assertEqual(bps1[0]["blueprint"], bps2[0]["blueprint"])
+
+    def test_add_blueprint_with_invalid_name(self):
+        user = self._register_user("gwen", "Strong1!")
+        blueprint_text = "math: 1\n int 1 10\n"
+        with self.assertRaises(AssertionError) as context:
+            self.bp_service.add_user_blueprint(
+                user.id, "invalid name!", "desc", blueprint_text
+            )
+        self.assertIn(
+            "Blueprint name must be alphanumeric", str(context.exception)
+        )
+
+    def test_update_blueprint_with_invalid_name(self):
+        user = self._register_user("hank", "Strong1!")
+        blueprint_text = "math: 1\n int 1 10\n"
+        self.bp_service.add_user_blueprint(
+            user.id, "bp to update", "desc", blueprint_text
+        )
+
+        new_blueprint_text = "math: 2\n int 2 20\n"
+        with self.assertRaises(AssertionError) as context:
+            self.bp_service.update_user_blueprint(
+                user.id,
+                "bp to update",
+                "new desc",
+                new_blueprint_text,
+                "invalid name!",
+            )
+        self.assertIn(
+            "Blueprint name must be alphanumeric", str(context.exception)
+        )
 
 
 if __name__ == "__main__":

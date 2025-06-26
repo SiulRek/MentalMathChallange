@@ -7,7 +7,7 @@ from core.parse_blueprint_from_text import (
     parse_blueprint_from_text,
     UserConfigError,
 )
-
+from app.validators import assert_blueprint_name
 
 class BlueprintService:
     def __init__(self, db):
@@ -18,6 +18,11 @@ class BlueprintService:
         self.db.create_all()
 
     def add_user_blueprint(self, user_id, name, description, blueprint_text):
+        try:
+            assert_blueprint_name(name)
+        except ValueError as e:
+            return False, str(e)
+        
         existing = UserBlueprint.query.filter_by(
             user_id=user_id, name=name
         ).first()
@@ -47,6 +52,11 @@ class BlueprintService:
     def update_user_blueprint(
         self, user_id, name, description, blueprint_text, new_name=None
     ):
+        if new_name:
+            try:
+                assert_blueprint_name(new_name)
+            except ValueError as e:
+                return False, str(e)
         blueprint = UserBlueprint.query.filter_by(
             user_id=user_id, name=name
         ).first()
