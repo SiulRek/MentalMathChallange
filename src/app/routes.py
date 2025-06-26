@@ -54,7 +54,8 @@ def _register_authentication_and_user_management_routes(app):
             session.pop("pending_email")
             return redirect(url_for("login"))
 
-        message = "A confirmation email has been sent. Please check your inbox and confirm."
+        message = "A confirmation email has been sent. "
+        message += "Please check your inbox and confirm."
         return render_template(
             "message.html", message=message, type="request_email_confirmation"
         )

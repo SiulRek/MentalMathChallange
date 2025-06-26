@@ -22,7 +22,8 @@ def assert_password(password):
         "Password must contain at least one letter."
     assert any(char in "!@#$%^&*()-_=+[]{}|;:,.<>?/" for char in password), \
         "Password must contain at least one special character."
-    assert len(password) <= 128, "Password cannot be longer than 128 characters."
+    assert len(password) <= 128, \
+        "Password cannot be longer than 128 characters."
     assert any(char.isupper() for char in password), \
         "Password must contain at least one uppercase letter."
 
