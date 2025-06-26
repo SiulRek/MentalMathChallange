@@ -10,20 +10,18 @@ from core.generate_quiz import generate_quiz
 from core.unparse_blueprint_to_text import unparse_blueprint_to_text
 
 
-def register_routes(app):
-    # ─────────────── Utility: Login Required Decorator ───────────────
-    def login_required(f):
-        @wraps(f)
-        def decorated(*args, **kwargs):
-            if "user_id" not in session:
-                flash("Please log in to continue.", "info")
-                return redirect(url_for("login"))
-            return f(*args, **kwargs)
+def _login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if "user_id" not in session:
+            flash("Please log in to continue.", "info")
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
 
-        return decorated
+    return decorated
 
-    # ─────────────── Authentication & User Management Routes ───────────────
 
+def _register_authentication_and_user_management_routes(app):
     @app.route("/register", methods=["GET", "POST"])
     def register():
         if request.method == "POST":
@@ -108,19 +106,19 @@ def register_routes(app):
         return render_template("login.html")
 
     @app.route("/logout", methods=["POST"])
-    @login_required
+    @_login_required
     def logout():
         session.clear()
         flash("You have been logged out.", "info")
         return redirect(url_for("login"))
 
     @app.route("/user-settings")
-    @login_required
+    @_login_required
     def user_settings():
         return render_template("user_settings.html")
 
     @app.route("/delete-account", methods=["GET", "POST"])
-    @login_required
+    @_login_required
     def delete_account():
         if request.method == "POST":
             if request.form.get("confirm") == "yes":
@@ -132,8 +130,8 @@ def register_routes(app):
             return redirect(url_for("user_settings"))
         return render_template("confirm_delete.html")
 
-    # ─────────────── Blueprint Management Routes ───────────────
 
+def _register_blueprint_management_routes(app):
     @app.route("/", methods=["GET", "POST"])
     def index():
         if "user_id" not in session:
@@ -163,7 +161,7 @@ def register_routes(app):
         return render_template("index.html", blueprints=blueprints)
 
     @app.route("/create_blueprint", methods=["GET", "POST"])
-    @login_required
+    @_login_required
     def create_blueprint():
         if request.method == "POST":
             name = request.form.get("name", "").strip()
@@ -194,7 +192,7 @@ def register_routes(app):
         )
 
     @app.route("/edit_blueprint", methods=["GET", "POST"])
-    @login_required
+    @_login_required
     def edit_blueprint():
         user_id = session["user_id"]
 
@@ -255,10 +253,10 @@ def register_routes(app):
             original_name=blueprint_entry["name"],
         )
 
-    # ─────────────── Quiz Routes ───────────────
 
+def _register_quiz_routes(app):
     @app.route("/quiz", methods=["GET", "POST"])
-    @login_required
+    @_login_required
     def quiz():
         if request.method == "POST" and request.form.get("retry_incorrect"):
             results = session.get("results", [])
@@ -293,7 +291,7 @@ def register_routes(app):
         return render_template("quiz.html", quiz=quiz)
 
     @app.route("/submit", methods=["POST"])
-    @login_required
+    @_login_required
     def submit():
         quiz = session.get("quiz", [])
         try:
@@ -315,7 +313,7 @@ def register_routes(app):
         return redirect(url_for("result"))
 
     @app.route("/result", methods=["GET", "POST"])
-    @login_required
+    @_login_required
     def result():
         results = session.get("results", [])
         duration = calculate_duration()
@@ -345,8 +343,19 @@ def register_routes(app):
         session["stop_time"] = stop_time.isoformat()
         return (stop_time - start_time).total_seconds()
 
-    # ─────────────── Miscellaneous Routes ───────────────
 
+def _register_miscellaneous_routes(app):
     @app.route("/help")
     def help_page():
         return render_template("help.html")
+
+
+def register_routes(app):
+    _register_authentication_and_user_management_routes(app)
+    _register_blueprint_management_routes(app)
+    _register_quiz_routes(app)
+    _register_miscellaneous_routes(app)
+
+    @app.route("/health")
+    def health_check():
+        return "OK", 200
