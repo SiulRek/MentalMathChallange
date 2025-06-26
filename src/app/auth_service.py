@@ -125,13 +125,6 @@ class AuthService:
         return True, "User deleted successfully."
     
     def change_user_password(self, user_id, old_password, new_password):
-        """
-        Change the password for a user.
-        :param user_id: ID of the user whose password is to be changed.
-        :param old_password: Current password of the user.
-        :param new_password: New password to set for the user.
-        :return: Tuple (success: bool, message: str)
-        """
         user = User.query.get(user_id)
         if not user:
             return False, "User not found."
@@ -150,3 +143,20 @@ class AuthService:
         user.password_hash = self._hash_password(new_password)
         self.db.session.commit()
         return True, "Password changed successfully."
+    
+    def reset_user_password_by_email(self, email, new_password):
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return False, "User not found."
+
+        try:
+            assert_password(new_password)
+        except AssertionError as e:
+            return False, str(e)
+
+        user.password_hash = self._hash_password(new_password)
+        self.db.session.commit()
+        return True, "Password updated successfully."
+
+    def is_existing_user_email(self, email):
+        return User.query.filter_by(email=email).first() is not None

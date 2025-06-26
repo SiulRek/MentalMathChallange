@@ -112,12 +112,6 @@ class TestAuthService(unittest.TestCase):
         self._register_user("frank", "OldPass1@")
         user = User.query.filter_by(username="frank").first()
         self.assertIsNotNone(user)
-
-        if (
-            "New password cannot be the same as the old password."
-            not in self.auth.change_user_password.__doc__
-        ):
-            self.skipTest("Same-password check not implemented in service.")
         success, msg = self.auth.change_user_password(
             user.id, "OldPass1@", "OldPass1@"
         )
@@ -153,6 +147,50 @@ class TestAuthService(unittest.TestCase):
         success, result = self.auth.login_user("frank", "NewPass1!")
         self.assertTrue(success)
         self.assertIn("user_id", result)
+
+    def test_reset_password_user_not_found(self):
+        success, msg = self.auth.reset_user_password_by_email(
+            "unknown@example.com", "NewPass1!"
+        )
+        self.assertFalse(success)
+        self.assertEqual(msg, "User not found.")
+
+    def test_reset_password_invalid_format(self):
+        self._register_user("testuser", "ValidPass1!")
+        email = "testuser@example.com"
+        success, msg = self.auth.reset_user_password_by_email(email, "123")
+        self.assertFalse(success)
+        self.assertIn("password", msg.lower())
+
+    def test_reset_password_successful(self):
+        self._register_user("resetme", "Original1!")
+        email = "resetme@example.com"
+        success, msg = self.auth.reset_user_password_by_email(
+            email, "NewValid1!"
+        )
+        self.assertTrue(success)
+        self.assertEqual(msg, "Password updated successfully.")
+
+        success, result = self.auth.login_user("resetme", "NewValid1!")
+        self.assertTrue(success)
+
+    def test_is_existing_user_email_true(self):
+        self._register_user("existing", "Password1@")
+        email = "existing@example.com"
+        self.assertTrue(self.auth.is_existing_user_email(email))
+
+    def test_is_existing_user_email_false(self):
+        self.assertFalse(
+            self.auth.is_existing_user_email("nonexistent@example.com")
+        )
+
+    def test_is_existing_user_email_empty(self):
+        self.assertFalse(self.auth.is_existing_user_email(""))
+
+    def test_is_existing_user_email_invalid_format(self):
+        self.assertFalse(
+            self.auth.is_existing_user_email("invalid-email-format")
+        )
 
 
 if __name__ == "__main__":
