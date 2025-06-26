@@ -25,10 +25,10 @@ def _register_authentication_and_user_management_routes(app):
     @app.route("/register", methods=["GET", "POST"])
     def register():
         if request.method == "POST":
-            username = request.form.get("username", "")
-            email = request.form.get("email", "")
-            password = request.form.get("password", "")
-            confirm_password = request.form.get("confirm_password", "")
+            username = request.form["username"]
+            email = request.form["email"]
+            password = request.form["password"]
+            confirm_password = request.form["confirm_password"]
 
             if password != confirm_password:
                 flash("Passwords do not match.", "error")
@@ -47,16 +47,11 @@ def _register_authentication_and_user_management_routes(app):
 
     @app.route("/request-email-confirmation")
     def request_email_confirmation():
-        pending_email = session.get("pending_email")
-        if not pending_email:
-            flash(
-                "No email with pending confirmation found in this session.",
-                "error",
-            )
-            return redirect(url_for("register"))
+        pending_email = session["pending_email"]
 
         confirmed = app.auth.is_user_email_confirmed(pending_email)
         if confirmed:
+            session.pop("pending_email")
             return redirect(url_for("login"))
 
         message = "A confirmation email has been sent. Please check your inbox and confirm."
@@ -94,8 +89,8 @@ def _register_authentication_and_user_management_routes(app):
             return redirect(url_for("index"))
 
         if request.method == "POST":
-            username = request.form.get("username", "")
-            password = request.form.get("password", "")
+            username = request.form["username"]
+            password = request.form["password"]
             success, result = app.auth.login_user(username, password)
             if success:
                 session["user_id"] = result["user_id"]
@@ -140,9 +135,8 @@ def _register_blueprint_management_routes(app):
         user_id = session["user_id"]
 
         if request.method == "POST":
-            blueprint_name = request.form.get("blueprint_name", "").strip()
-            action = request.form.get("action")
-            blueprint = request.form.get("blueprint")
+            blueprint_name = request.form["blueprint_name"]
+            action = request.form["action"]
 
             if action == "delete":
                 success, message = app.bp_service.delete_user_blueprint(
@@ -152,9 +146,18 @@ def _register_blueprint_management_routes(app):
                     flash(message, "error")
                 return redirect(url_for("index"))
 
-            elif blueprint:  # Start Quiz
-                session["blueprint"] = blueprint
+            elif action == "quiz":
+                blueprint_entry = app.bp_service.get_user_blueprint(
+                    user_id, blueprint_name
+                )
+                session["blueprint"] = blueprint_entry["blueprint"]
                 return redirect(url_for("quiz"))
+
+            else:
+                raise ValueError(f"Unknown action: {action}")
+
+        session.clear()
+        session["user_id"] = user_id
 
         blueprints = app.bp_service.get_user_blueprints_list(user_id)
         blueprints.sort(key=lambda x: x["name"].lower())
@@ -164,9 +167,9 @@ def _register_blueprint_management_routes(app):
     @_login_required
     def create_blueprint():
         if request.method == "POST":
-            name = request.form.get("name", "").strip()
-            description = request.form.get("description", "").strip()
-            blueprint_text = request.form.get("blueprint", "").strip()
+            name = request.form["name"]
+            description = request.form["description"].strip()
+            blueprint_text = request.form["blueprint"]
 
             if not name or not blueprint_text:
                 flash("Name and blueprint text cannot be empty.", "error")
@@ -197,14 +200,10 @@ def _register_blueprint_management_routes(app):
         user_id = session["user_id"]
 
         if request.method == "POST":
-            original_name = request.form.get("original_name", "").strip()
-            new_name = request.form.get("name", "").strip()
-            description = request.form.get("description", "").strip()
-            blueprint_text = request.form.get("blueprint", "").strip()
-
-            if not original_name:
-                flash("Original blueprint name is missing.", "error")
-                return redirect(url_for("index"))
+            original_name = request.form["original_name"]
+            new_name = request.form["name"]
+            description = request.form["description"].strip()
+            blueprint_text = request.form["blueprint"]
 
             if not new_name or not blueprint_text:
                 flash("Name and blueprint text cannot be empty.", "error")
@@ -231,18 +230,12 @@ def _register_blueprint_management_routes(app):
             flash(message, "error")
 
         # GET method
-        name = request.args.get("name", "").strip()
-        blueprint_entry = next(
-            (
-                b
-                for b in app.bp_service.get_user_blueprints_list(user_id)
-                if b["name"] == name
-            ),
-            None,
+        name = request.args["name"]
+        blueprint_entry = app.bp_service.get_user_blueprint(
+            user_id=user_id, name=name
         )
         if not blueprint_entry:
-            flash(f"No blueprint named '{name}' found.", "error")
-            return redirect(url_for("index"))
+            raise ValueError(f"No blueprint found with name '{name}'.")
 
         blueprint = unparse_blueprint_to_text(blueprint_entry["blueprint"])
         return render_template(
@@ -258,31 +251,11 @@ def _register_quiz_routes(app):
     @app.route("/quiz", methods=["GET", "POST"])
     @_login_required
     def quiz():
-        if request.method == "POST" and request.form.get("retry_incorrect"):
-            results = session.get("results", [])
-            if not results:
-                flash("No previous results found.", "error")
-                return redirect(url_for("index"))
-
-            incorrect_results = [
-                res for res in results if not res["is_correct"]
-            ]
-
-            quiz = [
-                {
-                    "question": res["question"],
-                    "answer": res["correct_answer"],
-                    "category": res["category"],
-                }
-                for res in incorrect_results
-            ]
-            session["quiz"] = quiz
+        if request.form.get("retry_incorrect") and request.method == "POST":
+            results = session["results"]
+            session["quiz"] = create_quiz_from_incorrect_results(results)
             session["start_time"] = datetime.utcnow().isoformat()
-            return render_template("quiz.html", quiz=quiz)
-
-        if "blueprint" not in session:
-            flash("No blueprint found in session.", "error")
-            return redirect(url_for("index"))
+            return render_template("quiz.html", quiz=session["quiz"])
 
         blueprint = json.loads(session["blueprint"])
         quiz = generate_quiz(blueprint)
@@ -290,10 +263,23 @@ def _register_quiz_routes(app):
         session["start_time"] = datetime.utcnow().isoformat()
         return render_template("quiz.html", quiz=quiz)
 
+    def create_quiz_from_incorrect_results(results):
+            incorrect_results = [
+                res for res in results if not res["is_correct"]
+            ]
+            return [
+                {
+                    "question": res["question"],
+                    "answer": res["correct_answer"],
+                    "category": res["category"],
+                }
+                for res in incorrect_results
+            ]
+
     @app.route("/submit", methods=["POST"])
     @_login_required
     def submit():
-        quiz = session.get("quiz", [])
+        quiz = session["quiz"]
         try:
             results = compute_quiz_results(quiz, submission=request.form)
         except UserResponseError as e:
@@ -315,7 +301,7 @@ def _register_quiz_routes(app):
     @app.route("/result", methods=["GET", "POST"])
     @_login_required
     def result():
-        results = session.get("results", [])
+        results = session["results"]
         duration = calculate_duration()
         total = len(results)
         correct = sum(1 for r in results if r["is_correct"])

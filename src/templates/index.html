@@ -47,7 +47,7 @@
 
             <form method="post" action="{{ url_for('index') }}" class="blueprint-card-actions">
               <input type="hidden" name="blueprint_name" value="{{ blueprint.name }}">
-              <button type="submit" name="blueprint" value="{{ blueprint.blueprint }}">Start Quiz</button>
+              <button type="submit" name="action" value="quiz">Start Quiz</button>
               <button type="submit" name="action" value="delete" class="delete-button" title="Delete Blueprint">🗑</button>
             </form>
           </div>
