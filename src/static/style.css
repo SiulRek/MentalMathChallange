@@ -188,6 +188,28 @@ button[type="button"] {
 
 
 /* ──────────────────────────────── */
+/* Login links                  */
+/* ──────────────────────────────── */
+.auth-links {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 0.95em;
+}
+
+.auth-links p {
+  margin-bottom: 8px;
+}
+
+.auth-links a {
+  font-weight: 500;
+  color: #3a86ff;
+}
+
+.auth-links a:hover {
+  text-decoration: underline;
+}
+
+/* ──────────────────────────────── */
 /* Quiz Header & Timer             */
 /* ──────────────────────────────── */
 .quiz-header {

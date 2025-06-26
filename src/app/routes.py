@@ -4,7 +4,11 @@ import json
 
 from flask import render_template, request, session, redirect, url_for, flash
 
-from app.email_utils import send_confirmation_email, decode_email_token
+from app.email_utils import (
+    send_confirmation_email,
+    send_password_reset_email,
+    decode_email_token,
+)
 from core.compute_quiz_results import compute_quiz_results, UserResponseError
 from core.generate_quiz import generate_quiz
 from core.unparse_blueprint_to_text import unparse_blueprint_to_text
@@ -144,11 +148,44 @@ def _register_authentication_and_user_management_routes(app):
             if success:
                 flash("Password changed successfully.", "success")
                 return redirect(url_for("user_settings"))
-            else:
-                flash(msg, "error")
+            flash(msg, "error")
 
         return render_template("change_password.html")
 
+    @app.route("/forgot-password", methods=["GET", "POST"])
+    def forgot_password():
+        if request.method == "POST":
+            email = request.form["email"]
+            if app.auth.is_existing_user_email(email):
+                send_password_reset_email(email)
+            flash("If that email exists, a reset link has been sent.", "info")
+            return redirect(url_for("login"))
+
+        return render_template("forgot_password.html")
+
+    @app.route("/reset-password/<token>", methods=["GET", "POST"])
+    def reset_password(token):
+        email = decode_email_token(token, type="password-reset")
+        if not email:
+            flash("Invalid or expired reset link.", "error")
+            return redirect(url_for("forgot_password"))
+
+        if request.method == "POST":
+            password = request.form["password"]
+            confirm = request.form["confirm_password"]
+            if password != confirm:
+                flash("Passwords do not match.", "error")
+                return render_template("reset_password.html", token=token)
+
+            success, message = app.auth.reset_user_password_by_email(
+                email, password
+            )
+            if success:
+                flash("Password reset successful. Please log in.", "success")
+                return redirect(url_for("login"))
+            flash(message, "error")
+
+        return render_template("reset_password.html", token=token)
 
 
 def _register_blueprint_management_routes(app):
@@ -179,7 +216,9 @@ def _register_blueprint_management_routes(app):
                 return redirect(url_for("quiz"))
 
             else:
-                raise ValueError(f"Unknown action: {action}")
+                raise ValueError(
+                    f"Unknown action: {action}"
+                )
 
         session.clear()
         session["user_id"] = user_id
@@ -259,7 +298,9 @@ def _register_blueprint_management_routes(app):
             user_id=user_id, name=name
         )
         if not blueprint_entry:
-            raise ValueError(f"No blueprint found with name '{name}'.")
+            raise ValueError(
+                f"No blueprint found with name '{name}'."
+            )
 
         blueprint = unparse_blueprint_to_text(blueprint_entry["blueprint"])
         return render_template(
@@ -288,17 +329,15 @@ def _register_quiz_routes(app):
         return render_template("quiz.html", quiz=quiz)
 
     def create_quiz_from_incorrect_results(results):
-            incorrect_results = [
-                res for res in results if not res["is_correct"]
-            ]
-            return [
-                {
-                    "question": res["question"],
-                    "answer": res["correct_answer"],
-                    "category": res["category"],
-                }
-                for res in incorrect_results
-            ]
+        incorrect_results = [res for res in results if not res["is_correct"]]
+        return [
+            {
+                "question": res["question"],
+                "answer": res["correct_answer"],
+                "category": res["category"],
+            }
+            for res in incorrect_results
+        ]
 
     @app.route("/submit", methods=["POST"])
     @_login_required
