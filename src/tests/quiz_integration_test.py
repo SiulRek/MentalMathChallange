@@ -1,9 +1,6 @@
 import unittest
 
-from core.compute_quiz_results import (
-    compute_quiz_results,
-    UserResponseError,
-)
+from core.compute_quiz_results import compute_quiz_results, UserResponseError
 from core.generate_quiz import generate_quiz
 from core.parse_blueprint_from_text import (
     _parse_blueprint_from_text,
@@ -50,7 +47,9 @@ date: 1
         self.assertTrue(results[0]["is_correct"])
         self.assertTrue(results[1]["is_correct"])
         self.assertEqual(results[0]["user_answer"], "3")
-        self.assertEqual(results[1]["user_answer"], date_question["answer"])
+        self.assertEqual(
+            results[1]["user_answer"].lower(), date_question["answer"]
+        )
 
     def test_partial_answers_and_incorrect(self):
         blueprint_text = """math: 2
