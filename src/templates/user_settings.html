@@ -2,17 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>User Settings</title>
+  <title>User Settings - Mental Math Challenge</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-  <div class="container">
-    <div class="header-bar">
-      <h1>User Settings</h1>
-      <div class="auth-status">
-        <span>👤 {{ session.username }}</span>
-        <a href="{{ url_for('index') }}">Home</a>
-      </div>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
+  <body>
+    <div class="container">
+      <div class="header-bar">
+        <h1>User Settings</h1>
+        <img src="{{ url_for('static', filename='icon.png') }}" alt="Logo" class="app-logo">
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -36,6 +34,8 @@
     <form action="{{ url_for('delete_account') }}" method="get">
       <button type="submit" class="danger-button">Delete Account</button>
     </form>
+
+    <p><a href="javascript:history.back()">← Go Back</a></p>
 
   </div>
 </body>

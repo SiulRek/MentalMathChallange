@@ -2,12 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Help - Blueprint Format</title>
+  <title>Help - Blueprint Format - Mental Math Challenge</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
 </head>
 <body>
   <div class="container">
-    <h1>Blueprint Format Instructions</h1>
+    <div class="header-bar">
+      <h2>Blueprint Format Instructions</h2>
+      <img src="{{ url_for('static', filename='icon.png') }}" alt="Logo" class="app-logo">
+    </div>
 
     <p>
       Each section defines a type of problem to include, either
@@ -56,7 +60,7 @@
       Errors in structure will trigger configuration errors.
     </p>
 
-    <p><a href="{{ url_for('index') }}">← Back to Quiz</a></p>
+    <p><a href="javascript:history.back()">← Go Back</a></p>
   </div>
 </body>
 </html>

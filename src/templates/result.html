@@ -4,10 +4,14 @@
   <meta charset="UTF-8">
   <title>Results - Mental Math Challenge</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
 </head>
 <body>
   <div class="container">
-    <h2 class="result-title">Your Results</h2>
+    <div class="header-bar">
+      <h2>Your Results</h2>
+      <img src="{{ url_for('static', filename='icon.png') }}" alt="Logo" class="app-logo">
+    </div>
 
     {% if duration %}
       <div class="result-time-centered">
