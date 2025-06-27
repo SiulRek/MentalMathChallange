@@ -134,7 +134,7 @@ class MathQuizGeneratorTest(unittest.TestCase):
             ("0.0001", "1e-4"),
             ("0.00011", "1e-4"),
             ("1000", "1e3"),
-            # ("999", "1e3"), TODO: This is a bug in the original code, it should not be equal
+            ("999", "1e3"),
             ("2", "1.99"),
             ("0.0001", "0.9e-4"),
         ]

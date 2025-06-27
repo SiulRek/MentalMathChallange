@@ -147,5 +147,5 @@ class MathQuizGenerator(_QuizGeneratorBase):
         a = adjust_precision(answer_a)
         b = adjust_precision(answer_b)
         diff = abs(float(a) - float(b))
-        tol = max(derive_tol(a), derive_tol(b)) / 2
+        tol = max(derive_tol(answer_a), derive_tol(answer_b)) / 2
         return diff <= tol
