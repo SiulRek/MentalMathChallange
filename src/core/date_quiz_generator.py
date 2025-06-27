@@ -1,25 +1,13 @@
-from abc import ABC, abstractmethod
-
 from core.date_utils import (
     random_date,
     derive_weekday,
     sanitize_weekday_string,
 )
 from core.exceptions import UserResponseError
-
-class _QuizGeneratorBase(ABC):
-    @classmethod
-    @abstractmethod
-    def generate(cls, sub_blueprint):
-        pass
-
-    @classmethod
-    @abstractmethod
-    def compare_answer(cls, user_answer, correct_answer):
-        pass
+from core.quiz_generator_base import QuizGeneratorBase
 
 
-class DateQuizGenerator(_QuizGeneratorBase):
+class DateQuizGenerator(QuizGeneratorBase):
     @classmethod
     def _generate_expression(cls, sub_blueprint):
         start_year = sub_blueprint.get("start_year", 1900)

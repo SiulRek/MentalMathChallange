@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 import random
 import re
 
@@ -13,24 +12,12 @@ from scipy.constants import (
 )
 
 from core.exceptions import UserResponseError, UserConfigError
-
+from core.quiz_generator_base import QuizGeneratorBase
 
 MAX_PRECISION = 10
 
 
-class _QuizGeneratorBase(ABC):
-    @classmethod
-    @abstractmethod
-    def generate(cls, sub_blueprint):
-        pass
-
-    @classmethod
-    @abstractmethod
-    def compare_answer(cls, user_answer, correct_answer):
-        pass
-
-
-class MathQuizGenerator(_QuizGeneratorBase):
+class MathQuizGenerator(QuizGeneratorBase):
     @classmethod
     def _generate_expression(cls, elements):
         expr = ""
