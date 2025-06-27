@@ -1,5 +1,5 @@
 from core.date_utils import sanitize_weekday_string
-from core.generate_quiz import MAX_PRECISION
+from core.quiz_utils import compare_answers
 
 
 class UserResponseError(Exception):
@@ -52,53 +52,6 @@ def _parse_user_answer(user_answer, category):
         ) from e
     user_answer = str(user_answer)
     return user_answer
-
-
-def _adjust_numeric_precision(correct_answer, precision):
-    correct_answer = f"{float(correct_answer):.{precision}f}"
-    if "." in correct_answer:
-        exponent = 0
-        if "e" in correct_answer:
-            correct_answer, exponent = correct_answer.split("e")
-            exponent = int(exponent)
-        correct_answer = correct_answer.rstrip("0").rstrip(".")
-        correct_answer = (
-            correct_answer + "e" + str(exponent)
-            if exponent != 0
-            else correct_answer
-        )
-    return correct_answer
-
-
-def _derive_tolerance_range(numeric_string):
-    # Derive a tolerance range based on the least significant decimal digit,
-    # scaled by the exponent (if in scientific notation).
-    # Examples:
-    #   "1.2345"      → 0.0001
-    #   "1.23450"     → 0.00001
-    #   "1.2345e+2"   → 0.0001 * 10^2 = 0.01
-    #   "1000"        → 1
-
-    exponent = 0
-    if "e" in numeric_string:
-        numeric_string, exponent = numeric_string.split("e")
-    tolerance_mask = "".join(
-        ["0" if c.isdigit() else c for c in numeric_string]
-    )
-    tolerance_mask = tolerance_mask[:-1] + "1"
-    range = float(tolerance_mask) * 10 ** int(exponent)
-    return range
-
-
-def _tolerant_comparison_of_numeric_strings(a, b):
-    if a == "in" or b == "inf":
-        return a == b
-    tol_range_a = _derive_tolerance_range(a)
-    tol_range_b = _derive_tolerance_range(b)
-    diff = abs(float(a) - float(b))
-    if tol_range_a == tol_range_b:
-        return diff == 0
-    return diff < max(tol_range_a, tol_range_b) / 2
 
 
 def _remove_trailing_zeros(numeric_string):
@@ -156,20 +109,20 @@ def compute_quiz_results(quiz, submission):
         user_answer = _parse_user_answer(user_answer, category)
         if user_answer is None:
             correct = False
-        elif category == "date":
-            correct = user_answer == correct_answer
-            user_answer = user_answer.capitalize()
-            correct_answer = correct_answer.capitalize()
         else:
-            correct_answer = _adjust_numeric_precision(
-                correct_answer, MAX_PRECISION
+            correct = compare_answers(
+                user_answer,
+                correct_answer,
+                category=category,
             )
-            user_answer = _adjust_numeric_precision(user_answer, MAX_PRECISION)
-            correct = _tolerant_comparison_of_numeric_strings(
-                user_answer, correct_answer
-            )
-            correct_answer = _remove_trailing_zeros(correct_answer)
-            user_answer = _remove_trailing_zeros(user_answer)
+            # TODO: The prettification of the answer should be done in the quiz
+            # generator
+            if category == "date":
+                user_answer = user_answer.capitalize()
+                correct_answer = correct_answer.capitalize()
+            elif category == "math":
+                correct_answer = _remove_trailing_zeros(correct_answer)
+                user_answer = _remove_trailing_zeros(user_answer)
         results.append(
             {
                 "question": question,

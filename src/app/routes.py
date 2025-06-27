@@ -10,7 +10,7 @@ from app.email_utils import (
     decode_email_token,
 )
 from core.compute_quiz_results import compute_quiz_results, UserResponseError
-from core.generate_quiz import generate_quiz
+from core.quiz_utils import generate_quiz
 from core.unparse_blueprint_to_text import unparse_blueprint_to_text
 
 
@@ -358,14 +358,14 @@ def _register_quiz_routes(app):
                 previous_answers=previous_answers,
             )
 
-        session["results"] = results
+        session["results"] = _convert_is_correct_flag(results, type_= str)
         return redirect(url_for("result"))
 
     @app.route("/result", methods=["GET", "POST"])
     @_login_required
     def result():
-        results = session["results"]
-        duration = calculate_duration()
+        results = _convert_is_correct_flag(session["results"], type_=bool)
+        duration = _calculate_duration()
         total = len(results)
         correct = sum(1 for r in results if r["is_correct"])
         incorrect = total - correct
@@ -380,7 +380,18 @@ def _register_quiz_routes(app):
             percentage=percentage,
         )
 
-    def calculate_duration():
+    def _convert_is_correct_flag(results, type_):
+        if type_ == bool:
+            for res in results:
+                res["is_correct"] = str(res["is_correct"]).lower() == "true"
+        elif type_ == str:
+            for res in results:
+                res["is_correct"] = "true" if res["is_correct"] else "false"
+        else:
+            raise ValueError(f"Unsupported type: {type_}")
+        return results
+
+    def _calculate_duration():
         start_time = datetime.fromisoformat(session["start_time"])
         stop_time = (
             datetime.fromisoformat(session.get("stop_time"))
