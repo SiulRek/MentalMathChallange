@@ -46,18 +46,6 @@ def send_confirmation_email(user_email):
     mail.send(msg)
 
 
-def decode_email_token(token, expiration=300, type="email-confirm"):
-    serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
-    salt = TYPE_SALT_MAPPING[type]
-    try:
-        email = serializer.loads(
-            token, salt=salt, max_age=expiration
-        )
-        return email
-    except (BadSignature, SignatureExpired):
-        return None
-
-
 def send_password_reset_email(user_email):
     serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
     salt = TYPE_SALT_MAPPING["password-reset"]
@@ -71,3 +59,13 @@ def send_password_reset_email(user_email):
     )
     msg.body = f"Click the link to reset your password: {link}"
     mail.send(msg)
+
+
+def decode_email_token(token, expiration=300, type="email-confirm"):
+    serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+    salt = TYPE_SALT_MAPPING[type]
+    try:
+        email = serializer.loads(token, salt=salt, max_age=expiration)
+        return email
+    except (BadSignature, SignatureExpired):
+        return None
