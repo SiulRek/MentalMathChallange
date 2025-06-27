@@ -65,3 +65,7 @@ class DateQuizGenerator(_QuizGeneratorBase):
         except Exception:
             return False
         return answer_a == answer_b
+    
+    @classmethod
+    def prettify_answer(cls, answer):
+        return answer.capitalize()

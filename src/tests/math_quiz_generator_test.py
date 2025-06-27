@@ -7,6 +7,8 @@ from core.parse_blueprint_from_text import UserConfigError
 
 @patch("core.math_quiz_generator.MAX_PRECISION", 10)
 class MathQuizGeneratorTest(unittest.TestCase):
+
+    # ---------------- Test generate method ----------------
     def test_generate_single_int(self):
         blueprint = {
             "elements": [{"type": "int", "start": 1, "end": 1}],
@@ -127,6 +129,32 @@ class MathQuizGeneratorTest(unittest.TestCase):
         result = MathQuizGenerator.generate(blueprint)
         self.assertEqual(result[0]["answer"], "inf")
 
+    def test_invalid_element_type_raises(self):
+        blueprint = {
+            "elements": [{"type": "unknown", "value": "x"}],
+            "count": 1,
+        }
+        with self.assertRaises(ValueError):
+            MathQuizGenerator.generate(blueprint)
+
+    def test_start_greater_than_end_raises(self):
+        for element_type in ["int", "float", "float.3"]:
+            blueprint = {
+                "elements": [{"type": element_type, "start": 2, "end": 1}],
+                "count": 1,
+            }
+            with self.assertRaises(AssertionError):
+                MathQuizGenerator.generate(blueprint)
+
+    def test_missing_end_raises_user_config_error(self):
+        blueprint = {
+            "elements": [{"type": "float", "start": 0}],
+            "count": 1,
+        }
+        with self.assertRaises(UserConfigError):
+            MathQuizGenerator.generate(blueprint)
+
+    # ---------------- Test compare_answer method ----------------
     def test_compare_answer_exact_and_tolerance(self):
         equal_numbers = [
             ("1.0", "1.00"),
@@ -156,30 +184,15 @@ class MathQuizGeneratorTest(unittest.TestCase):
     def test_compare_answer_incorrect(self):
         self.assertFalse(MathQuizGenerator.compare_answer("5", "2"))
 
-    def test_invalid_element_type_raises(self):
-        blueprint = {
-            "elements": [{"type": "unknown", "value": "x"}],
-            "count": 1,
-        }
-        with self.assertRaises(ValueError):
-            MathQuizGenerator.generate(blueprint)
-
-    def test_start_greater_than_end_raises(self):
-        for element_type in ["int", "float", "float.3"]:
-            blueprint = {
-                "elements": [{"type": element_type, "start": 2, "end": 1}],
-                "count": 1,
-            }
-            with self.assertRaises(AssertionError):
-                MathQuizGenerator.generate(blueprint)
-
-    def test_missing_end_raises_user_config_error(self):
-        blueprint = {
-            "elements": [{"type": "float", "start": 0}],
-            "count": 1,
-        }
-        with self.assertRaises(UserConfigError):
-            MathQuizGenerator.generate(blueprint)
+    # ---------------- Test prettify_answer method ----------------
+    def test_prettify_answer(self):
+        self.assertEqual(MathQuizGenerator.prettify_answer("1.0000"), "1")
+        self.assertEqual(MathQuizGenerator.prettify_answer("2.5000"), "2.5")
+        self.assertEqual(MathQuizGenerator.prettify_answer("3.1400"), "3.14")
+        self.assertEqual(MathQuizGenerator.prettify_answer("4.0000"), "4")
+        self.assertEqual(
+            MathQuizGenerator.prettify_answer("5.1234567890"), "5.123456789"
+        )
 
 
 if __name__ == "__main__":

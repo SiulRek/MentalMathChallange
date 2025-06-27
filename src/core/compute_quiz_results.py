@@ -1,5 +1,5 @@
 from core.date_utils import sanitize_weekday_string
-from core.quiz_utils import compare_answers
+from core.quiz_utils import compare_answers, prettify_answer
 
 
 class UserResponseError(Exception):
@@ -54,16 +54,6 @@ def _parse_user_answer(user_answer, category):
     return user_answer
 
 
-def _remove_trailing_zeros(numeric_string):
-    numeric_string = (
-        numeric_string.rstrip("0").rstrip(".")
-        if "." in numeric_string
-        else numeric_string
-    )
-
-    return numeric_string
-
-
 def compute_quiz_results(quiz, submission):
     """
     Compute the results of a quiz based on the user's answers.
@@ -107,22 +97,17 @@ def compute_quiz_results(quiz, submission):
         question, correct_answer, category = quiz_elem
         correct_answer = correct_answer.lower()
         user_answer = _parse_user_answer(user_answer, category)
-        if user_answer is None:
-            correct = False
-        else:
-            correct = compare_answers(
-                user_answer,
-                correct_answer,
-                category=category,
-            )
-            # TODO: The prettification of the answer should be done in the quiz
-            # generator
-            if category == "date":
-                user_answer = user_answer.capitalize()
-                correct_answer = correct_answer.capitalize()
-            elif category == "math":
-                correct_answer = _remove_trailing_zeros(correct_answer)
-                user_answer = _remove_trailing_zeros(user_answer)
+        correct = compare_answers(
+            user_answer,
+            correct_answer,
+            category=category,
+        )
+        user_answer = prettify_answer(
+            user_answer, category=category
+        )
+        correct_answer = prettify_answer(
+            correct_answer, category=category
+        )
         results.append(
             {
                 "question": question,

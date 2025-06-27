@@ -149,3 +149,12 @@ class MathQuizGenerator(_QuizGeneratorBase):
         diff = abs(float(a) - float(b))
         tol = max(derive_tol(answer_a), derive_tol(answer_b)) / 2
         return diff <= tol
+    
+    @classmethod
+    def prettify_answer(cls, answer):
+        answer = (
+            answer.rstrip("0").rstrip(".")
+            if "." in answer
+            else answer
+        )
+        return answer

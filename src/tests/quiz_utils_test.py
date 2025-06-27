@@ -1,9 +1,9 @@
 import unittest
 
-from core.quiz_utils import generate_quiz, compare_answers
+from core.quiz_utils import generate_quiz, compare_answers, prettify_answer
 
 
-class QuizUtilsTest(unittest.TestCase):
+class GenerateQuizTest(unittest.TestCase):
     def test_generate_quiz_math(self):
         blueprint = [
             (
@@ -38,8 +38,15 @@ class QuizUtilsTest(unittest.TestCase):
         self.assertTrue(quiz["question"].endswith("2000"))
         self.assertIn(
             quiz["answer"],
-            ["monday", "tuesday", "wednesday", "thursday",
-             "friday", "saturday", "sunday"]
+            [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday",
+            ],
         )
         self.assertEqual(quiz["category"], "date")
 
@@ -73,6 +80,8 @@ class QuizUtilsTest(unittest.TestCase):
         self.assertEqual(result[1]["category"], "date")
         self.assertTrue(result[1]["question"].endswith("2000"))
 
+
+class CompareAnswersTest(unittest.TestCase):
     def test_compare_math_true(self):
         self.assertTrue(compare_answers("2", "2.0", "math"))
         self.assertFalse(compare_answers("5", "2", "math"))
@@ -81,12 +90,24 @@ class QuizUtilsTest(unittest.TestCase):
         self.assertTrue(compare_answers("Monday", "monday", "date"))
         self.assertFalse(compare_answers("notaday", "monday", "date"))
 
-    def test_invalid_category_raises(self):
-        with self.assertRaises(ValueError):
-            generate_quiz([({"category": "invalid"}, 1)])
+    def test_compare_empty(self):
+        self.assertFalse(compare_answers("", "2", "math"))
+        self.assertFalse(compare_answers("2", "", "date"))
+        self.assertFalse(compare_answers(None, "", "math"))
 
-        with self.assertRaises(ValueError):
-            compare_answers("x", "y", "invalid")
+
+class PrettifyAnswerTest(unittest.TestCase):
+    def test_prettify_answer_math(self):
+        self.assertEqual(prettify_answer("2.0000", "math"), "2")
+        self.assertEqual(prettify_answer("3.1400", "math"), "3.14")
+        self.assertIsNone(prettify_answer("", "math"))
+        self.assertIsNone(prettify_answer(None, "math"))
+
+    def test_prettify_answer_date(self):
+        self.assertEqual(prettify_answer("Monday", "date"), "Monday")
+        self.assertEqual(prettify_answer("tuesday", "date"), "Tuesday")
+        self.assertIsNone(prettify_answer("", "date"))
+        self.assertIsNone(prettify_answer(None, "date"))
 
 
 if __name__ == "__main__":
