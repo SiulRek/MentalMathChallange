@@ -28,6 +28,18 @@ def compare_answers(answer_a, answer_b, category):
     return quiz_gen.compare_answer(answer_a, answer_b)
 
 
+def parse_user_answer(user_answer, category):
+    try:
+        user_answer = user_answer.strip()
+    except AttributeError:
+        pass
+    if not user_answer:
+        return None
+
+    quiz_gen = _get_generator(category)
+    return quiz_gen.parse_user_answer(user_answer)
+
+
 def prettify_answer(answer, category):
     if not answer:
         return None

@@ -1,6 +1,7 @@
 import unittest
 
-from core.compute_quiz_results import compute_quiz_results, UserResponseError
+from core.compute_quiz_results import compute_quiz_results
+from core.exceptions import UserResponseError
 from tests.utils.base_test_case import BaseTestCase
 
 

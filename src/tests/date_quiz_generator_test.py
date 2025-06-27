@@ -1,6 +1,7 @@
 import unittest
 
 from core.date_quiz_generator import DateQuizGenerator
+from core.exceptions import UserResponseError
 
 
 class DateQuizGeneratorTest(unittest.TestCase):
@@ -90,6 +91,35 @@ class DateQuizGeneratorTest(unittest.TestCase):
                 self.assertFalse(
                     DateQuizGenerator.compare_answer(user, answer)
                 )
+
+    # ---------------- Test parse_user_answer method ----------------
+    def test_parse_user_answer_valid(self):
+        test_cases = [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+        ]
+        for user in test_cases:
+            with self.subTest(user=user):
+                self.assertEqual(
+                    DateQuizGenerator.parse_user_answer(user), user.lower()
+                )
+
+    def test_parse_user_answer_invalid(self):
+        test_cases = [
+            "notaday",
+            "12345",
+            "w",
+            "tuesday!",
+        ]
+        for user in test_cases:
+            with self.subTest(user=user):
+                with self.assertRaises(UserResponseError):
+                    DateQuizGenerator.parse_user_answer(user)
 
     # ---------------- Test prettify_answer method ----------------
     def test_prettify_answer(self):

@@ -1,6 +1,12 @@
 import unittest
 
-from core.quiz_utils import generate_quiz, compare_answers, prettify_answer
+from core.exceptions import UserResponseError
+from core.quiz_utils import (
+    generate_quiz,
+    compare_answers,
+    parse_user_answer,
+    prettify_answer,
+)
 
 
 class GenerateQuizTest(unittest.TestCase):
@@ -94,6 +100,20 @@ class CompareAnswersTest(unittest.TestCase):
         self.assertFalse(compare_answers("", "2", "math"))
         self.assertFalse(compare_answers("2", "", "date"))
         self.assertFalse(compare_answers(None, "", "math"))
+
+
+class ParseUserAnswerTest(unittest.TestCase):
+    def test_parse_user_answer_math(self):
+        self.assertEqual(parse_user_answer("2.0000", "math"), "2.0000")
+        self.assertEqual(parse_user_answer("3.1400", "math"), "3.1400")
+        with self.assertRaises(UserResponseError):
+            parse_user_answer("notanumber", "math")
+
+    def test_parse_user_answer_date(self):
+        self.assertEqual(parse_user_answer("Monday", "date"), "monday")
+        self.assertEqual(parse_user_answer("tu", "date"), "tuesday")
+        with self.assertRaises(UserResponseError):
+            parse_user_answer("notaday", "date")
 
 
 class PrettifyAnswerTest(unittest.TestCase):

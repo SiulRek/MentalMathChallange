@@ -5,7 +5,7 @@ from core.date_utils import (
     derive_weekday,
     sanitize_weekday_string,
 )
-
+from core.exceptions import UserResponseError
 
 class _QuizGeneratorBase(ABC):
     @classmethod
@@ -35,8 +35,18 @@ class DateQuizGenerator(_QuizGeneratorBase):
     def _prettify_expression(cls, date_str):
         year, month, day = date_str.split("-")
         month_names = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December",
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
         ]
         month = month_names[int(month) - 1]
         return f"{month} {day}, {year}"
@@ -60,12 +70,24 @@ class DateQuizGenerator(_QuizGeneratorBase):
     @classmethod
     def compare_answer(cls, answer_a, answer_b):
         try:
+            # TODO: Avoid redundant usage of sanitize_weekday_string
             answer_a = sanitize_weekday_string(answer_a)
             answer_b = sanitize_weekday_string(answer_b)
         except Exception:
             return False
         return answer_a == answer_b
-    
+
+    @classmethod
+    def parse_user_answer(cls, user_answer):
+        try:
+            return sanitize_weekday_string(user_answer)
+        except (AssertionError, ValueError) as e:
+            raise UserResponseError(
+                f"Invalid weekday string '{user_answer}'. Error: {e}. "
+                "Expected one of ['monday', 'tuesday', 'wednesday', "
+                "'thursday', 'friday', 'saturday', 'sunday']."
+            ) from e
+
     @classmethod
     def prettify_answer(cls, answer):
         return answer.capitalize()

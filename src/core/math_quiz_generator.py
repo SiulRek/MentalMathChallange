@@ -13,6 +13,8 @@ from scipy.constants import (
 )
 
 from core.parse_blueprint_from_text import UserConfigError
+from core.exceptions import UserResponseError
+
 
 MAX_PRECISION = 10
 
@@ -149,6 +151,16 @@ class MathQuizGenerator(_QuizGeneratorBase):
         diff = abs(float(a) - float(b))
         tol = max(derive_tol(answer_a), derive_tol(answer_b)) / 2
         return diff <= tol
+
+    @classmethod
+    def parse_user_answer(cls, user_answer):
+        try:
+            float(user_answer)
+        except ValueError as e:
+            raise UserResponseError(
+                f"Invalid answer '{user_answer}'. Answer must be numeric."
+            ) from e
+        return str(user_answer)
     
     @classmethod
     def prettify_answer(cls, answer):

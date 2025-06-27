@@ -1,5 +1,4 @@
-from core.date_utils import sanitize_weekday_string
-from core.quiz_utils import compare_answers, prettify_answer
+from core.quiz_utils import compare_answers, parse_user_answer, prettify_answer
 
 
 class UserResponseError(Exception):
@@ -30,28 +29,6 @@ def _collect_user_answers(submitted_answers, total_expected_answers):
     sorted_answers = list(sorted_form.values())
     return sorted_answers
 
-
-def _parse_user_answer(user_answer, category):
-    if not user_answer:
-        return
-    user_answer = user_answer.strip()
-    if category == "date":
-        try:
-            return sanitize_weekday_string(user_answer)
-        except (AssertionError, ValueError) as e:
-            raise UserResponseError(
-                f"Invalid weekday string '{user_answer}'. Error: {e}. "
-                "Expected one of ['monday', 'tuesday', 'wednesday', "
-                "'thursday', 'friday', 'saturday', 'sunday']."
-            )
-    try:
-        user_answer = float(user_answer)
-    except ValueError as e:
-        raise UserResponseError(
-            f"Invalid answer '{user_answer}'. Answer must be numeric."
-        ) from e
-    user_answer = str(user_answer)
-    return user_answer
 
 
 def compute_quiz_results(quiz, submission):
@@ -96,7 +73,7 @@ def compute_quiz_results(quiz, submission):
     for quiz_elem, user_answer in zip(quiz, user_answers):
         question, correct_answer, category = quiz_elem
         correct_answer = correct_answer.lower()
-        user_answer = _parse_user_answer(user_answer, category)
+        user_answer = parse_user_answer(user_answer, category)
         correct = compare_answers(
             user_answer,
             correct_answer,

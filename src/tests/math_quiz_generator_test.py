@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch
 
+from core.exceptions import UserResponseError
 from core.math_quiz_generator import MathQuizGenerator
 from core.parse_blueprint_from_text import UserConfigError
 
@@ -184,15 +185,52 @@ class MathQuizGeneratorTest(unittest.TestCase):
     def test_compare_answer_incorrect(self):
         self.assertFalse(MathQuizGenerator.compare_answer("5", "2"))
 
+    # ---------------- Test parse_user_answer method ----------------
+    def test_parse_user_answer_valid(self):
+        valid_answers = [
+            "1.0",
+            "2.5",
+            "3.1400",
+            "4.0000",
+            "5.1234567890",
+            "1e3",
+            "2.0001",
+        ]
+        for answer in valid_answers:
+            with self.subTest(answer=answer):
+                self.assertEqual(
+                    MathQuizGenerator.parse_user_answer(answer), answer
+                )
+
+    def test_parse_user_answer_invalid(self):
+        invalid_answers = [
+            "abc",
+            "1.2.3",
+            "1e",
+            "1e+",
+            "1e-",
+            "1.2e3.4",
+            "1.2e3+4",
+        ]
+        for answer in invalid_answers:
+            with self.subTest(answer=answer):
+                with self.assertRaises(UserResponseError):
+                    MathQuizGenerator.parse_user_answer(answer)
+
     # ---------------- Test prettify_answer method ----------------
     def test_prettify_answer(self):
-        self.assertEqual(MathQuizGenerator.prettify_answer("1.0000"), "1")
-        self.assertEqual(MathQuizGenerator.prettify_answer("2.5000"), "2.5")
-        self.assertEqual(MathQuizGenerator.prettify_answer("3.1400"), "3.14")
-        self.assertEqual(MathQuizGenerator.prettify_answer("4.0000"), "4")
-        self.assertEqual(
-            MathQuizGenerator.prettify_answer("5.1234567890"), "5.123456789"
-        )
+        test_cases = [
+            ("1.0000", "1"),
+            ("2.5000", "2.5"),
+            ("3.1400", "3.14"),
+            ("4.0000", "4"),
+            ("5.1234567890", "5.123456789"),
+        ]
+        for input_val, expected in test_cases:
+            with self.subTest(input_val=input_val, expected=expected):
+                self.assertEqual(
+                    MathQuizGenerator.prettify_answer(input_val), expected
+                )
 
 
 if __name__ == "__main__":
