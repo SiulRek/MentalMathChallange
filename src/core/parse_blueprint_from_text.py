@@ -1,22 +1,16 @@
 import re
 
 from numpy import abs, ceil, floor, round, exp, log, log10, sqrt, sin, cos, tan  # noqa: F401, E501
-
 from scipy.constants import (
     c, h, hbar, G, e, k, N_A, R, alpha, mu_0, epsilon_0,  # noqa: F401
     sigma, zero_Celsius, pi, Avogadro, Boltzmann, Planck,  # noqa: F401
     speed_of_light, elementary_charge, gravitational_constant,  # noqa: F401
 )
 
+
+from core.exceptions import UserConfigError
+
 SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%", "**"}
-
-
-class UserConfigError(Exception):
-    """
-    Base class for user blueprinturation errors.
-    """
-
-    pass
 
 
 def _parse_tokens_to_kwargs(tokens, keys, type_map):
@@ -320,15 +314,14 @@ def parse_blueprint_from_text(blueprint_text):
         - (                         # Open bracket
         - )                         # Close bracket
         - func <function_name>      # Valid: abs, ceil, floor, round,
-                                    # exp, log, log10, sqrt, sin, cos,
-                                    # tan (uses numpy functions)
+                                    # exp, log, log10, sqrt, sin, cos, tan (uses
+                                    # numpy functions)
         - const <constant_name>     # Valid: c, h, hbar, G, e, k, N_A,
-                                    # R, alpha, mu_0, epsilon_0,
-                                    # sigma, zero_Celsius, pi,
-                                    # Avogadro, Boltzmann, Planck,
-                                    # speed_of_light, elementary_charge,
-                                    # gravitational_constant
-                                    # (uses scipy constants)
+                                    # R, alpha, mu_0, epsilon_0, sigma,
+                                    # zero_Celsius, pi, Avogadro, Boltzmann,
+                                    # Planck, speed_of_light, elementary_charge,
+                                    # gravitational_constant (uses scipy
+                                    # constants)
 
     For 'date', valid indented lines include:
         - start <year>              # Optional, default = 1900

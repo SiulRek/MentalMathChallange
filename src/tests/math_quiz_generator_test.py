@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from core.exceptions import UserResponseError
 from core.math_quiz_generator import MathQuizGenerator
-from core.parse_blueprint_from_text import UserConfigError
+from core.exceptions import UserConfigError
 
 
 @patch("core.math_quiz_generator.MAX_PRECISION", 10)

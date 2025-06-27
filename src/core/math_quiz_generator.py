@@ -12,8 +12,7 @@ from scipy.constants import (
     speed_of_light, elementary_charge, gravitational_constant   # noqa: F401
 )
 
-from core.parse_blueprint_from_text import UserConfigError
-from core.exceptions import UserResponseError
+from core.exceptions import UserResponseError, UserConfigError
 
 
 MAX_PRECISION = 10
