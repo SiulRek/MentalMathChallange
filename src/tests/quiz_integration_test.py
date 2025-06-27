@@ -1,7 +1,7 @@
 import unittest
 
 from core.compute_quiz_results import compute_quiz_results, UserResponseError
-from core.generate_quiz import generate_quiz
+from core.quiz_utils import generate_quiz
 from core.parse_blueprint_from_text import (
     _parse_blueprint_from_text,
     UserConfigError,
