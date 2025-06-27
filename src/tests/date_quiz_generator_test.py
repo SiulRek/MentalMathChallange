@@ -53,8 +53,8 @@ class DateQuizGeneratorTest(unittest.TestCase):
             )
             self.assertEqual(quiz["category"], "date")
 
-    # ---------------- Test compare_answer method ----------------
-    def test_compare_answer_correct(self):
+    # ---------------- Test compare_answers method ----------------
+    def test_compare_answers_correct(self):
         test_cases = [
             ("Monday", "monday"),
             ("friday", "friday"),
@@ -64,9 +64,9 @@ class DateQuizGeneratorTest(unittest.TestCase):
         ]
         for user, answer in test_cases:
             with self.subTest(user=user, answer=answer):
-                self.assertTrue(DateQuizGenerator.compare_answer(user, answer))
+                self.assertTrue(DateQuizGenerator.compare_answers(user, answer))
 
-    def test_compare_answer_incorrect(self):
+    def test_compare_answers_incorrect(self):
         test_cases = [
             ("Monday", "tuesday"),
             ("friday", "saturday"),
@@ -77,10 +77,10 @@ class DateQuizGeneratorTest(unittest.TestCase):
         for user, answer in test_cases:
             with self.subTest(user=user, answer=answer):
                 self.assertFalse(
-                    DateQuizGenerator.compare_answer(user, answer)
+                    DateQuizGenerator.compare_answers(user, answer)
                 )
 
-    def test_compare_answer_invalid_string(self):
+    def test_compare_answers_invalid_string(self):
         test_cases = [
             ("notaday", "monday"),
             ("12345", "tuesday"),
@@ -89,7 +89,7 @@ class DateQuizGeneratorTest(unittest.TestCase):
         for user, answer in test_cases:
             with self.subTest(user=user, answer=answer):
                 self.assertFalse(
-                    DateQuizGenerator.compare_answer(user, answer)
+                    DateQuizGenerator.compare_answers(user, answer)
                 )
 
     # ---------------- Test parse_user_answer method ----------------

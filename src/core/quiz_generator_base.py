@@ -20,7 +20,7 @@ class QuizGeneratorBase(ABC):
 
     @classmethod
     @abstractmethod
-    def compare_answer(cls, answer_a, answer_b):
+    def compare_answers(cls, answer_a, answer_b):
         """
         Compare two answers and return True if they are equivalent, False
         otherwise.

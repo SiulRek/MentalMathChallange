@@ -56,7 +56,7 @@ class DateQuizGenerator(QuizGeneratorBase):
         return quizzes
 
     @classmethod
-    def compare_answer(cls, answer_a, answer_b):
+    def compare_answers(cls, answer_a, answer_b):
         try:
             # TODO: Avoid redundant usage of sanitize_weekday_string
             answer_a = sanitize_weekday_string(answer_a)

@@ -1,4 +1,4 @@
-from core.quiz_utils import compare_answers, parse_user_answer, prettify_answer
+from core.quiz_utils import compare_answerss, parse_user_answer, prettify_answer
 
 
 class UserResponseError(Exception):
@@ -74,7 +74,7 @@ def compute_quiz_results(quiz, submission):
         question, correct_answer, category = quiz_elem
         correct_answer = correct_answer.lower()
         user_answer = parse_user_answer(user_answer, category)
-        correct = compare_answers(
+        correct = compare_answerss(
             user_answer,
             correct_answer,
             category=category,

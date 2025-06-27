@@ -98,7 +98,7 @@ class MathQuizGenerator(QuizGeneratorBase):
         return quizzes
 
     @classmethod
-    def compare_answer(cls, answer_a, answer_b):
+    def compare_answers(cls, answer_a, answer_b):
         def adjust_precision(s):
             s = f"{float(s):.{MAX_PRECISION}f}"
             if "." in s:

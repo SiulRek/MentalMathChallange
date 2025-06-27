@@ -21,11 +21,11 @@ def generate_quiz(blueprint):
     return quiz
 
 
-def compare_answers(answer_a, answer_b, category):
+def compare_answerss(answer_a, answer_b, category):
     if not answer_a or not answer_b:
         return False
     quiz_gen = _get_generator(category)
-    return quiz_gen.compare_answer(answer_a, answer_b)
+    return quiz_gen.compare_answers(answer_a, answer_b)
 
 
 def parse_user_answer(user_answer, category):

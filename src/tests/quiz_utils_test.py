@@ -3,7 +3,7 @@ import unittest
 from core.exceptions import UserResponseError
 from core.quiz_utils import (
     generate_quiz,
-    compare_answers,
+    compare_answerss,
     parse_user_answer,
     prettify_answer,
 )
@@ -89,17 +89,17 @@ class GenerateQuizTest(unittest.TestCase):
 
 class CompareAnswersTest(unittest.TestCase):
     def test_compare_math_true(self):
-        self.assertTrue(compare_answers("2", "2.0", "math"))
-        self.assertFalse(compare_answers("5", "2", "math"))
+        self.assertTrue(compare_answerss("2", "2.0", "math"))
+        self.assertFalse(compare_answerss("5", "2", "math"))
 
     def test_compare_date_true(self):
-        self.assertTrue(compare_answers("Monday", "monday", "date"))
-        self.assertFalse(compare_answers("notaday", "monday", "date"))
+        self.assertTrue(compare_answerss("Monday", "monday", "date"))
+        self.assertFalse(compare_answerss("notaday", "monday", "date"))
 
     def test_compare_empty(self):
-        self.assertFalse(compare_answers("", "2", "math"))
-        self.assertFalse(compare_answers("2", "", "date"))
-        self.assertFalse(compare_answers(None, "", "math"))
+        self.assertFalse(compare_answerss("", "2", "math"))
+        self.assertFalse(compare_answerss("2", "", "date"))
+        self.assertFalse(compare_answerss(None, "", "math"))
 
 
 class ParseUserAnswerTest(unittest.TestCase):

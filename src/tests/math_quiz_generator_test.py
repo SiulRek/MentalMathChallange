@@ -155,8 +155,8 @@ class MathQuizGeneratorTest(unittest.TestCase):
         with self.assertRaises(UserConfigError):
             MathQuizGenerator.generate(blueprint)
 
-    # ---------------- Test compare_answer method ----------------
-    def test_compare_answer_exact_and_tolerance(self):
+    # ---------------- Test compare_answers method ----------------
+    def test_compare_answers_exact_and_tolerance(self):
         equal_numbers = [
             ("1.0", "1.00"),
             ("1.5", "1.50"),
@@ -169,8 +169,8 @@ class MathQuizGeneratorTest(unittest.TestCase):
         ]
         for a, b in equal_numbers:
             with self.subTest(a=a, b=b):
-                self.assertTrue(MathQuizGenerator.compare_answer(a, b))
-                self.assertTrue(MathQuizGenerator.compare_answer(b, a))
+                self.assertTrue(MathQuizGenerator.compare_answers(a, b))
+                self.assertTrue(MathQuizGenerator.compare_answers(b, a))
 
         not_equal_numbers = [
             ("1.1", "1.0001"),
@@ -179,11 +179,11 @@ class MathQuizGeneratorTest(unittest.TestCase):
         ]
         for a, b in not_equal_numbers:
             with self.subTest(a=a, b=b):
-                self.assertFalse(MathQuizGenerator.compare_answer(a, b))
-                self.assertFalse(MathQuizGenerator.compare_answer(b, a))
+                self.assertFalse(MathQuizGenerator.compare_answers(a, b))
+                self.assertFalse(MathQuizGenerator.compare_answers(b, a))
 
-    def test_compare_answer_incorrect(self):
-        self.assertFalse(MathQuizGenerator.compare_answer("5", "2"))
+    def test_compare_answers_incorrect(self):
+        self.assertFalse(MathQuizGenerator.compare_answers("5", "2"))
 
     # ---------------- Test parse_user_answer method ----------------
     def test_parse_user_answer_valid(self):
