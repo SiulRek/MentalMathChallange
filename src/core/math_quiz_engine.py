@@ -12,12 +12,12 @@ from scipy.constants import (
 )
 
 from core.exceptions import UserResponseError, UserConfigError
-from core.quiz_generator_base import QuizGeneratorBase
+from core.quiz_engine_base import QuizEngineBase
 
 MAX_PRECISION = 10
 
 
-class MathQuizGenerator(QuizGeneratorBase):
+class MathQuizEngine(QuizEngineBase):
     @classmethod
     def _generate_expression(cls, elements):
         expr = ""

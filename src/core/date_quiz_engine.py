@@ -4,10 +4,10 @@ from core.date_utils import (
     sanitize_weekday_string,
 )
 from core.exceptions import UserResponseError
-from core.quiz_generator_base import QuizGeneratorBase
+from core.quiz_engine_base import QuizEngineBase
 
 
-class DateQuizGenerator(QuizGeneratorBase):
+class DateQuizEngine(QuizEngineBase):
     @classmethod
     def _generate_expression(cls, sub_blueprint):
         start_year = sub_blueprint.get("start_year", 1900)

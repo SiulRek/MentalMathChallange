@@ -2,12 +2,12 @@ import unittest
 from unittest.mock import patch
 
 from core.exceptions import UserResponseError
-from core.math_quiz_generator import MathQuizGenerator
+from core.math_quiz_engine import MathQuizEngine
 from core.exceptions import UserConfigError
 from tests.utils.base_test_case import BaseTestCase
 
 
-@patch("core.math_quiz_generator.MAX_PRECISION", 10)
+@patch("core.math_quiz_engine.MAX_PRECISION", 10)
 class MathQuizGeneratorTest(BaseTestCase):
 
     # ---------------- Test generate method ----------------
@@ -16,7 +16,7 @@ class MathQuizGeneratorTest(BaseTestCase):
             "elements": [{"type": "int", "start": 1, "end": 1}],
             "count": 1,
         }
-        result = MathQuizGenerator.generate(blueprint)
+        result = MathQuizEngine.generate(blueprint)
         quiz = result[0]
         self.assertEqual(quiz["question"], "1")
         self.assertEqual(quiz["answer"], "1")
@@ -30,7 +30,7 @@ class MathQuizGeneratorTest(BaseTestCase):
             ],
             "count": 1,
         }
-        result = MathQuizGenerator.generate(blueprint)
+        result = MathQuizEngine.generate(blueprint)
         quiz = result[0]
         self.assertEqual(quiz["question"], "2 + 3")
         self.assertEqual(quiz["answer"], "5")
@@ -44,7 +44,7 @@ class MathQuizGeneratorTest(BaseTestCase):
             ],
             "count": 3,
         }
-        result = MathQuizGenerator.generate(blueprint)
+        result = MathQuizEngine.generate(blueprint)
         self.assertEqual(len(result), 3)
         for quiz in result:
             self.assertEqual(quiz["question"], "1 * 5")
@@ -63,7 +63,7 @@ class MathQuizGeneratorTest(BaseTestCase):
             ],
             "count": 1,
         }
-        result = MathQuizGenerator.generate(blueprint)
+        result = MathQuizEngine.generate(blueprint)
         quiz = result[0]
         self.assertEqual(quiz["question"], "1 + (2 - 3)")
         self.assertEqual(quiz["answer"], "0")
@@ -77,7 +77,7 @@ class MathQuizGeneratorTest(BaseTestCase):
             ],
             "count": 1,
         }
-        result = MathQuizGenerator.generate(blueprint)
+        result = MathQuizEngine.generate(blueprint)
         quiz = result[0]
         self.assertEqual(quiz["question"], "pi + 1")
         self.assertAlmostEqual(
@@ -93,7 +93,7 @@ class MathQuizGeneratorTest(BaseTestCase):
             ],
             "count": 1,
         }
-        result = MathQuizGenerator.generate(blueprint)
+        result = MathQuizEngine.generate(blueprint)
         quiz = result[0]
         parts = quiz["question"].split("+")
         self.assertEqual(len(parts), 2)
@@ -114,7 +114,7 @@ class MathQuizGeneratorTest(BaseTestCase):
             ],
             "count": 1,
         }
-        result = MathQuizGenerator.generate(blueprint)
+        result = MathQuizEngine.generate(blueprint)
         quiz = result[0]
         self.assertEqual(quiz["question"], "0 + 0 + 0")
         self.assertEqual(quiz["answer"], "0")
@@ -128,7 +128,7 @@ class MathQuizGeneratorTest(BaseTestCase):
             ],
             "count": 1,
         }
-        result = MathQuizGenerator.generate(blueprint)
+        result = MathQuizEngine.generate(blueprint)
         self.assertEqual(result[0]["answer"], "inf")
 
     def test_invalid_element_type_raises(self):
@@ -137,7 +137,7 @@ class MathQuizGeneratorTest(BaseTestCase):
             "count": 1,
         }
         with self.assertRaises(ValueError):
-            MathQuizGenerator.generate(blueprint)
+            MathQuizEngine.generate(blueprint)
 
     def test_start_greater_than_end_raises(self):
         for element_type in ["int", "float", "float.3"]:
@@ -146,7 +146,7 @@ class MathQuizGeneratorTest(BaseTestCase):
                 "count": 1,
             }
             with self.assertRaises(AssertionError):
-                MathQuizGenerator.generate(blueprint)
+                MathQuizEngine.generate(blueprint)
 
     def test_missing_end_raises_user_config_error(self):
         blueprint = {
@@ -154,7 +154,7 @@ class MathQuizGeneratorTest(BaseTestCase):
             "count": 1,
         }
         with self.assertRaises(UserConfigError):
-            MathQuizGenerator.generate(blueprint)
+            MathQuizEngine.generate(blueprint)
 
     # ---------------- Test compare_answers method ----------------
     def test_compare_answers_exact_and_tolerance(self):
@@ -170,8 +170,8 @@ class MathQuizGeneratorTest(BaseTestCase):
         ]
         for a, b in equal_numbers:
             with self.subTest(a=a, b=b):
-                self.assertTrue(MathQuizGenerator.compare_answers(a, b))
-                self.assertTrue(MathQuizGenerator.compare_answers(b, a))
+                self.assertTrue(MathQuizEngine.compare_answers(a, b))
+                self.assertTrue(MathQuizEngine.compare_answers(b, a))
 
         not_equal_numbers = [
             ("1.1", "1.0001"),
@@ -180,11 +180,11 @@ class MathQuizGeneratorTest(BaseTestCase):
         ]
         for a, b in not_equal_numbers:
             with self.subTest(a=a, b=b):
-                self.assertFalse(MathQuizGenerator.compare_answers(a, b))
-                self.assertFalse(MathQuizGenerator.compare_answers(b, a))
+                self.assertFalse(MathQuizEngine.compare_answers(a, b))
+                self.assertFalse(MathQuizEngine.compare_answers(b, a))
 
     def test_compare_answers_incorrect(self):
-        self.assertFalse(MathQuizGenerator.compare_answers("5", "2"))
+        self.assertFalse(MathQuizEngine.compare_answers("5", "2"))
 
     # ---------------- Test parse_user_answer method ----------------
     def test_parse_user_answer_valid(self):
@@ -200,7 +200,7 @@ class MathQuizGeneratorTest(BaseTestCase):
         for answer in valid_answers:
             with self.subTest(answer=answer):
                 self.assertEqual(
-                    MathQuizGenerator.parse_user_answer(answer), answer
+                    MathQuizEngine.parse_user_answer(answer), answer
                 )
 
     def test_parse_user_answer_invalid(self):
@@ -216,7 +216,7 @@ class MathQuizGeneratorTest(BaseTestCase):
         for answer in invalid_answers:
             with self.subTest(answer=answer):
                 with self.assertRaises(UserResponseError):
-                    MathQuizGenerator.parse_user_answer(answer)
+                    MathQuizEngine.parse_user_answer(answer)
 
     # ---------------- Test prettify_answer method ----------------
     def test_prettify_answer(self):
@@ -230,7 +230,7 @@ class MathQuizGeneratorTest(BaseTestCase):
         for input_val, expected in test_cases:
             with self.subTest(input_val=input_val, expected=expected):
                 self.assertEqual(
-                    MathQuizGenerator.prettify_answer(input_val), expected
+                    MathQuizEngine.prettify_answer(input_val), expected
                 )
 
 

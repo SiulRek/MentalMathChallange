@@ -10,7 +10,7 @@ from app.email_utils import (
     decode_email_token,
 )
 from core.compute_quiz_results import compute_quiz_results, UserResponseError
-from core.quiz_generator import generate_quiz
+from core.quiz_engine import generate_quiz
 from core.unparse_blueprint_to_text import unparse_blueprint_to_text
 
 

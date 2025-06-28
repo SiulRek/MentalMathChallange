@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class QuizGeneratorBase(ABC):
+class QuizEngineBase(ABC):
     @classmethod
     @abstractmethod
     def generate(cls, sub_blueprint):

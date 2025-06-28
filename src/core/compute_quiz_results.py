@@ -1,4 +1,4 @@
-from core.quiz_generator import QuizGenerator
+from core.quiz_engine import QuizEngine
 
 
 class UserResponseError(Exception):
@@ -69,18 +69,18 @@ def compute_quiz_results(quiz, submission):
     )
     quiz = [(q["question"], q["answer"], q["category"]) for q in quiz]
     results = []
-    quiz_gen = QuizGenerator()
+    q_engine = QuizEngine()
     for quiz_elem, user_answer in zip(quiz, user_answers):
         question, correct_answer, category = quiz_elem
         correct_answer = correct_answer.lower()
-        quiz_gen.focus_on_category(category)
-        user_answer = quiz_gen.parse_user_answer(user_answer)
-        correct = quiz_gen.compare_answers(
+        q_engine.focus_on_category(category)
+        user_answer = q_engine.parse_user_answer(user_answer)
+        correct = q_engine.compare_answers(
             user_answer,
             correct_answer,
         )
-        user_answer = quiz_gen.prettify_answer(user_answer)
-        correct_answer = quiz_gen.prettify_answer(correct_answer)
+        user_answer = q_engine.prettify_answer(user_answer)
+        correct_answer = q_engine.prettify_answer(correct_answer)
         results.append(
             {
                 "question": question,

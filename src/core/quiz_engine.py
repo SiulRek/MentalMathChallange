@@ -1,37 +1,37 @@
-from core.date_quiz_generator import DateQuizGenerator
-from core.math_quiz_generator import MathQuizGenerator
-from core.quiz_generator_base import QuizGeneratorBase
+from core.date_quiz_engine import DateQuizEngine
+from core.math_quiz_engine import MathQuizEngine
+from core.quiz_engine_base import QuizEngineBase
 
 
-class QuizGenerator(QuizGeneratorBase):
+class QuizEngine(QuizEngineBase):
     def __init__(self):
-        self.focused_gen = None
+        self.active_engine = None
 
-    def _get_generator(self, generator_type):
+    def _get_engine(self, type):
         """
-        Get the appropriate quiz generator class.
+        Get the appropriate quiz engine class.
 
         Parameters
         ----------
-        generator_type : str
-            The type of quiz generator ('math' or 'date').
+        engine_type : str
+            The type of quiz engine ('math' or 'date').
 
         Returns
         -------
         Type
-            The corresponding quiz generator class.
+            The corresponding quiz engine class.
 
         Raises
         ------
         ValueError
             If the quiz type is unsupported.
         """
-        if generator_type == "math":
-            return MathQuizGenerator
-        if generator_type == "date":
-            return DateQuizGenerator
+        if type == "math":
+            return MathQuizEngine
+        if type == "date":
+            return DateQuizEngine
         raise ValueError(
-            f"Unsupported quiz type: {generator_type}"
+            f"Unsupported quiz type: {type}"
         )
 
     def generate(self, blueprint):
@@ -52,17 +52,17 @@ class QuizGenerator(QuizGeneratorBase):
         quiz = []
         for sub_blueprint, count in blueprint:
             sub_blueprint["count"] = count
-            quiz_gen = self._get_generator(sub_blueprint["category"])
-            quiz.extend(quiz_gen.generate(sub_blueprint))
+            engine = self._get_engine(sub_blueprint["category"])
+            quiz.extend(engine.generate(sub_blueprint))
         return quiz
 
     def focus_on_category(self, category):
-        self.focused_gen = self._get_generator(category)
+        self.active_engine = self._get_engine(category)
 
-    def _validate_focused_generator(self):
-        if not self.focused_gen:
+    def _validate_focused_engine(self):
+        if not self.active_engine:
             raise ValueError(
-                "No focused generator set. Use focus_on_category() first."
+                "No focused engine set. Use focus_on_category() first."
             )
 
     def compare_answers(self, answer_a, answer_b):
@@ -79,13 +79,13 @@ class QuizGenerator(QuizGeneratorBase):
         Returns
         -------
         bool
-            True if the answers match according to the generator's logic, False
+            True if the answers match according to the engine's logic, False
             otherwise.
         """
-        self._validate_focused_generator()
+        self._validate_focused_engine()
         if not answer_a or not answer_b:
             return False
-        return self.focused_gen.compare_answers(answer_a, answer_b)
+        return self.active_engine.compare_answers(answer_a, answer_b)
 
     def parse_user_answer(self, user_answer):
         """
@@ -101,7 +101,7 @@ class QuizGenerator(QuizGeneratorBase):
         any or None
             The parsed answer or None if the input is invalid.
         """
-        self._validate_focused_generator()
+        self._validate_focused_engine()
         try:
             user_answer = user_answer.strip()
         except AttributeError:
@@ -109,7 +109,7 @@ class QuizGenerator(QuizGeneratorBase):
         if not user_answer:
             return None
 
-        return self.focused_gen.parse_user_answer(user_answer)
+        return self.active_engine.parse_user_answer(user_answer)
 
     def prettify_answer(self, answer):
         """
@@ -125,10 +125,10 @@ class QuizGenerator(QuizGeneratorBase):
         str or None
             The prettified answer or None if the answer is invalid.
         """
-        self._validate_focused_generator()
+        self._validate_focused_engine()
         if not answer:
             return None
-        return self.focused_gen.prettify_answer(answer)
+        return self.active_engine.prettify_answer(answer)
 
 
 def generate_quiz(blueprint):
@@ -146,5 +146,5 @@ def generate_quiz(blueprint):
     list
         A list containing generated quiz questions.
     """
-    quiz_gen = QuizGenerator()
-    return quiz_gen.generate(blueprint)
+    engine = QuizEngine()
+    return engine.generate(blueprint)
