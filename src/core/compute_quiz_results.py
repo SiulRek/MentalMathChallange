@@ -1,36 +1,7 @@
 from core.quiz_engine import QuizEngine
 
 
-class UserResponseError(Exception):
-    """
-    Base class for user answer processing errors.
-    """
-
-    pass
-
-
-def _collect_user_answers(submitted_answers, total_expected_answers):
-    def _get_index(item):
-        try:
-            key = item[0]
-            return int(key.split("_")[1])
-        except (ValueError, IndexError):
-            raise ValueError(
-                f"Invalid answer key '{item[0]}'. Expected format "
-                "'answer_<index>'."
-            )
-
-    for i in range(total_expected_answers):
-        key = f"answer_{i}"
-        if key not in submitted_answers:
-            submitted_answers[key] = ""
-
-    sorted_form = dict(sorted(submitted_answers.items(), key=_get_index))
-    sorted_answers = list(sorted_form.values())
-    return sorted_answers
-
-
-def compute_quiz_results(quiz, submission):
+def compute_quiz_results(quiz, user_answers):
     """
     Compute the results of a quiz based on the user's answers.
 
@@ -40,14 +11,13 @@ def compute_quiz_results(quiz, submission):
         A list of dictionaries, where each dictionary contains:
         - "question" : str
             The question text.
-        - "answer" : str
+        - "user_answers" : str
             The correct answer to the question.
         - "category" : str
             The category of the question, either "date" or "math".
-    submission : dict
-        A dictionary containing the user's answers. The keys are expected to be
-        in the format "answer_<index>", where <index> is the index of the
-        question in the quiz.
+    answers : list of str
+        A list of strings representing the user's answers to the quiz questions
+        in the same order as the quiz.
 
     Returns
     -------
@@ -64,9 +34,6 @@ def compute_quiz_results(quiz, submission):
         - "is_correct" : bool
             Whether the user's answer is correct.
     """
-    user_answers = _collect_user_answers(
-        submitted_answers=submission, total_expected_answers=len(quiz)
-    )
     quiz = [(q["question"], q["answer"], q["category"]) for q in quiz]
     results = []
     q_engine = QuizEngine()

@@ -1,5 +1,6 @@
 import unittest
 
+from app.collect_user_answers import collect_user_answers
 from core.compute_quiz_results import compute_quiz_results
 from core.exceptions import UserConfigError, UserResponseError
 from core.parse_blueprint_from_text import _parse_blueprint_from_text
@@ -37,11 +38,11 @@ date: 1
         self.assertEqual(date_question["category"], "date")
         self.assertRegex(date_question["answer"], r"^[A-Za-z]+$")
 
-        user_answers = {
+        submission = {
             "answer_0": "3",
             "answer_1": date_question["answer"],
         }
-
+        user_answers = collect_user_answers(submission, len(quiz))
         results = compute_quiz_results(quiz, user_answers)
 
         self.assertEqual(len(results), 2)
@@ -61,10 +62,11 @@ date: 1
         parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = self.quiz_engine.generate(parsed)
 
-        user_answers = {
+        submission = {
             "answer_0": "1",
+            # answer_1 missing
         }
-
+        user_answers = collect_user_answers(submission, len(quiz))
         results = compute_quiz_results(quiz, user_answers)
 
         self.assertEqual(len(results), 2)
@@ -81,7 +83,8 @@ date: 1
         parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = self.quiz_engine.generate(parsed)
 
-        user_answers = {"answer_0": "not_a_number"}
+        submission = {"answer_0": "not_a_number"}
+        user_answers = collect_user_answers(submission, len(quiz))
 
         with self.assertRaises(UserResponseError):
             compute_quiz_results(quiz, user_answers)
@@ -98,7 +101,9 @@ date: 1
         correct = float(quiz[0]["answer"])
         rounded_str = str(round(correct, 1))
 
-        results = compute_quiz_results(quiz, {"answer_0": rounded_str})
+        submission = {"answer_0": rounded_str}
+        user_answers = collect_user_answers(submission, len(quiz))
+        results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
 
     def test_integration_multiple_operators(self):
@@ -111,7 +116,9 @@ date: 1
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = self.quiz_engine.generate(parsed)
-        user_answers = {"answer_0": quiz[0]["answer"]}
+
+        submission = {"answer_0": quiz[0]["answer"]}
+        user_answers = collect_user_answers(submission, len(quiz))
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
 
@@ -123,8 +130,10 @@ date: 1
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = self.quiz_engine.generate(parsed)
+
         self.assertEqual(quiz[0]["answer"], "inf")
-        user_answers = {"answer_0": "inf"}
+        submission = {"answer_0": "inf"}
+        user_answers = collect_user_answers(submission, len(quiz))
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
 
@@ -135,7 +144,9 @@ date: 1
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = self.quiz_engine.generate(parsed)
-        user_answers = {"answer_0": quiz[0]["answer"].lower()}
+
+        submission = {"answer_0": quiz[0]["answer"].lower()}
+        user_answers = collect_user_answers(submission, len(quiz))
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
 
@@ -147,8 +158,10 @@ date: 1
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = self.quiz_engine.generate(parsed)
+
         truncated = str(round(float(quiz[0]["answer"]), 6))
-        user_answers = {"answer_0": truncated}
+        submission = {"answer_0": truncated}
+        user_answers = collect_user_answers(submission, len(quiz))
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
 
@@ -160,9 +173,12 @@ date: 1
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
         quiz = self.quiz_engine.generate(parsed)
+
         self.assertEqual(quiz[0]["question"], "1.12 + 2.988")
         truncated = str(round(float(quiz[0]["answer"]), 3))
-        user_answers = {"answer_0": truncated}
+
+        submission = {"answer_0": truncated}
+        user_answers = collect_user_answers(submission, len(quiz))
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
 

@@ -9,7 +9,9 @@ from app.email_utils import (
     send_password_reset_email,
     decode_email_token,
 )
-from core.compute_quiz_results import compute_quiz_results, UserResponseError
+from app.collect_user_answers import collect_user_answers
+from core.compute_quiz_results import compute_quiz_results
+from core.exceptions import UserResponseError
 from core.quiz_engine import generate_quiz
 from core.unparse_blueprint_to_text import unparse_blueprint_to_text
 
@@ -344,7 +346,10 @@ def _register_quiz_routes(app):
     def submit():
         quiz = session["quiz"]
         try:
-            results = compute_quiz_results(quiz, submission=request.form)
+            user_answers = collect_user_answers(
+                request.form, total_expected_answers=len(quiz)
+            )
+            results = compute_quiz_results(quiz, user_answers)
         except UserResponseError as e:
             previous_answers = {
                 k: v
