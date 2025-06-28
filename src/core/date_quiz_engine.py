@@ -1,7 +1,7 @@
 from core.date_utils import (
     random_date,
     derive_weekday,
-    sanitize_weekday_string,
+    standardize_weekday_string,
 )
 from core.exceptions import UserResponseError
 from core.quiz_engine_base import QuizEngineBase
@@ -58,9 +58,8 @@ class DateQuizEngine(QuizEngineBase):
     @classmethod
     def compare_answers(cls, answer_a, answer_b):
         try:
-            # TODO: Avoid redundant usage of sanitize_weekday_string
-            answer_a = sanitize_weekday_string(answer_a)
-            answer_b = sanitize_weekday_string(answer_b)
+            answer_a = standardize_weekday_string(answer_a)
+            answer_b = standardize_weekday_string(answer_b)
         except Exception:
             return False
         return answer_a == answer_b
@@ -68,7 +67,7 @@ class DateQuizEngine(QuizEngineBase):
     @classmethod
     def parse_user_answer(cls, user_answer):
         try:
-            return sanitize_weekday_string(user_answer)
+            return standardize_weekday_string(user_answer)
         except (AssertionError, ValueError) as e:
             raise UserResponseError(
                 f"Invalid weekday string '{user_answer}'. Error: {e}. "

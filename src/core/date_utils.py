@@ -2,7 +2,7 @@ import calendar
 import random
 
 
-def sanitize_weekday_string(weekday):
+def standardize_weekday_string(weekday):
     """
     Sanitize the weekday string to ensure it is in lowercase and stripped of
     whitespace.
