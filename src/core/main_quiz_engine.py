@@ -3,7 +3,7 @@ from core.math_quiz_engine import MathQuizEngine
 from core.quiz_engine_base import QuizEngineBase
 
 
-class QuizEngine(QuizEngineBase):
+class MainQuizEngine(QuizEngineBase):
     def __init__(self):
         self.active_engine = None
 
@@ -146,5 +146,5 @@ def generate_quiz(blueprint):
     list
         A list containing generated quiz questions.
     """
-    engine = QuizEngine()
+    engine = MainQuizEngine()
     return engine.generate(blueprint)

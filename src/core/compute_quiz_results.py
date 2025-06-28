@@ -1,4 +1,4 @@
-from core.quiz_engine import QuizEngine
+from core.main_quiz_engine import MainQuizEngine
 
 
 def compute_quiz_results(quiz, user_answers):
@@ -36,7 +36,7 @@ def compute_quiz_results(quiz, user_answers):
     """
     quiz = [(q["question"], q["answer"], q["category"]) for q in quiz]
     results = []
-    q_engine = QuizEngine()
+    q_engine = MainQuizEngine()
     for quiz_elem, user_answer in zip(quiz, user_answers):
         question, correct_answer, category = quiz_elem
         correct_answer = correct_answer.lower()

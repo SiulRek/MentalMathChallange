@@ -4,14 +4,14 @@ from app.collect_user_answers import collect_user_answers
 from core.compute_quiz_results import compute_quiz_results
 from core.exceptions import UserConfigError, UserResponseError
 from core.parse_blueprint_from_text import _parse_blueprint_from_text
-from core.quiz_engine import QuizEngine
+from core.main_quiz_engine import MainQuizEngine
 from tests.utils.base_test_case import BaseTestCase
 
 
 class QuizIntegrationTest(BaseTestCase):
 
     def setUp(self):
-        self.quiz_engine = QuizEngine()
+        self.quiz_engine = MainQuizEngine()
 
     def test_full_integration_math_and_date(self):
         blueprint_text = """math: 1

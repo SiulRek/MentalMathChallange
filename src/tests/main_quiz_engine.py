@@ -1,13 +1,13 @@
 import unittest
 
 from core.exceptions import UserResponseError
-from core.quiz_engine import QuizEngine
+from core.main_quiz_engine import MainQuizEngine
 from tests.utils.base_test_case import BaseTestCase
 
 
-class GenerateQuizTest(BaseTestCase):
+class MainQuizEngine(BaseTestCase):
     def setUp(self):
-        self.quiz_engine = QuizEngine()
+        self.quiz_engine = MainQuizEngine()
 
     def test_generate_quiz_math(self):
         blueprint = [
@@ -88,7 +88,7 @@ class GenerateQuizTest(BaseTestCase):
 
 class CompareAnswersTest(BaseTestCase):
     def setUp(self):
-        self.quiz_engine = QuizEngine()
+        self.quiz_engine = MainQuizEngine()
 
     def test_compare_math_true(self):
         self.quiz_engine.focus_on_category("math")
@@ -117,7 +117,7 @@ class CompareAnswersTest(BaseTestCase):
 
 class ParseUserAnswerTest(BaseTestCase):
     def setUp(self):
-        self.quiz_engine = QuizEngine()
+        self.quiz_engine = MainQuizEngine()
 
     def test_parse_user_answer_math(self):
         self.quiz_engine.focus_on_category("math")
@@ -148,7 +148,7 @@ class ParseUserAnswerTest(BaseTestCase):
 
 class PrettifyAnswerTest(BaseTestCase):
     def setUp(self):
-        self.quiz_engine = QuizEngine()
+        self.quiz_engine = MainQuizEngine()
 
     def test_prettify_answer_math(self):
         self.quiz_engine.focus_on_category("math")
