@@ -2,14 +2,15 @@ import unittest
 
 from core.compute_quiz_results import compute_quiz_results
 from core.exceptions import UserConfigError, UserResponseError
-from core.quiz_utils import generate_quiz
-from core.parse_blueprint_from_text import (
-    _parse_blueprint_from_text,
-)
+from core.parse_blueprint_from_text import _parse_blueprint_from_text
+from core.quiz_generator import QuizGenerator
 from tests.utils.base_test_case import BaseTestCase
 
 
 class TestQuizIntegration(BaseTestCase):
+
+    def setUp(self):
+        self.quiz_generator = QuizGenerator()
 
     def test_full_integration_math_and_date(self):
         blueprint_text = """math: 1
@@ -22,7 +23,7 @@ date: 1
   end 2020
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
-        quiz = generate_quiz(parsed)
+        quiz = self.quiz_generator.generate(parsed)
 
         self.assertEqual(len(quiz), 2)
 
@@ -58,7 +59,7 @@ date: 1
   int 1 1
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
-        quiz = generate_quiz(parsed)
+        quiz = self.quiz_generator.generate(parsed)
 
         user_answers = {
             "answer_0": "1",
@@ -78,7 +79,7 @@ date: 1
   int 1 1
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
-        quiz = generate_quiz(parsed)
+        quiz = self.quiz_generator.generate(parsed)
 
         user_answers = {"answer_0": "not_a_number"}
 
@@ -92,14 +93,12 @@ date: 1
   float 2.0 2.0
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
-        quiz = generate_quiz(parsed)
+        quiz = self.quiz_generator.generate(parsed)
 
         correct = float(quiz[0]["answer"])
         rounded_str = str(round(correct, 1))
 
-        user_answers = {"answer_0": rounded_str}
-
-        results = compute_quiz_results(quiz, user_answers)
+        results = compute_quiz_results(quiz, {"answer_0": rounded_str})
         self.assertTrue(results[0]["is_correct"])
 
     def test_integration_multiple_operators(self):
@@ -111,7 +110,7 @@ date: 1
   int 1 1
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
-        quiz = generate_quiz(parsed)
+        quiz = self.quiz_generator.generate(parsed)
         user_answers = {"answer_0": quiz[0]["answer"]}
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
@@ -123,7 +122,7 @@ date: 1
   int 0 0
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
-        quiz = generate_quiz(parsed)
+        quiz = self.quiz_generator.generate(parsed)
         self.assertEqual(quiz[0]["answer"], "inf")
         user_answers = {"answer_0": "inf"}
         results = compute_quiz_results(quiz, user_answers)
@@ -135,7 +134,7 @@ date: 1
   end 2020
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
-        quiz = generate_quiz(parsed)
+        quiz = self.quiz_generator.generate(parsed)
         user_answers = {"answer_0": quiz[0]["answer"].lower()}
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])
@@ -147,7 +146,7 @@ date: 1
   float 2.987654321 2.987654321
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
-        quiz = generate_quiz(parsed)
+        quiz = self.quiz_generator.generate(parsed)
         truncated = str(round(float(quiz[0]["answer"]), 6))
         user_answers = {"answer_0": truncated}
         results = compute_quiz_results(quiz, user_answers)
@@ -160,7 +159,7 @@ date: 1
   float.3 2.987654321 2.987654321
 """
         parsed = _parse_blueprint_from_text(blueprint_text)
-        quiz = generate_quiz(parsed)
+        quiz = self.quiz_generator.generate(parsed)
         self.assertEqual(quiz[0]["question"], "1.12 + 2.988")
         truncated = str(round(float(quiz[0]["answer"]), 3))
         user_answers = {"answer_0": truncated}

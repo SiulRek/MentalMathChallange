@@ -1,4 +1,4 @@
-from core.quiz_utils import compare_answers, parse_user_answer, prettify_answer
+from core.quiz_generator import QuizGenerator
 
 
 class UserResponseError(Exception):
@@ -28,7 +28,6 @@ def _collect_user_answers(submitted_answers, total_expected_answers):
     sorted_form = dict(sorted(submitted_answers.items(), key=_get_index))
     sorted_answers = list(sorted_form.values())
     return sorted_answers
-
 
 
 def compute_quiz_results(quiz, submission):
@@ -70,21 +69,18 @@ def compute_quiz_results(quiz, submission):
     )
     quiz = [(q["question"], q["answer"], q["category"]) for q in quiz]
     results = []
+    quiz_gen = QuizGenerator()
     for quiz_elem, user_answer in zip(quiz, user_answers):
         question, correct_answer, category = quiz_elem
         correct_answer = correct_answer.lower()
-        user_answer = parse_user_answer(user_answer, category)
-        correct = compare_answers(
+        quiz_gen.focus_on_category(category)
+        user_answer = quiz_gen.parse_user_answer(user_answer)
+        correct = quiz_gen.compare_answers(
             user_answer,
             correct_answer,
-            category=category,
         )
-        user_answer = prettify_answer(
-            user_answer, category=category
-        )
-        correct_answer = prettify_answer(
-            correct_answer, category=category
-        )
+        user_answer = quiz_gen.prettify_answer(user_answer)
+        correct_answer = quiz_gen.prettify_answer(correct_answer)
         results.append(
             {
                 "question": question,
