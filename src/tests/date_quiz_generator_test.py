@@ -2,9 +2,10 @@ import unittest
 
 from core.date_quiz_generator import DateQuizGenerator
 from core.exceptions import UserResponseError
+from tests.utils.base_test_case import BaseTestCase
 
 
-class DateQuizGeneratorTest(unittest.TestCase):
+class DateQuizGeneratorTest(BaseTestCase):
 
     # ---------------- Test generate method ----------------
     def test_generate_date_fixed_year(self):

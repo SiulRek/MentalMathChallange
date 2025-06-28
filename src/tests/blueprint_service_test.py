@@ -8,10 +8,12 @@ from app.auth_service import AuthService
 from app.blueprint_service import BlueprintService
 from app.models import User, UserBlueprint
 from core.parse_blueprint_from_text import parse_blueprint_from_text
+from tests.utils.base_test_case import BaseTestCase
 
 
-class TestBlueprintService(unittest.TestCase):
+class TestBlueprintService(BaseTestCase):
     def setUp(self):
+        super().setUp()
         self.app = Flask(__name__)
         self.app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -26,6 +28,7 @@ class TestBlueprintService(unittest.TestCase):
         self.bp_service = BlueprintService(db=db)
 
     def tearDown(self):
+        super().tearDown()
         db.session.remove()
         db.drop_all()
 

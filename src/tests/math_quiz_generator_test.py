@@ -4,10 +4,11 @@ from unittest.mock import patch
 from core.exceptions import UserResponseError
 from core.math_quiz_generator import MathQuizGenerator
 from core.exceptions import UserConfigError
+from tests.utils.base_test_case import BaseTestCase
 
 
 @patch("core.math_quiz_generator.MAX_PRECISION", 10)
-class MathQuizGeneratorTest(unittest.TestCase):
+class MathQuizGeneratorTest(BaseTestCase):
 
     # ---------------- Test generate method ----------------
     def test_generate_single_int(self):

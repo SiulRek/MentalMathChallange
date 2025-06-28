@@ -7,9 +7,10 @@ from core.quiz_utils import (
     parse_user_answer,
     prettify_answer,
 )
+from tests.utils.base_test_case import BaseTestCase
 
 
-class GenerateQuizTest(unittest.TestCase):
+class GenerateQuizTest(BaseTestCase):
     def test_generate_quiz_math(self):
         blueprint = [
             (
@@ -87,7 +88,7 @@ class GenerateQuizTest(unittest.TestCase):
         self.assertTrue(result[1]["question"].endswith("2000"))
 
 
-class CompareAnswersTest(unittest.TestCase):
+class CompareAnswersTest(BaseTestCase):
     def test_compare_math_true(self):
         self.assertTrue(compare_answerss("2", "2.0", "math"))
         self.assertFalse(compare_answerss("5", "2", "math"))
@@ -102,7 +103,7 @@ class CompareAnswersTest(unittest.TestCase):
         self.assertFalse(compare_answerss(None, "", "math"))
 
 
-class ParseUserAnswerTest(unittest.TestCase):
+class ParseUserAnswerTest(BaseTestCase):
     def test_parse_user_answer_math(self):
         self.assertEqual(parse_user_answer("2.0000", "math"), "2.0000")
         self.assertEqual(parse_user_answer("3.1400", "math"), "3.1400")
@@ -116,7 +117,7 @@ class ParseUserAnswerTest(unittest.TestCase):
             parse_user_answer("notaday", "date")
 
 
-class PrettifyAnswerTest(unittest.TestCase):
+class PrettifyAnswerTest(BaseTestCase):
     def test_prettify_answer_math(self):
         self.assertEqual(prettify_answer("2.0000", "math"), "2")
         self.assertEqual(prettify_answer("3.1400", "math"), "3.14")

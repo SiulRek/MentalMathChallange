@@ -6,10 +6,12 @@ from flask import Flask
 from app import db
 from app.auth_service import AuthService
 from app.models import User
+from tests.utils.base_test_case import BaseTestCase
 
 
-class TestAuthService(unittest.TestCase):
+class TestAuthService(BaseTestCase):
     def setUp(self):
+        super().setUp()
         self.app = Flask(__name__)
         self.app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -24,6 +26,7 @@ class TestAuthService(unittest.TestCase):
         self.auth = AuthService(db=db)
 
     def tearDown(self):
+        super().tearDown()
         db.session.remove()
         db.drop_all()
         self.ctx.pop()
