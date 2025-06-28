@@ -9,7 +9,7 @@ from app.models import User
 from tests.utils.base_test_case import BaseTestCase
 
 
-class TestAuthService(BaseTestCase):
+class AuthServiceTest(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.app = Flask(__name__)

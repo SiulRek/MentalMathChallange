@@ -11,7 +11,7 @@ from core.parse_blueprint_from_text import parse_blueprint_from_text
 from tests.utils.base_test_case import BaseTestCase
 
 
-class TestBlueprintService(BaseTestCase):
+class BlueprintServiceTest(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.app = Flask(__name__)

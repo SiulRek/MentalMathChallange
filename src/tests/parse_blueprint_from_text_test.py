@@ -8,7 +8,7 @@ from core.unparse_blueprint_to_text import unparse_blueprint_to_text
 from tests.utils.base_test_case import BaseTestCase
 
 
-class TestParseBlueprintFromText(BaseTestCase):
+class ParseBlueprintFromTextTest(BaseTestCase):
 
     # ---------- Test Cases for Valid Math Blocks ----------
     def test_blueprint_single_operator(self):

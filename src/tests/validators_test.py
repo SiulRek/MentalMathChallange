@@ -10,7 +10,7 @@ from app.validators import (
 from tests.utils.base_test_case import BaseTestCase
 
 
-class TestValidators(BaseTestCase):
+class ValidatorsTest(BaseTestCase):
 
     # --- assert_username ---
 

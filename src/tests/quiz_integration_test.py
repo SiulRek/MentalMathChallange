@@ -7,7 +7,7 @@ from core.quiz_engine import QuizEngine
 from tests.utils.base_test_case import BaseTestCase
 
 
-class TestQuizIntegration(BaseTestCase):
+class QuizIntegrationTest(BaseTestCase):
 
     def setUp(self):
         self.quiz_engine = QuizEngine()

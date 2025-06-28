@@ -5,7 +5,7 @@ from core.exceptions import UserResponseError
 from tests.utils.base_test_case import BaseTestCase
 
 
-class TestComputeQuizResults(BaseTestCase):
+class ComputeQuizResultsTest(BaseTestCase):
 
     def test_correct_category_in_results(self):
         quiz = [
