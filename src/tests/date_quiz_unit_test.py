@@ -1,6 +1,6 @@
 import unittest
 
-from core.date_quiz_engine import DateQuizEngine
+from core.date_quiz_unit import DateQuizUnit
 from core.exceptions import UserResponseError
 from tests.utils.base_test_case import BaseTestCase
 
@@ -10,7 +10,7 @@ class DateQuizGeneratorTest(BaseTestCase):
     # ---------------- Test generate method ----------------
     def test_generate_date_fixed_year(self):
         blueprint = {"start_year": 2000, "end_year": 2000, "count": 3}
-        quizzes = DateQuizEngine.generate(blueprint)
+        quizzes = DateQuizUnit.generate_quiz(blueprint)
         self.assertEqual(len(quizzes), 3)
         for quiz in quizzes:
             self.assertTrue(quiz["question"].endswith("2000"))
@@ -32,11 +32,11 @@ class DateQuizGeneratorTest(BaseTestCase):
     def test_invalid_year_range_raises(self):
         blueprint = {"start_year": 2025, "end_year": 2020, "count": 1}
         with self.assertRaises(AssertionError):
-            DateQuizEngine.generate(blueprint)
+            DateQuizUnit.generate_quiz(blueprint)
 
     def test_generate_date_default_years(self):
         blueprint = {"count": 2}
-        quizzes = DateQuizEngine.generate(blueprint)
+        quizzes = DateQuizUnit.generate_quiz(blueprint)
         self.assertEqual(len(quizzes), 2)
         for quiz in quizzes:
             self.assertRegex(quiz["question"], r"\w+ \d{2}, \d{4}")
@@ -65,7 +65,7 @@ class DateQuizGeneratorTest(BaseTestCase):
         ]
         for user, answer in test_cases:
             with self.subTest(user=user, answer=answer):
-                self.assertTrue(DateQuizEngine.compare_answers(user, answer))
+                self.assertTrue(DateQuizUnit.compare_answers(user, answer))
 
     def test_compare_answers_incorrect(self):
         test_cases = [
@@ -78,7 +78,7 @@ class DateQuizGeneratorTest(BaseTestCase):
         for user, answer in test_cases:
             with self.subTest(user=user, answer=answer):
                 self.assertFalse(
-                    DateQuizEngine.compare_answers(user, answer)
+                    DateQuizUnit.compare_answers(user, answer)
                 )
 
     def test_compare_answers_invalid_string(self):
@@ -90,7 +90,7 @@ class DateQuizGeneratorTest(BaseTestCase):
         for user, answer in test_cases:
             with self.subTest(user=user, answer=answer):
                 self.assertFalse(
-                    DateQuizEngine.compare_answers(user, answer)
+                    DateQuizUnit.compare_answers(user, answer)
                 )
 
     # ---------------- Test parse_user_answer method ----------------
@@ -107,7 +107,7 @@ class DateQuizGeneratorTest(BaseTestCase):
         for user in test_cases:
             with self.subTest(user=user):
                 self.assertEqual(
-                    DateQuizEngine.parse_user_answer(user), user.lower()
+                    DateQuizUnit.parse_user_answer(user), user.lower()
                 )
 
     def test_parse_user_answer_invalid(self):
@@ -120,7 +120,7 @@ class DateQuizGeneratorTest(BaseTestCase):
         for user in test_cases:
             with self.subTest(user=user):
                 with self.assertRaises(UserResponseError):
-                    DateQuizEngine.parse_user_answer(user)
+                    DateQuizUnit.parse_user_answer(user)
 
     # ---------------- Test prettify_answer method ----------------
     def test_prettify_answer(self):
@@ -131,7 +131,7 @@ class DateQuizGeneratorTest(BaseTestCase):
         for user, expected in test_cases:
             with self.subTest(user=user, expected=expected):
                 self.assertEqual(
-                    DateQuizEngine.prettify_answer(user), expected
+                    DateQuizUnit.prettify_answer(user), expected
                 )
 
 

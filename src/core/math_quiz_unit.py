@@ -12,14 +12,18 @@ from scipy.constants import (
 )
 
 from core.exceptions import UserResponseError, UserConfigError
-from core.quiz_engine_base import QuizEngineBase
+from core.quiz_unit_base import QuizUnitBase
 
 MAX_PRECISION = 10
 
 
-class MathQuizEngine(QuizEngineBase):
+class MathQuizUnit(QuizUnitBase):
+    """
+    Quiz unit for generating mathematical quizzes based on a blueprint.
+    """
+
     @classmethod
-    def _generate_expression(cls, elements):
+    def _generate_question(cls, elements):
         expr = ""
         for elem in elements:
             elem_type = elem["type"]
@@ -62,7 +66,7 @@ class MathQuizEngine(QuizEngineBase):
         return expr.rstrip()
 
     @classmethod
-    def _evaluate_expression(cls, expr):
+    def _envaluate_question(cls, expr):
         try:
             res = eval(expr)
             float(res)
@@ -75,21 +79,21 @@ class MathQuizEngine(QuizEngineBase):
         return str(res)
 
     @classmethod
-    def _prettify_expression(cls, expr):
+    def _prettify_question(cls, expr):
         expr = re.sub(r"\(\s+", "(", expr)
         expr = re.sub(r"\s+\)", ")", expr)
         return expr
 
     @classmethod
-    def generate(cls, sub_blueprint):
-        count = sub_blueprint.get("count", 1)
+    def generate_quiz(cls, unit_blueprint):
+        count = unit_blueprint.get("count", 1)
         quizzes = []
 
         for _ in range(count):
-            elements = sub_blueprint["elements"]
-            expr = cls._generate_expression(elements)
-            answer = cls._evaluate_expression(expr)
-            question = cls._prettify_expression(expr)
+            elements = unit_blueprint["elements"]
+            expr = cls._generate_question(elements)
+            answer = cls._envaluate_question(expr)
+            question = cls._prettify_question(expr)
 
             quizzes.append(
                 {"question": question, "answer": answer, "category": "math"}

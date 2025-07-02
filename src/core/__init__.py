@@ -13,7 +13,7 @@ def generate_quiz(blueprint):
     Parameters
     ----------
     blueprint : list of tuple
-        A list of tuples where each tuple is (sub_blueprint : dict, count :
+        A list of tuples where each tuple is (unit_blueprint : dict, count :
         int).
 
     Returns

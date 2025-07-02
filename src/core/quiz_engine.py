@@ -1,5 +1,5 @@
-from core.date_quiz_engine import DateQuizEngine
-from core.math_quiz_engine import MathQuizEngine
+from core.date_quiz_unit import DateQuizUnit
+from core.math_quiz_unit import MathQuizUnit
 
 
 class QuizEngine:
@@ -8,19 +8,19 @@ class QuizEngine:
 
     def _get_engine(self, type):
         if type == "math":
-            return MathQuizEngine
+            return MathQuizUnit
         if type == "date":
-            return DateQuizEngine
+            return DateQuizUnit
         raise ValueError(
             f"Unsupported quiz type: {type}"
         )
 
     def generate_quiz(self, blueprint):
         quiz = []
-        for sub_blueprint, count in blueprint:
-            sub_blueprint["count"] = count
-            engine = self._get_engine(sub_blueprint["category"])
-            quiz.extend(engine.generate(sub_blueprint))
+        for unit_blueprint, count in blueprint:
+            unit_blueprint["count"] = count
+            engine = self._get_engine(unit_blueprint["category"])
+            quiz.extend(engine.generate_quiz(unit_blueprint))
         return quiz
 
     def _focus_on_category(self, category):

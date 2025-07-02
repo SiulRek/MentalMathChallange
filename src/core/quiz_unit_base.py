@@ -1,12 +1,16 @@
 from abc import ABC, abstractmethod
 
 
-class QuizEngineBase(ABC):
+class QuizUnitBase(ABC):
+    """
+    Base class for quiz engines unit that handle specific types of quizzes.
+    """
+
     @classmethod
     @abstractmethod
-    def generate(cls, sub_blueprint):
+    def generate_quiz(cls, unit_blueprint):
         """
-        Generate a quiz based on the provided sub_blueprint.
+        Generate a quiz based on the provided unit_blueprint.
         """
         pass
 

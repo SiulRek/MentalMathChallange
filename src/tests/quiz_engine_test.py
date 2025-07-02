@@ -1,7 +1,7 @@
 import unittest
 
 from core.exceptions import UserResponseError
-from core.main_quiz_engine import QuizEngine
+from core.quiz_engine import QuizEngine
 from tests.utils.base_test_case import BaseTestCase
 
 # NOTE: The logic for generating quizzes and computing results is not tested
