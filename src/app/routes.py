@@ -10,9 +10,8 @@ from app.email_utils import (
     decode_email_token,
 )
 from app.collect_user_answers import collect_user_answers
-from core.compute_quiz_results import compute_quiz_results
+from core import generate_quiz, compute_quiz_results
 from core.exceptions import UserResponseError
-from core.main_quiz_engine import generate_quiz
 from core.unparse_blueprint_to_text import unparse_blueprint_to_text
 
 

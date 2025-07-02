@@ -1,4 +1,28 @@
+__all__ = [
+    "generate_quiz",
+    "compute_quiz_results",
+]
+
 from core.main_quiz_engine import MainQuizEngine
+
+
+def generate_quiz(blueprint):
+    """
+    Generate a quiz based on the provided blueprint.
+
+    Parameters
+    ----------
+    blueprint : list of tuple
+        A list of tuples where each tuple is (sub_blueprint : dict, count :
+        int).
+
+    Returns
+    -------
+    list
+        A list containing generated quiz questions.
+    """
+    engine = MainQuizEngine()
+    return engine.generate(blueprint)
 
 
 def compute_quiz_results(quiz, user_answers):
@@ -34,27 +58,5 @@ def compute_quiz_results(quiz, user_answers):
         - "is_correct" : bool
             Whether the user's answer is correct.
     """
-    quiz = [(q["question"], q["answer"], q["category"]) for q in quiz]
-    results = []
-    q_engine = MainQuizEngine()
-    for quiz_elem, user_answer in zip(quiz, user_answers):
-        question, correct_answer, category = quiz_elem
-        correct_answer = correct_answer.lower()
-        q_engine._focus_on_category(category)
-        user_answer = q_engine._parse_user_answer(user_answer)
-        correct = q_engine._compare_answers(
-            user_answer,
-            correct_answer,
-        )
-        user_answer = q_engine._prettify_answer(user_answer)
-        correct_answer = q_engine._prettify_answer(correct_answer)
-        results.append(
-            {
-                "question": question,
-                "category": category,
-                "correct_answer": correct_answer,
-                "user_answer": user_answer or "Not answered",
-                "is_correct": correct,
-            }
-        )
-    return results
+    engine = MainQuizEngine()
+    return engine.compute_quiz_results(quiz, user_answers)
