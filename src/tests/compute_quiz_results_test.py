@@ -1,6 +1,6 @@
 import unittest
 
-from core.compute_quiz_results import compute_quiz_results
+from core.main_quiz_engine import compute_quiz_results
 from core.exceptions import UserResponseError
 from tests.utils.base_test_case import BaseTestCase
 
@@ -112,9 +112,8 @@ class ComputeQuizResultsTest(BaseTestCase):
             {"question": "2 + 2", "answer": "4.0", "category": "math"},
         ]
         user_answers = ["2", ""]  # Simulate missing
-        result = compute_quiz_results(quiz, user_answers)
-        self.assertEqual(result[1]["user_answer"], "Not answered")
-        self.assertFalse(result[1]["is_correct"])
+        with self.assertRaises(UserResponseError):
+            compute_quiz_results(quiz, user_answers)
 
     def test_float_precision_tolerance_rounding_required(self):
         quiz = [

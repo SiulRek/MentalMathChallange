@@ -40,14 +40,14 @@ def compute_quiz_results(quiz, user_answers):
     for quiz_elem, user_answer in zip(quiz, user_answers):
         question, correct_answer, category = quiz_elem
         correct_answer = correct_answer.lower()
-        q_engine.focus_on_category(category)
-        user_answer = q_engine.parse_user_answer(user_answer)
-        correct = q_engine.compare_answers(
+        q_engine._focus_on_category(category)
+        user_answer = q_engine._parse_user_answer(user_answer)
+        correct = q_engine._compare_answers(
             user_answer,
             correct_answer,
         )
-        user_answer = q_engine.prettify_answer(user_answer)
-        correct_answer = q_engine.prettify_answer(correct_answer)
+        user_answer = q_engine._prettify_answer(user_answer)
+        correct_answer = q_engine._prettify_answer(correct_answer)
         results.append(
             {
                 "question": question,

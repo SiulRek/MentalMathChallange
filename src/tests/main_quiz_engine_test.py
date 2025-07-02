@@ -91,28 +91,28 @@ class CompareAnswersTest(BaseTestCase):
         self.quiz_engine = MainQuizEngine()
 
     def test_compare_math_true(self):
-        self.quiz_engine.focus_on_category("math")
-        self.assertTrue(self.quiz_engine.compare_answers("2", "2.0"))
-        self.assertFalse(self.quiz_engine.compare_answers("5", "2"))
+        self.quiz_engine._focus_on_category("math")
+        self.assertTrue(self.quiz_engine._compare_answers("2", "2.0"))
+        self.assertFalse(self.quiz_engine._compare_answers("5", "2"))
 
     def test_compare_date_true(self):
-        self.quiz_engine.focus_on_category("date")
+        self.quiz_engine._focus_on_category("date")
         self.assertTrue(
-            self.quiz_engine.compare_answers("Monday", "monday")
+            self.quiz_engine._compare_answers("Monday", "monday")
         )
         self.assertFalse(
-            self.quiz_engine.compare_answers("notaday", "monday")
+            self.quiz_engine._compare_answers("notaday", "monday")
         )
 
     def test_compare_empty(self):
-        self.quiz_engine.focus_on_category("math")
-        self.assertFalse(self.quiz_engine.compare_answers("", "2"))
-        self.assertFalse(self.quiz_engine.compare_answers("2", ""))
-        self.assertFalse(self.quiz_engine.compare_answers(None, ""))
+        self.quiz_engine._focus_on_category("math")
+        self.assertFalse(self.quiz_engine._compare_answers("", "2"))
+        self.assertFalse(self.quiz_engine._compare_answers("2", ""))
+        self.assertFalse(self.quiz_engine._compare_answers(None, ""))
 
     def test_compare_without_focus_raises(self):
         with self.assertRaises(ValueError):
-            self.quiz_engine.compare_answers("2", "2")
+            self.quiz_engine._compare_answers("2", "2")
 
 
 class ParseUserAnswerTest(BaseTestCase):
@@ -120,30 +120,30 @@ class ParseUserAnswerTest(BaseTestCase):
         self.quiz_engine = MainQuizEngine()
 
     def test_parse_user_answer_math(self):
-        self.quiz_engine.focus_on_category("math")
+        self.quiz_engine._focus_on_category("math")
         self.assertEqual(
-            self.quiz_engine.parse_user_answer("2.0000"), "2.0000"
+            self.quiz_engine._parse_user_answer("2.0000"), "2.0000"
         )
         self.assertEqual(
-            self.quiz_engine.parse_user_answer("3.1400"), "3.1400"
+            self.quiz_engine._parse_user_answer("3.1400"), "3.1400"
         )
         with self.assertRaises(UserResponseError):
-            self.quiz_engine.parse_user_answer("notanumber")
+            self.quiz_engine._parse_user_answer("notanumber")
 
     def test_parse_user_answer_date(self):
-        self.quiz_engine.focus_on_category("date")
+        self.quiz_engine._focus_on_category("date")
         self.assertEqual(
-            self.quiz_engine.parse_user_answer("Monday"), "monday"
+            self.quiz_engine._parse_user_answer("Monday"), "monday"
         )
         self.assertEqual(
-            self.quiz_engine.parse_user_answer("tu"), "tuesday"
+            self.quiz_engine._parse_user_answer("tu"), "tuesday"
         )
         with self.assertRaises(UserResponseError):
-            self.quiz_engine.parse_user_answer("notaday")
+            self.quiz_engine._parse_user_answer("notaday")
 
     def test_parse_without_focus_raises(self):
         with self.assertRaises(ValueError):
-            self.quiz_engine.parse_user_answer("Monday")
+            self.quiz_engine._parse_user_answer("Monday")
 
 
 class PrettifyAnswerTest(BaseTestCase):
@@ -151,26 +151,26 @@ class PrettifyAnswerTest(BaseTestCase):
         self.quiz_engine = MainQuizEngine()
 
     def test_prettify_answer_math(self):
-        self.quiz_engine.focus_on_category("math")
-        self.assertEqual(self.quiz_engine.prettify_answer("2.0000"), "2")
-        self.assertEqual(self.quiz_engine.prettify_answer("3.1400"), "3.14")
-        self.assertIsNone(self.quiz_engine.prettify_answer(""))
-        self.assertIsNone(self.quiz_engine.prettify_answer(None))
+        self.quiz_engine._focus_on_category("math")
+        self.assertEqual(self.quiz_engine._prettify_answer("2.0000"), "2")
+        self.assertEqual(self.quiz_engine._prettify_answer("3.1400"), "3.14")
+        self.assertIsNone(self.quiz_engine._prettify_answer(""))
+        self.assertIsNone(self.quiz_engine._prettify_answer(None))
 
     def test_prettify_answer_date(self):
-        self.quiz_engine.focus_on_category("date")
+        self.quiz_engine._focus_on_category("date")
         self.assertEqual(
-            self.quiz_engine.prettify_answer("Monday"), "Monday"
+            self.quiz_engine._prettify_answer("Monday"), "Monday"
         )
         self.assertEqual(
-            self.quiz_engine.prettify_answer("tuesday"), "Tuesday"
+            self.quiz_engine._prettify_answer("tuesday"), "Tuesday"
         )
-        self.assertIsNone(self.quiz_engine.prettify_answer(""))
-        self.assertIsNone(self.quiz_engine.prettify_answer(None))
+        self.assertIsNone(self.quiz_engine._prettify_answer(""))
+        self.assertIsNone(self.quiz_engine._prettify_answer(None))
 
     def test_prettify_without_focus_raises(self):
         with self.assertRaises(ValueError):
-            self.quiz_engine.prettify_answer("Monday")
+            self.quiz_engine._prettify_answer("Monday")
 
 
 if __name__ == "__main__":
