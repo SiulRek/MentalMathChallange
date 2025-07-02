@@ -15,7 +15,7 @@ class QuizEngine:
             f"Unsupported quiz type: {type}"
         )
 
-    def geenrate_quiz(self, blueprint):
+    def generate_quiz(self, blueprint):
         quiz = []
         for sub_blueprint, count in blueprint:
             sub_blueprint["count"] = count

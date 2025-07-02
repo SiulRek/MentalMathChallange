@@ -3,7 +3,7 @@ __all__ = [
     "compute_quiz_results",
 ]
 
-from core.main_quiz_engine import QuizEngine
+from core.quiz_engine import QuizEngine
 
 
 def generate_quiz(blueprint):
@@ -22,7 +22,7 @@ def generate_quiz(blueprint):
         A list containing generated quiz questions.
     """
     engine = QuizEngine()
-    return engine.geenrate_quiz(blueprint)
+    return engine.generate_quiz(blueprint)
 
 
 def compute_quiz_results(quiz, user_answers):
