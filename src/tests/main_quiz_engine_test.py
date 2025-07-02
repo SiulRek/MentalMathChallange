@@ -5,7 +5,7 @@ from core.main_quiz_engine import MainQuizEngine
 from tests.utils.base_test_case import BaseTestCase
 
 
-class MainQuizEngine(BaseTestCase):
+class MainQuizEngineTest(BaseTestCase):
     def setUp(self):
         self.quiz_engine = MainQuizEngine()
 
