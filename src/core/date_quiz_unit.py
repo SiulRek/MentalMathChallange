@@ -47,18 +47,18 @@ class DateQuizUnit(QuizUnitBase):
     @classmethod
     def generate_quiz(cls, unit_blueprint):
         count = unit_blueprint.get("count", 1)
-        quizzes = []
+        quiz = []
 
         for _ in range(count):
             date = cls._generate_question(unit_blueprint)
             answer = cls._envaluate_question(date)
             question = cls._prettify_question(date)
 
-            quizzes.append(
+            quiz.append(
                 {"question": question, "answer": answer, "category": "date"}
             )
 
-        return quizzes
+        return quiz
 
     @classmethod
     def compare_answers(cls, answer_a, answer_b):

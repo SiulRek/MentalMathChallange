@@ -87,7 +87,7 @@ class MathQuizUnit(QuizUnitBase):
     @classmethod
     def generate_quiz(cls, unit_blueprint):
         count = unit_blueprint.get("count", 1)
-        quizzes = []
+        quiz = []
 
         for _ in range(count):
             elements = unit_blueprint["elements"]
@@ -95,11 +95,11 @@ class MathQuizUnit(QuizUnitBase):
             answer = cls._envaluate_question(expr)
             question = cls._prettify_question(expr)
 
-            quizzes.append(
+            quiz.append(
                 {"question": question, "answer": answer, "category": "math"}
             )
 
-        return quizzes
+        return quiz
 
     @classmethod
     def compare_answers(cls, answer_a, answer_b):
