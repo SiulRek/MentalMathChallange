@@ -1,7 +1,7 @@
 import unittest
 
 from core.exceptions import UserResponseError
-from core.main_quiz_engine import MainQuizEngine
+from core.main_quiz_engine import QuizEngine
 from tests.utils.base_test_case import BaseTestCase
 
 # NOTE: The logic for generating quizzes and computing results is not tested
@@ -10,7 +10,7 @@ from tests.utils.base_test_case import BaseTestCase
 
 class CompareAnswersTest(BaseTestCase):
     def setUp(self):
-        self.quiz_engine = MainQuizEngine()
+        self.quiz_engine = QuizEngine()
 
     def test_compare_math_true(self):
         self.quiz_engine._focus_on_category("math")
@@ -37,7 +37,7 @@ class CompareAnswersTest(BaseTestCase):
 
 class ParseUserAnswerTest(BaseTestCase):
     def setUp(self):
-        self.quiz_engine = MainQuizEngine()
+        self.quiz_engine = QuizEngine()
 
     def test_parse_user_answer_math(self):
         self.quiz_engine._focus_on_category("math")
@@ -66,7 +66,7 @@ class ParseUserAnswerTest(BaseTestCase):
 
 class PrettifyAnswerTest(BaseTestCase):
     def setUp(self):
-        self.quiz_engine = MainQuizEngine()
+        self.quiz_engine = QuizEngine()
 
     def test_prettify_answer_math(self):
         self.quiz_engine._focus_on_category("math")

@@ -2,7 +2,7 @@ from core.date_quiz_engine import DateQuizEngine
 from core.math_quiz_engine import MathQuizEngine
 
 
-class MainQuizEngine:
+class QuizEngine:
     def __init__(self):
         self.active_engine = None
 

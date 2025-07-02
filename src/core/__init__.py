@@ -3,7 +3,7 @@ __all__ = [
     "compute_quiz_results",
 ]
 
-from core.main_quiz_engine import MainQuizEngine
+from core.main_quiz_engine import QuizEngine
 
 
 def generate_quiz(blueprint):
@@ -21,7 +21,7 @@ def generate_quiz(blueprint):
     list
         A list containing generated quiz questions.
     """
-    engine = MainQuizEngine()
+    engine = QuizEngine()
     return engine.geenrate_quiz(blueprint)
 
 
@@ -58,5 +58,5 @@ def compute_quiz_results(quiz, user_answers):
         - "is_correct" : bool
             Whether the user's answer is correct.
     """
-    engine = MainQuizEngine()
+    engine = QuizEngine()
     return engine.compute_quiz_results(quiz, user_answers)
