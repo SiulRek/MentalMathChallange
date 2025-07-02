@@ -22,7 +22,7 @@ def generate_quiz(blueprint):
         A list containing generated quiz questions.
     """
     engine = MainQuizEngine()
-    return engine.generate(blueprint)
+    return engine.geenrate_quiz(blueprint)
 
 
 def compute_quiz_results(quiz, user_answers):
