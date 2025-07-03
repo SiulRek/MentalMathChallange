@@ -21,12 +21,11 @@ class ParseBlueprintFromTextTest(BaseTestCase):
                 "elements": [
                     {"type": "int", "start": 1, "end": 10},
                     {"type": "operator", "value": "+"},
-                    {"type": "float", "start": 3.0, "end": 7.5},
-                ],
-                "category": "math",
-            },
-            2,
-        )
+                    {"type": "float", "start": 3.0, "end": 7.5}],
+                    "count": 2,
+                },
+            "math",
+        )   
         self.assertEqual(result[0], expected)
 
     def test_with_alternating_elements(self):
@@ -36,7 +35,8 @@ class ParseBlueprintFromTextTest(BaseTestCase):
   float 2.5 5.5
 """
         result = parse_blueprint_from_text(blueprint)
-        self.assertEqual(result[0][0]["category"], "math")
+        self.assertEqual(result[0][1], "math")
+        self.assertEqual(result[0][0]["count"], 1)
         self.assertEqual(len(result[0][0]["elements"]), 3)
         self.assertEqual(result[0][0]["elements"][0]["type"], "int")
         self.assertEqual(result[0][0]["elements"][1]["value"], "-")
@@ -234,18 +234,19 @@ class ParseBlueprintFromTextTest(BaseTestCase):
         result = parse_blueprint_from_text(blueprint)
         expected = [
             {
-                "category": "date",
+                "count": 1,
                 "start_year": 1990,
                 "end_year": 2020,
             },
-            1,
+            "date",
         ]
         self.assertEqual(result, [tuple(expected)])
 
     def test_validate_date_without_any_year(self):
         blueprint = "date: 1\n"
         result = parse_blueprint_from_text(blueprint)
-        self.assertEqual(result[0][0]["category"], "date")
+        self.assertEqual(result[0][1], "date")
+        self.assertEqual(result[0][0]["count"], 1)
 
     # ---------- Test Cases for Mixed Blueprints ----------
     def test_multiple_blocks(self):
@@ -260,8 +261,8 @@ date: 2
 """
         result = parse_blueprint_from_text(blueprint)
         self.assertEqual(len(result), 2)
-        self.assertEqual(result[0][0]["category"], "math")
-        self.assertEqual(result[1][0]["category"], "date")
+        self.assertEqual(result[0][1], "math")
+        self.assertEqual(result[1][1], "date")
 
     def test_inconsistent_spacing(self):
         blueprint = """math:  1
@@ -275,8 +276,8 @@ date: 2
 """
         result = parse_blueprint_from_text(blueprint)
         self.assertEqual(len(result), 2)
-        self.assertEqual(result[0][0]["category"], "math")
-        self.assertEqual(result[1][0]["category"], "date")
+        self.assertEqual(result[0][1], "math")
+        self.assertEqual(result[1][1], "date")
 
     def test_whitespace_and_empty_lines(self):
         blueprint = """
@@ -290,7 +291,8 @@ math: 1
   float 2.0 4.0
 """
         result = parse_blueprint_from_text(blueprint)
-        self.assertEqual(result[0][0]["category"], "math")
+        self.assertEqual(result[0][1], "math")
+        self.assertEqual(result[0][0]["count"], 1)
         self.assertEqual(len(result[0][0]["elements"]), 3)
 
     def test_operator_multiple_values(self):
@@ -715,14 +717,14 @@ class GenerateQuizTest(BaseTestCase):
         blueprint = [
             (
                 {
-                    "category": "math",
+                    "count": 2,
                     "elements": [
                         {"type": "int", "start": 1, "end": 1},
                         {"type": "operator", "value": "+"},
                         {"type": "int", "start": 1, "end": 1},
                     ],
                 },
-                2,
+                "math",
             )
         ]
         result = generate_quiz(blueprint)
@@ -735,8 +737,8 @@ class GenerateQuizTest(BaseTestCase):
     def test_generate_quiz_date(self):
         blueprint = [
             (
-                {"category": "date", "start_year": 2000, "end_year": 2000},
-                1,
+                {"count": 1, "start_year": 2000, "end_year": 2000},
+                "date",
             )
         ]
         result = generate_quiz(blueprint)
@@ -761,22 +763,22 @@ class GenerateQuizTest(BaseTestCase):
         blueprint = [
             (
                 {
-                    "category": "math",
+                    "count": 1,
                     "elements": [
                         {"type": "int", "start": 1, "end": 1},
                         {"type": "operator", "value": "+"},
                         {"type": "int", "start": 1, "end": 1},
                     ],
                 },
-                1,
+                "math",
             ),
             (
                 {
-                    "category": "date",
+                    "count": 1,
                     "start_year": 2000,
                     "end_year": 2000,
                 },
-                1,
+                "date",
             ),
         ]
         result = generate_quiz(blueprint)

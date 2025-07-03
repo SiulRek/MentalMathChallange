@@ -72,16 +72,14 @@ class QuizEngine:
             options = self._parse_options(block_text)
             blueprint_unit = quiz_unit.generate_blueprint_unit(options)
 
-            blueprint_unit.update({"category": category})
-            blueprint.append((blueprint_unit, count))
+            blueprint_unit.update({"count": count})
+            blueprint.append((blueprint_unit, category))
 
         return blueprint
 
     def generate_quiz(self, blueprint):
         quiz = []
-        for unit_blueprint, count in blueprint:
-            category = unit_blueprint.get("category")
-            unit_blueprint["count"] = count
+        for unit_blueprint, category in blueprint:
             engine = self._get_engine(category)
             quiz.extend(engine.generate_quiz(unit_blueprint))
         return quiz

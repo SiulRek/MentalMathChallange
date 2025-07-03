@@ -21,9 +21,8 @@ def unparse_blueprint_to_text(blueprint_data):
     if isinstance(blueprint_data, str):
         blueprint_data = json.loads(blueprint_data)
 
-    for blueprint, count in blueprint_data:
-        category = blueprint["category"]
-        lines.append(f"{category}: {count}")
+    for blueprint, category in blueprint_data:
+        lines.append(f"{category}: {blueprint['count']}")
 
         if category == "math":
             for elem in blueprint["elements"]:
