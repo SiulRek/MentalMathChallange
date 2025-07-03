@@ -79,9 +79,9 @@ class QuizEngine:
 
     def generate_quiz(self, blueprint):
         quiz = []
-        for unit_blueprint, category in blueprint:
+        for blueprint_unit, category in blueprint:
             q_unit = self._get_quiz_unit(category)
-            quiz.extend(q_unit.generate_quiz(unit_blueprint))
+            quiz.extend(q_unit.generate_quiz(blueprint_unit))
         return quiz
 
     def _focus_on_category(self, category):

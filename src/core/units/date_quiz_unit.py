@@ -48,9 +48,9 @@ class DateQuizUnit(QuizUnitBase):
         return unit_bp
 
     @classmethod
-    def _generate_question(cls, unit_blueprint):
-        start_year = unit_blueprint.get("start_year", 1900)
-        end_year = unit_blueprint.get("end_year", 2050)
+    def _generate_question(cls, blueprint_unit):
+        start_year = blueprint_unit.get("start_year", 1900)
+        end_year = blueprint_unit.get("end_year", 2050)
         assert end_year >= start_year, "End year must be >= start year"
         return random_date(start_year, end_year)
 
@@ -79,12 +79,12 @@ class DateQuizUnit(QuizUnitBase):
         return f"{month} {day}, {year}"
 
     @classmethod
-    def generate_quiz(cls, unit_blueprint):
-        count = unit_blueprint.get("count", 1)
+    def generate_quiz(cls, blueprint_unit):
+        count = blueprint_unit.get("count", 1)
         quiz = []
 
         for _ in range(count):
-            date = cls._generate_question(unit_blueprint)
+            date = cls._generate_question(blueprint_unit)
             answer = cls._envaluate_question(date)
             question = cls._prettify_question(date)
 

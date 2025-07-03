@@ -357,12 +357,12 @@ class MathQuizUnit(QuizUnitBase):
         return expr
 
     @classmethod
-    def generate_quiz(cls, unit_blueprint):
-        count = unit_blueprint.get("count", 1)
+    def generate_quiz(cls, blueprint_unit):
+        count = blueprint_unit.get("count", 1)
         quiz = []
 
         for _ in range(count):
-            elements = unit_blueprint["elements"]
+            elements = blueprint_unit["elements"]
             expr = cls._generate_question(elements)
             answer = cls._envaluate_question(expr)
             question = cls._prettify_question(expr)

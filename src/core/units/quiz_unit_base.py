@@ -16,9 +16,9 @@ class QuizUnitBase(ABC):
 
     @classmethod
     @abstractmethod
-    def generate_quiz(cls, unit_blueprint):
+    def generate_quiz(cls, blueprint_unit):
         """
-        Generate a quiz based on the provided unit_blueprint.
+        Generate a quiz based on the provided blueprint_unit.
         """
         pass
 
