@@ -1,6 +1,6 @@
 import unittest
 
-from core.exceptions import UserResponseError
+from core.units.exceptions import UserResponseError
 from core.quiz_engine import QuizEngine
 from tests.utils.base_test_case import BaseTestCase
 

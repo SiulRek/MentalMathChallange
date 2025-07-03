@@ -1,7 +1,7 @@
 import unittest
 
-from core.date_quiz_unit import DateQuizUnit
-from core.exceptions import UserResponseError
+from core.units.date_quiz_unit import DateQuizUnit
+from core.units.exceptions import UserResponseError
 from tests.utils.base_test_case import BaseTestCase
 
 

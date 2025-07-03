@@ -1,11 +1,18 @@
 import random
 import re
 
-from numpy import abs
-from scipy.constants import c, e
-from core.exceptions import UserConfigError, UserResponseError
-from core.quiz_unit_base import QuizUnitBase
-from core.shared import MappingError, map_args_to_option
+from numpy import (
+    abs, ceil, floor, round, exp,   # noqa: F401
+    log, log10, sqrt, sin, cos, tan  # noqa: F401
+)
+from scipy.constants import (
+    c, h, hbar, G, e, k, N_A, R, alpha, mu_0, epsilon_0,    # noqa: F401
+    sigma, zero_Celsius, pi, Avogadro, Boltzmann, Planck,   # noqa: F401
+    speed_of_light, elementary_charge, gravitational_constant   # noqa: F401
+)
+from core.units.exceptions import UserConfigError, UserResponseError
+from core.units.quiz_unit_base import QuizUnitBase
+from core.units.shared import MappingError, map_args_to_option
 
 MAX_PRECISION = 10
 SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%", "**"}

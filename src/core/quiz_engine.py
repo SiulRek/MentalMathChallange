@@ -1,6 +1,6 @@
-from core.date_quiz_unit import DateQuizUnit
-from core.exceptions import UserConfigError
-from core.math_quiz_unit import MathQuizUnit
+from core.units.date_quiz_unit import DateQuizUnit
+from core.units.exceptions import UserConfigError
+from core.units.math_quiz_unit import MathQuizUnit
 
 
 class QuizEngine:
