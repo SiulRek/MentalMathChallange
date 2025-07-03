@@ -24,9 +24,7 @@ def standardize_weekday_string(weekday):
             break
     else:
         raise ValueError(
-            f"Invalid weekday string: {weekday}. Must be one of ['monday', "
-            "'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', "
-            "'sunday']"
+            f"Invalid weekday string: {weekday}."
         )
     return sanitized_weekday
 

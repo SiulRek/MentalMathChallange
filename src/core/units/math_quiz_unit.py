@@ -346,7 +346,7 @@ class MathQuizUnit(QuizUnitBase):
             res = float("inf")
         except (ValueError, TypeError, SyntaxError) as exc:
             raise ValueError(
-                f"Invalid expression '{expr}'. Error: {exc}"
+                f"Invalid expression '{expr}': {exc}"
             ) from exc
         return str(res)
 

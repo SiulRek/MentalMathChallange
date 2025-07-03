@@ -110,9 +110,7 @@ class DateQuizUnit(QuizUnitBase):
         except (AssertionError, ValueError) as e:
             # TODO: Remove line 75 to 76 of error message
             raise UserResponseError(
-                f"Invalid weekday string '{user_answer}'. Error: {e}. "
-                "Expected one of ['monday', 'tuesday', 'wednesday', "
-                "'thursday', 'friday', 'saturday', 'sunday']."
+                f"Invalid weekday string "
             ) from e
 
     @classmethod
