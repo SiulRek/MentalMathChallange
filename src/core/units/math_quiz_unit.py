@@ -279,8 +279,7 @@ class MathQuizUnit(QuizUnitBase):
                 else:
                     raise UserConfigError(f"Unknown option key: {key}")
         except (MappingError, AssertionError) as e:
-            # XXX: Change here this is just temporarily message!!!!!!
-            raise UserConfigError(f"Invalid option '{key}': {args}") from e
+            raise UserConfigError(f"Invalid option '{key}': {e}") from e
 
         if not elems:
             raise UserConfigError(
