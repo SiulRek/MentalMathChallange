@@ -77,6 +77,18 @@ class QuizEngine:
 
         return blueprint
 
+    def unparse_blueprint_to_text(self, blueprint):
+        text = ""
+        for blueprint_unit, category in blueprint:
+            text += f"{category}: {blueprint_unit['count']}\n"
+            quiz_unit = self._get_quiz_unit(category)
+            options = quiz_unit.unparse_options(blueprint_unit)
+            text += "\n".join(
+                f"  {opt['key']} {' '.join(opt['args'])}" for opt in options
+            )
+            text += "\n\n"
+        return text.strip()
+    
     def generate_quiz(self, blueprint):
         quiz = []
         for blueprint_unit, category in blueprint:

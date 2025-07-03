@@ -13,7 +13,15 @@ class QuizUnitBase(ABC):
         Convert options to a blueprint unit for the quiz engine.
         """
         pass
-
+    
+    @classmethod
+    @abstractmethod
+    def unparse_options(cls, blueprint_unit):
+        """
+        Convert a blueprint unit back to options for the quiz engine.
+        """
+        pass
+    
     @classmethod
     @abstractmethod
     def generate_quiz(cls, blueprint_unit):

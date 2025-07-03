@@ -10,6 +10,7 @@ from scipy.constants import (
     sigma, zero_Celsius, pi, Avogadro, Boltzmann, Planck,   # noqa: F401
     speed_of_light, elementary_charge, gravitational_constant   # noqa: F401
 )
+
 from core.units.exceptions import UserConfigError, UserResponseError
 from core.units.quiz_unit_base import QuizUnitBase
 from core.units.shared import MappingError, map_args_to_option
@@ -278,7 +279,8 @@ class MathQuizUnit(QuizUnitBase):
                 else:
                     raise UserConfigError(f"Unknown option key: {key}")
         except (MappingError, AssertionError) as e:
-            raise UserConfigError(f"Invalid option '{key}': {e}") from e
+            # XXX: Change here this is just temporarily message!!!!!!
+            raise UserConfigError(f"Invalid option '{key}': {args}") from e
 
         if not elems:
             raise UserConfigError(
@@ -291,6 +293,37 @@ class MathQuizUnit(QuizUnitBase):
             raise UserConfigError(f"Invalid math expression: {exc}") from exc
 
         return blueprint_unit
+
+    @classmethod
+    def unparse_options(cls, blueprint_unit):
+        """
+        Convert a blueprint unit back to options for the math quiz.
+        """
+        reverse_key_mapping = {v: k for k, v in KEY_MAPPING.items()}
+        options = []
+        for elem in blueprint_unit["elements"]:
+            old_key = elem["type"]
+            key = reverse_key_mapping.get(old_key, old_key)
+            opt = {"key": key}
+            if old_key == "int":
+                args = [elem.get("start", 0), elem["end"]]
+            elif old_key == "float" or re.match(r"float\.(\d+)", key):
+                args = [elem.get("start", 0.0), elem["end"]]
+            elif old_key == "operator":
+                args = elem["value"]
+                if isinstance(args, str):
+                    args = [args]
+            elif old_key == "bracket":
+                opt.update({"key": elem["value"]})
+                args = []
+            elif old_key in ["function", "constant"]:
+                args = [elem["value"]]
+            else:
+                raise ValueError(f"Invalid element type '{old_key}'")
+            args = map(str, args)
+            opt.update({"args": args})
+            options.append(opt)
+        return options
 
     @classmethod
     def _generate_question(cls, elements):
@@ -345,9 +378,7 @@ class MathQuizUnit(QuizUnitBase):
         except ZeroDivisionError:
             res = float("inf")
         except (ValueError, TypeError, SyntaxError) as exc:
-            raise ValueError(
-                f"Invalid expression '{expr}': {exc}"
-            ) from exc
+            raise ValueError(f"Invalid expression '{expr}': {exc}") from exc
         return str(res)
 
     @classmethod

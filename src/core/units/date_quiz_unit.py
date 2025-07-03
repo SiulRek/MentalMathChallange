@@ -48,6 +48,18 @@ class DateQuizUnit(QuizUnitBase):
         return unit_bp
 
     @classmethod
+    def unparse_options(cls, blueprint_unit):
+        """
+        Convert a blueprint unit back to options for the date quiz.
+        """
+        options = []
+        if "start_year" in blueprint_unit:
+            options.append({"key": "start", "args": [str(blueprint_unit["start_year"])]})
+        if "end_year" in blueprint_unit:
+            options.append({"key": "end", "args": [str(blueprint_unit["end_year"])]})
+        return options
+    
+    @classmethod
     def _generate_question(cls, blueprint_unit):
         start_year = blueprint_unit.get("start_year", 1900)
         end_year = blueprint_unit.get("end_year", 2050)
