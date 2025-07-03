@@ -79,15 +79,19 @@ class BlueprintServiceTest(BaseTestCase):
         self.assertIsNotNone(bp)
         self.assertEqual(bp["name"], "bp1")
         self.assertEqual(bp["description"], "desc")
-        expected_blueprint = json.dumps(
-            parse_blueprint_from_text(blueprint_text)
-        )
+        expected_blueprint = parse_blueprint_from_text(blueprint_text)
+        expected_blueprint = json.loads(json.dumps(expected_blueprint))
+
         self.assertEqual(bp["blueprint"], expected_blueprint)
 
     def test_get_user_blueprints_list(self):
         user = self._register_user("carol", "Strong1!")
         bp1 = "math: 1\n int 1 10\n"
         bp2 = "math: 1\n int 2 20\n"
+        expected_bp1 = parse_blueprint_from_text(bp1)
+        expected_bp2 = parse_blueprint_from_text(bp2)
+        expected_bp1 = json.loads(json.dumps(expected_bp1))
+        expected_bp2 = json.loads(json.dumps(expected_bp2))
         self.bp_service.add_user_blueprint(user.id, "bp one", "desc1", bp1)
         self.bp_service.add_user_blueprint(user.id, "bp two", "desc2", bp2)
 
@@ -96,6 +100,8 @@ class BlueprintServiceTest(BaseTestCase):
         self.assertEqual(len(bp_list), 2)
         self.assertIn("bp one", names)
         self.assertIn("bp two", names)
+        self.assertEqual(bp_list[0]["blueprint"], expected_bp1)
+        self.assertEqual(bp_list[1]["blueprint"], expected_bp2)
 
     def test_update_existing_blueprint(self):
         user = self._register_user("dave", "Strong1!")

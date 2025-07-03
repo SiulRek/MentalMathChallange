@@ -102,7 +102,7 @@ class BlueprintService:
         blueprint = {
             "name": blueprint.name,
             "description": blueprint.description,
-            "blueprint": blueprint.blueprint,
+            "blueprint": json.loads(blueprint.blueprint),
         }
         return blueprint
 
@@ -113,7 +113,7 @@ class BlueprintService:
             blueprint = {
                 "name": blueprint.name,
                 "description": blueprint.description,
-                "blueprint": blueprint.blueprint,
+                "blueprint": json.loads(blueprint.blueprint),
             }
             blueprint_list.append(blueprint)
         return blueprint_list
