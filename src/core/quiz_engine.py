@@ -5,7 +5,7 @@ from core.units.math_quiz_unit import MathQuizUnit
 
 class QuizEngine:
     def __init__(self):
-        self.active_engine = None
+        self.active_unit = None
 
     def _parse_options(self, text):
         options = []
@@ -17,7 +17,7 @@ class QuizEngine:
             options.append({"key": key, "args": args})
         return options
 
-    def _get_engine(self, type):
+    def _get_quiz_unit(self, type):
         if type == "math":
             return MathQuizUnit
         if type == "date":
@@ -50,7 +50,7 @@ class QuizEngine:
             try:
                 category, count = line.split(":")
                 category = category.strip()
-                quiz_unit = self._get_engine(category)
+                quiz_unit = self._get_quiz_unit(category)
                 count = int(count.strip())
             except ValueError as exc:
                 raise UserConfigError(
@@ -80,27 +80,27 @@ class QuizEngine:
     def generate_quiz(self, blueprint):
         quiz = []
         for unit_blueprint, category in blueprint:
-            engine = self._get_engine(category)
-            quiz.extend(engine.generate_quiz(unit_blueprint))
+            q_unit = self._get_quiz_unit(category)
+            quiz.extend(q_unit.generate_quiz(unit_blueprint))
         return quiz
 
     def _focus_on_category(self, category):
-        self.active_engine = self._get_engine(category)
+        self.active_unit = self._get_quiz_unit(category)
 
-    def _validate_focused_engine(self):
-        if not self.active_engine:
+    def _validate_focused_quiz_unit(self):
+        if not self.active_unit:
             raise ValueError(
-                "No focused engine set. Use focus_on_category() first."
+                "No focused quiz unit set. Use focus_on_category() first."
             )
 
     def _compare_answers(self, answer_a, answer_b):
-        self._validate_focused_engine()
+        self._validate_focused_quiz_unit()
         if not answer_a or not answer_b:
             return False
-        return self.active_engine.compare_answers(answer_a, answer_b)
+        return self.active_unit.compare_answers(answer_a, answer_b)
 
     def _parse_user_answer(self, user_answer):
-        self._validate_focused_engine()
+        self._validate_focused_quiz_unit()
         try:
             user_answer = user_answer.strip()
         except AttributeError:
@@ -108,13 +108,13 @@ class QuizEngine:
         if not user_answer:
             return None
 
-        return self.active_engine.parse_user_answer(user_answer)
+        return self.active_unit.parse_user_answer(user_answer)
 
     def _prettify_answer(self, answer):
-        self._validate_focused_engine()
+        self._validate_focused_quiz_unit()
         if not answer:
             return None
-        return self.active_engine.prettify_answer(answer)
+        return self.active_unit.prettify_answer(answer)
 
     def compute_quiz_results(self, quiz, user_answers):
         quiz = [(q["question"], q["answer"], q["category"]) for q in quiz]
@@ -123,14 +123,14 @@ class QuizEngine:
             question, correct_answer, category = quiz_elem
             correct_answer = correct_answer.lower()
             self._focus_on_category(category)
-            engine = self.active_engine
-            user_answer = engine.parse_user_answer(user_answer)
-            correct = engine.compare_answers(
+            q_unit = self.active_unit
+            user_answer = q_unit.parse_user_answer(user_answer)
+            correct = q_unit.compare_answers(
                 user_answer,
                 correct_answer,
             )
-            user_answer = engine.prettify_answer(user_answer)
-            correct_answer = engine.prettify_answer(correct_answer)
+            user_answer = q_unit.prettify_answer(user_answer)
+            correct_answer = q_unit.prettify_answer(correct_answer)
             results.append(
                 {
                     "question": question,
