@@ -8,6 +8,14 @@ class QuizUnitBase(ABC):
 
     @classmethod
     @abstractmethod
+    def generate_blueprint_unit(cls, options):
+        """
+        Convert options to a blueprint unit for the quiz engine.
+        """
+        pass
+
+    @classmethod
+    @abstractmethod
     def generate_quiz(cls, unit_blueprint):
         """
         Generate a quiz based on the provided unit_blueprint.

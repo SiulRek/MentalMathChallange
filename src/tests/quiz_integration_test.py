@@ -3,7 +3,7 @@ import unittest
 from app.collect_user_answers import collect_user_answers
 from core import generate_quiz, compute_quiz_results
 from core.exceptions import UserConfigError, UserResponseError
-from core.parse_blueprint_from_text import _parse_blueprint_from_text
+from core.parse_blueprint_from_text import parse_blueprint_from_text
 from tests.utils.base_test_case import BaseTestCase
 
 
@@ -18,7 +18,7 @@ date: 1
   start 2020
   end 2020
 """
-        parsed = _parse_blueprint_from_text(blueprint_text)
+        parsed = parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         self.assertEqual(len(quiz), 2)
@@ -54,7 +54,7 @@ date: 1
   op +
   int 1 1
 """
-        parsed = _parse_blueprint_from_text(blueprint_text)
+        parsed = parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         submission = {
@@ -75,7 +75,7 @@ date: 1
   op *
   int 1 1
 """
-        parsed = _parse_blueprint_from_text(blueprint_text)
+        parsed = parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         submission = {"answer_0": "not_a_number"}
@@ -90,7 +90,7 @@ date: 1
   op +
   float 2.0 2.0
 """
-        parsed = _parse_blueprint_from_text(blueprint_text)
+        parsed = parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         correct = float(quiz[0]["answer"])
@@ -109,7 +109,7 @@ date: 1
   op /
   int 1 1
 """
-        parsed = _parse_blueprint_from_text(blueprint_text)
+        parsed = parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         submission = {"answer_0": quiz[0]["answer"]}
@@ -123,7 +123,7 @@ date: 1
   op /
   int 0 0
 """
-        parsed = _parse_blueprint_from_text(blueprint_text)
+        parsed = parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         self.assertEqual(quiz[0]["answer"], "inf")
@@ -137,7 +137,7 @@ date: 1
   start 2020
   end 2020
 """
-        parsed = _parse_blueprint_from_text(blueprint_text)
+        parsed = parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         submission = {"answer_0": quiz[0]["answer"].lower()}
@@ -151,7 +151,7 @@ date: 1
   op +
   float 2.987654321 2.987654321
 """
-        parsed = _parse_blueprint_from_text(blueprint_text)
+        parsed = parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         truncated = str(round(float(quiz[0]["answer"]), 6))
@@ -166,7 +166,7 @@ date: 1
   op +
   float.3 2.987654321 2.987654321
 """
-        parsed = _parse_blueprint_from_text(blueprint_text)
+        parsed = parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
         self.assertEqual(quiz[0]["question"], "1.12 + 2.988")
@@ -184,7 +184,7 @@ date: 1
   op *
 """
         with self.assertRaises(UserConfigError):
-            _parse_blueprint_from_text(blueprint_text)
+            parse_blueprint_from_text(blueprint_text)
 
 
 if __name__ == "__main__":

@@ -1,9 +1,7 @@
 import unittest
 
-from core.parse_blueprint_from_text import (
-    parse_blueprint_from_text,
-    UserConfigError,
-)
+from core.exceptions import UserConfigError
+from core.parse_blueprint_from_text import parse_blueprint_from_text
 from core.unparse_blueprint_to_text import unparse_blueprint_to_text
 from tests.utils.base_test_case import BaseTestCase
 
@@ -18,18 +16,18 @@ class ParseBlueprintFromTextTest(BaseTestCase):
   float 3.0 7.5
 """
         result = parse_blueprint_from_text(blueprint)
-        expected = [
+        expected = (
             {
-                "category": "math",
                 "elements": [
                     {"type": "int", "start": 1, "end": 10},
                     {"type": "operator", "value": "+"},
                     {"type": "float", "start": 3.0, "end": 7.5},
                 ],
+                "category": "math",
             },
             2,
-        ]
-        self.assertEqual(result, [tuple(expected)])
+        )
+        self.assertEqual(result[0], expected)
 
     def test_with_alternating_elements(self):
         blueprint = """math: 1
@@ -78,6 +76,13 @@ class ParseBlueprintFromTextTest(BaseTestCase):
         self.assertEqual(elements[-1]["type"], "float.3")
         self.assertEqual(elements[-1]["start"], 3.3)
         self.assertEqual(elements[-1]["end"], 4.4)
+
+    def test_float_precision_invalid(self):
+        blueprint = """math: 1
+    float.invalid 1.1 2.2
+"""
+        with self.assertRaises(UserConfigError) as exc:
+            parse_blueprint_from_text(blueprint)
 
     def test_multiple_operators(self):
         blueprint = """math: 1

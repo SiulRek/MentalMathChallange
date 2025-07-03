@@ -3,11 +3,10 @@ import json
 from sqlalchemy.exc import IntegrityError
 
 from app.models import UserBlueprint
-from core.parse_blueprint_from_text import (
-    parse_blueprint_from_text,
-    UserConfigError,
-)
 from app.validators import assert_blueprint_name
+from core.exceptions import UserConfigError
+from core.parse_blueprint_from_text import parse_blueprint_from_text
+
 
 class BlueprintService:
     def __init__(self, db):
@@ -22,7 +21,7 @@ class BlueprintService:
             assert_blueprint_name(name)
         except ValueError as e:
             return False, str(e)
-        
+
         existing = UserBlueprint.query.filter_by(
             user_id=user_id, name=name
         ).first()
