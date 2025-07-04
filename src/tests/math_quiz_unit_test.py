@@ -69,11 +69,11 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
 
     def test_numeric_valid_single_arg(self):
         cases = [
-            ({"key": "int", "args": ["5"]}, {"type": "int", "end": 5}),
-            ({"key": "float", "args": ["5.0"]}, {"type": "float", "end": 5.0}),
+            ({"key": "int", "args": ["5"]}, {"type": "int", "start": 0, "end": 5}),
+            ({"key": "float", "args": ["5.0"]}, {"type": "float", "start":0, "end": 5.0}),
             (
                 {"key": "float.2", "args": ["5.0"]},
-                {"type": "float.2", "end": 5.0},
+                {"type": "float.2", "start": 0, "end": 5.0},
             ),
         ]
         for option, expected in cases:

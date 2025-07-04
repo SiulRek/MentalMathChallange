@@ -203,10 +203,6 @@ class MathQuizUnit(QuizUnitBase):
         """
         Convert options to a blueprint unit for the math quiz.
         """
-
-        def add_opt(opt):
-            elems[-1].update(opt)
-
         blueprint_unit = {"elements": []}
         elems = blueprint_unit["elements"]
         try:
@@ -226,7 +222,6 @@ class MathQuizUnit(QuizUnitBase):
                         ],
                         1,
                     )
-                    add_opt(opt)
                 elif key == "float" or re.match(r"float\.(\d+)", key):
                     args.reverse()
                     map_args_to_option(
@@ -238,13 +233,12 @@ class MathQuizUnit(QuizUnitBase):
                         ],
                         1,
                     )
-                    add_opt(opt)
                 elif key == "operator":
                     assert (
                         len(args) > 0
                     ), "At least one operator must be defined"
                     args = args[0] if len(args) == 1 else args
-                    add_opt({"value": args})
+                    opt.update({"value": args})
                 elif key == "bracket":
                     args = [old_key] + args
                     map_args_to_option(
@@ -255,7 +249,6 @@ class MathQuizUnit(QuizUnitBase):
                         ],
                         1,
                     )
-                    add_opt(opt)
                 elif key == "function" or key == "constant":
                     map_args_to_option(
                         opt,
@@ -265,9 +258,14 @@ class MathQuizUnit(QuizUnitBase):
                         ],
                         1,
                     )
-                    add_opt(opt)
                 else:
                     raise UserConfigError(f"Unknown option key: {key}")
+                
+                if _is_numeric_type(key, ignore_constants=True):
+                    opt.setdefault("start", 0)
+                
+                elems[-1].update(opt)
+
         except (MappingError, AssertionError) as e:
             raise UserConfigError(f"Invalid option '{key}': {e}") from e
 
@@ -290,9 +288,9 @@ class MathQuizUnit(QuizUnitBase):
             key = reverse_key_mapping.get(old_key, old_key)
             opt = {"key": key}
             if old_key == "int":
-                args = [elem.get("start", 0), elem["end"]]
+                args = [elem["start"], elem["end"]]
             elif old_key == "float" or re.match(r"float\.(\d+)", key):
-                args = [elem.get("start", 0.0), elem["end"]]
+                args = [elem["start"], elem["end"]]
             elif old_key == "operator":
                 args = elem["value"]
                 if isinstance(args, str):
@@ -319,7 +317,7 @@ class MathQuizUnit(QuizUnitBase):
             if elem_type == "bracket":
                 expr += elem["value"]
             elif elem_type in ["int", "float"] or float_precision_match:
-                start = elem.get("start", 0)
+                start = elem["start"]
                 end = elem["end"]
 
                 if elem_type == "int":
