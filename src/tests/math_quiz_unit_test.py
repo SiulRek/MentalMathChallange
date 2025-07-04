@@ -47,7 +47,7 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
                 opt = self.bracket_close_option
             elif specifier == "const":
                 opt = self.constant_option
-            options.append(opt.copy())
+            options.append(deepcopy(opt))
         return options
 
     def test_numeric_valid_simple(self):
@@ -200,9 +200,12 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
     def test_numeric_invalid_args(self):
         cases = [
             ({"key": "int", "args": ["a", "b"]}),
-            ({"key": "int", "args": ["3.14", "2.71"]}),
+            ({"key": "int", "args": ["3.14", "3.71"]}),
+            ({"key": "int", "args": ["2", "1"]}),
             ({"key": "float", "args": ["a", "b"]}),
+            ({"key": "float", "args": ["2.0", "1.0"]}),
             ({"key": "float.2", "args": ["a", "b"]}),
+            ({"key": "float.2", "args": ["2.0", "1.0"]}),
             ({"key": "const", "args": ["invalid_constant"]}),
         ]
         for option in cases:

@@ -160,7 +160,9 @@ def _assert_math_expression_elements(elements):
     for elem in elements:
         type_ = elem["type"]
         if _is_numeric_type(type_, ignore_constants=True):
-            expr += "1"
+            start, end = elem["start"], elem["end"]
+            assert end >= start, f"{end} not greater or equal to {start}"
+            expr += "1" if not type_.startswith("float") else "1.0"
         elif type_ == "operator":
             value = elem["value"]
             value = list(value) if isinstance(value, str) else value
