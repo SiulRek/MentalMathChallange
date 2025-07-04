@@ -26,19 +26,6 @@ KEY_MAPPING = {
 }
 
 
-def _parse_tokens_to_kwargs(tokens, keys, type_map):
-    assert len(tokens) <= len(keys), "Too many tokens for the provided keys"
-    kwargs = {}
-    for i, token in enumerate(tokens):
-        try:
-            kwargs[keys[i]] = type_map[i](token)
-        except (ValueError, TypeError) as exc:
-            raise UserConfigError(
-                f"Invalid token '{token}' for key '{keys[i]}'"
-            ) from exc
-    return kwargs
-
-
 def _assert_valid_operators(ops):
     reminder = set(ops) - SUPPORTED_OPERATORS
     if len(ops) == 1:
