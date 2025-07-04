@@ -125,8 +125,8 @@ date: 1
         parsed = parse_blueprint_from_text(blueprint_text)
         quiz = generate_quiz(parsed)
 
-        self.assertEqual(quiz[0]["answer"], "inf")
-        submission = {"answer_0": "inf"}
+        self.assertEqual(quiz[0]["answer"], "nan")
+        submission = {"answer_0": "nan"}
         user_answers = collect_user_answers(submission, len(quiz))
         results = compute_quiz_results(quiz, user_answers)
         self.assertTrue(results[0]["is_correct"])

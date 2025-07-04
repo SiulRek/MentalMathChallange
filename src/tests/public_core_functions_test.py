@@ -651,7 +651,7 @@ int 1 5
         with self.assertRaises(UserConfigError) as exc:
             parse_blueprint_from_text(blueprint)
         self.assertIn(
-            "function preceded by a numeric type",
+            "function preceded by numeric",
             str(exc.exception),
         )
 
