@@ -67,7 +67,6 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
                 elem = blueprint["elements"][0]
                 self.assertEqual(elem, expected)
 
-    # ----------- Test Single Options -------------
     def test_numeric_valid_single_arg(self):
         cases = [
             ({"key": "int", "args": ["5"]}, {"type": "int", "end": 5}),
@@ -225,9 +224,7 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
         with self.assertRaises(UserConfigError):
             MathQuizUnit.generate_blueprint_unit(options)
 
-    # ----------------- Test Multiple Options in Sequence -----------------
-
-    def test_valid_sequence_simple(self):
+    def test_valid_sequence_short(self):
         options = [
             {"key": "int", "args": ["1", "10"]},
             {"key": "op", "args": ["+"]},
@@ -239,7 +236,7 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
         self.assertEqual(blueprint["elements"][1]["type"], "operator")
         self.assertEqual(blueprint["elements"][2]["type"], "int")
 
-    def test_valid_sequence_complex(self):
+    def test_valid_sequence_long(self):
         specifiers = [
             "func",
             "bracket_open",
@@ -402,6 +399,109 @@ class MathQuizUnparseOptionsTest(BaseTestCase):
             with self.subTest(original=original, roundtrip=roundtrip):
                 self.assertEqual(original["key"], roundtrip["key"])
                 self.assertEqual(original["args"], roundtrip["args"])
+
+
+class MathQuizGenerateQuizTest(BaseTestCase):
+    def test_generate_long_quiz_valid(self):
+        blueprint = {
+            "elements": [
+                {"type": "function", "value": "sqrt"},
+                {"type": "bracket", "value": "("},
+                {"type": "int", "start": 1, "end": 1},
+                {"type": "operator", "value": "+"},
+                {"type": "float.2", "start": 1.0, "end": 1.0},
+                {"type": "operator", "value": "*"},
+                {"type": "constant", "value": "pi"},
+                {"type": "bracket", "value": ")"},
+            ],
+            "count": 3,
+        }
+
+        quizzes = MathQuizUnit.generate_quiz(blueprint)
+        self.assertEqual(len(quizzes), 3)
+
+        for q in quizzes:
+            self.assertIn("question", q)
+            self.assertIn("answer", q)
+            self.assertIn("category", q)
+            self.assertEqual(q["category"], "math")
+
+            question = q["question"]
+            expected_question = "sqrt(1 + 1.00 * pi)"
+            self.assertEqual(question, expected_question)
+            answer = float(q["answer"])
+            expected_answer = (1 + 1.00 * 3.141592653589793) ** (1 / 2)
+            self.assertAlmostEqual(answer, expected_answer, places=6)
+
+    def test_generate_random_numeric_quiz(self):
+        elements = [
+            {"type": "int", "start": -10, "end": 10},
+            {"type": "float", "start": -10.0, "end": 10.0},
+            {"type": "float.2", "start": -10.0, "end": 10.0},
+        ]
+        for elem in elements:
+            with self.subTest(elem=elem):
+                type_ = elem["type"]
+                blueprint = {
+                    "elements": [elem],
+                    "count": 50,
+                }
+                quiz = MathQuizUnit.generate_quiz(blueprint)
+                self.assertEqual(len(quiz), 50)
+
+                for q in quiz:
+                    self.assertIn("question", q)
+                    self.assertIn("answer", q)
+                    self.assertIn("category", q)
+                    self.assertEqual(q["category"], "math")
+                    question = float(q["question"])
+                    if type_ == "int":
+                        question = int(question)
+                    else:
+                        question = round(question)
+                    self.assertIn(question, range(-10, 11))
+
+    def test_random_choice_operators(self):
+        operators = list(SUPPORTED_OPERATORS)
+        blueprint = {
+            "elements": [
+                {"type": "int", "start": 1, "end": 10},
+                {"type": "operator", "value": operators},
+                {"type": "int", "start": 1, "end": 10},
+            ],
+            "count": 50,
+        }
+        quiz = MathQuizUnit.generate_quiz(blueprint)
+        self.assertEqual(len(quiz), 50)
+
+        for q in quiz:
+            self.assertIn("question", q)
+            self.assertIn("answer", q)
+            self.assertIn("category", q)
+            self.assertEqual(q["category"], "math")
+            question = q["question"]
+            op = question.split(" ")[1]
+            self.assertIn(op, operators)
+
+    def test_zero_division(self):
+        blueprint = {
+            "elements": [
+                {"type": "int", "start": 1, "end": 10},
+                {"type": "operator", "value": ["/"]},
+                {"type": "int", "start": 0, "end": 0},
+            ],
+            "count": 50,
+        }
+        quiz = MathQuizUnit.generate_quiz(blueprint)
+        self.assertEqual(len(quiz), 50)
+
+        for q in quiz:
+            self.assertIn("question", q)
+            self.assertIn("answer", q)
+            self.assertIn("category", q)
+            self.assertEqual(q["category"], "math")
+            answer = q["answer"]
+            self.assertEqual(answer, "nan")
 
 
 if __name__ == "__main__":

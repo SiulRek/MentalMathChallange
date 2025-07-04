@@ -320,14 +320,7 @@ class MathQuizUnit(QuizUnitBase):
                 expr += elem["value"]
             elif elem_type in ["int", "float"] or float_precision_match:
                 start = elem.get("start", 0)
-                try:
-                    end = elem["end"]
-                except KeyError as exc:
-                    raise UserConfigError(
-                        "At least 'end' must be defined in 'int/float' "
-                        "range."
-                    ) from exc
-                assert end >= start, "End must be greater or equal to start"
+                end = elem["end"]
 
                 if elem_type == "int":
                     expr += str(random.randint(start, end))
@@ -338,8 +331,7 @@ class MathQuizUnit(QuizUnitBase):
                         else MAX_PRECISION
                     )
                     d = random.uniform(start, end)
-                    d = f"{d:.{prec}f}"
-                    expr += d.rstrip("0").rstrip(".") if "." in d else d
+                    expr += f"{d:.{prec}f}"
 
             elif elem_type == "operator":
                 op = elem["value"]
@@ -360,7 +352,7 @@ class MathQuizUnit(QuizUnitBase):
             res = eval(expr)
             float(res)
         except ZeroDivisionError:
-            res = float("inf")
+            res = float("nan")
         except (ValueError, TypeError, SyntaxError) as exc:
             raise ValueError(f"Invalid expression '{expr}': {exc}") from exc
         return str(res)
@@ -416,6 +408,9 @@ class MathQuizUnit(QuizUnitBase):
 
         if answer_a == answer_b:
             return True
+        
+        if "nan" in (answer_a, answer_b):
+            return False
 
         a = adjust_precision(answer_a)
         b = adjust_precision(answer_b)
