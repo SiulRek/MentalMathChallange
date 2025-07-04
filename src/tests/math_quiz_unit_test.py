@@ -1,237 +1,384 @@
 import unittest
 from unittest.mock import patch
 
-from quiz.units.exceptions import UserResponseError
-from quiz.units.math_quiz_unit import MathQuizUnit
 from quiz.units.exceptions import UserConfigError
+from quiz.units.math_quiz_unit import (
+    MathQuizUnit,
+    SUPPORTED_OPERATORS,
+    SUPPORTED_FUNCTIONS,
+    SUPPORTED_CONSTANTS,
+)
 from tests.utils.base_test_case import BaseTestCase
 
 
-@patch("quiz.units.math_quiz_unit.MAX_PRECISION", 10)
-class MathQuizGeneratorTest(BaseTestCase):
+class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
 
-    # ---------------- Test generate method ----------------
-    def test_generate_single_int(self):
-        blueprint = {
-            "elements": [{"type": "int", "start": 1, "end": 1}],
-            "count": 1,
-        }
-        result = MathQuizUnit.generate_quiz(blueprint)
-        quiz = result[0]
-        self.assertEqual(quiz["question"], "1")
-        self.assertEqual(quiz["answer"], "1")
+    def setUp(self):
+        self.int_option = {"key": "int", "args": ["1", "10"]}
+        self.float_option = {"key": "float", "args": ["1.0", "10.0"]}
+        self.float2_option = {"key": "float.2", "args": ["1.0", "10.0"]}
+        self.op_option = {"key": "op", "args": ["+"]}
+        self.ops_option = {"key": "op", "args": ["-", "*", "/"]}
+        self.func_option = {"key": "func", "args": ["sqrt"]}
+        self.bracket_open_option = {"key": "(", "args": []}
+        self.bracket_close_option = {"key": ")", "args": []}
+        self.constant_option = {"key": "const", "args": ["pi"]}
+        return super().setUp()
 
-    def test_generate_expression_simple_add(self):
-        blueprint = {
-            "elements": [
-                {"type": "int", "start": 2, "end": 2},
-                {"type": "operator", "value": "+"},
-                {"type": "int", "start": 3, "end": 3},
-            ],
-            "count": 1,
-        }
-        result = MathQuizUnit.generate_quiz(blueprint)
-        quiz = result[0]
-        self.assertEqual(quiz["question"], "2 + 3")
-        self.assertEqual(quiz["answer"], "5")
+    def _generate_options(self, option_specifiers):
+        options = []
+        for specifier in option_specifiers:
+            if isinstance(specifier, dict):
+                opt = specifier
+            if specifier == "int":
+                opt = self.int_option
+            elif specifier == "float":
+                opt = self.float_option
+            elif specifier == "float.2":
+                opt = self.float2_option
+            elif specifier == "op":
+                opt = self.op_option
+            elif specifier == "func":
+                opt = self.func_option
+            elif specifier == "bracket_open":
+                opt = self.bracket_open_option
+            elif specifier == "bracket_close":
+                opt = self.bracket_close_option
+            elif specifier == "const":
+                opt = self.constant_option
+            options.append(opt.copy())
+        return options
 
-    def test_generate_multiple_quizzes_fixed_output(self):
-        blueprint = {
-            "elements": [
-                {"type": "int", "start": 1, "end": 1},
-                {"type": "operator", "value": "*"},
-                {"type": "int", "start": 5, "end": 5},
-            ],
-            "count": 3,
-        }
-        result = MathQuizUnit.generate_quiz(blueprint)
-        self.assertEqual(len(result), 3)
-        for quiz in result:
-            self.assertEqual(quiz["question"], "1 * 5")
-            self.assertEqual(quiz["answer"], "5")
+    def test_numeric_valid_simple(self):
+        cases = [
+            (self.int_option, {"type": "int", "start": 1, "end": 10}),
+            (self.float_option, {"type": "float", "start": 1.0, "end": 10.0}),
+            (
+                self.float2_option,
+                {"type": "float.2", "start": 1.0, "end": 10.0},
+            ),
+            (self.constant_option, {"type": "constant", "value": "pi"}),
+        ]
+        for option, expected in cases:
+            with self.subTest(option=option):
+                blueprint = MathQuizUnit.generate_blueprint_unit([option])
+                self.assertEqual(len(blueprint["elements"]), 1)
+                elem = blueprint["elements"][0]
+                self.assertEqual(elem, expected)
 
-    def test_generate_with_brackets(self):
-        blueprint = {
-            "elements": [
-                {"type": "int", "start": 1, "end": 1},
-                {"type": "operator", "value": "+"},
-                {"type": "bracket", "value": "("},
-                {"type": "int", "start": 2, "end": 2},
-                {"type": "operator", "value": "-"},
-                {"type": "int", "start": 3, "end": 3},
-                {"type": "bracket", "value": ")"},
-            ],
-            "count": 1,
-        }
-        result = MathQuizUnit.generate_quiz(blueprint)
-        quiz = result[0]
-        self.assertEqual(quiz["question"], "1 + (2 - 3)")
-        self.assertEqual(quiz["answer"], "0")
+    # ----------- Test Single Options -------------
+    def test_numeric_valid_single_arg(self):
+        cases = [
+            ({"key": "int", "args": ["5"]}, {"type": "int", "end": 5}),
+            ({"key": "float", "args": ["5.0"]}, {"type": "float", "end": 5.0}),
+            (
+                {"key": "float.2", "args": ["5.0"]},
+                {"type": "float.2", "end": 5.0},
+            ),
+        ]
+        for option, expected in cases:
+            with self.subTest(option=option):
+                blueprint = MathQuizUnit.generate_blueprint_unit([option])
+                self.assertEqual(len(blueprint["elements"]), 1)
+                elem = blueprint["elements"][0]
+                self.assertEqual(elem, expected)
 
-    def test_generate_with_constant(self):
-        blueprint = {
-            "elements": [
-                {"type": "constant", "value": "pi"},
-                {"type": "operator", "value": "+"},
-                {"type": "int", "start": 1, "end": 1},
-            ],
-            "count": 1,
-        }
-        result = MathQuizUnit.generate_quiz(blueprint)
-        quiz = result[0]
-        self.assertEqual(quiz["question"], "pi + 1")
-        self.assertAlmostEqual(
-            float(quiz["answer"]), 3.141592653589793 + 1, places=5
-        )
+    @patch(
+        "quiz.units.math_quiz_unit._assert_math_expression_elements",
+        return_value=None,
+    )
+    def test_non_numeric_valid(self, mock_assert):
+        cases = [
+            (self.op_option, {"type": "operator", "value": "+"}),
+            (self.ops_option, {"type": "operator", "value": ["-", "*", "/"]}),
+            (self.func_option, {"type": "function", "value": "sqrt"}),
+            (self.bracket_open_option, {"type": "bracket", "value": "("}),
+            (self.bracket_close_option, {"type": "bracket", "value": ")"}),
+        ]
+        for option, expected in cases:
+            with self.subTest(option=option):
+                blueprint = MathQuizUnit.generate_blueprint_unit([option])
+                self.assertEqual(len(blueprint["elements"]), 1)
+                elem = blueprint["elements"][0]
+                self.assertEqual(elem, expected)
 
-    def test_generate_with_float_precision_pattern(self):
-        blueprint = {
-            "elements": [
-                {"type": "float.4", "start": 1.123456, "end": 1.123456},
-                {"type": "operator", "value": "+"},
-                {"type": "float.4", "start": 2.654321, "end": 2.654321},
-            ],
-            "count": 1,
-        }
-        result = MathQuizUnit.generate_quiz(blueprint)
-        quiz = result[0]
-        parts = quiz["question"].split("+")
-        self.assertEqual(len(parts), 2)
-        self.assertRegex(parts[0].strip(), r"\d+\.\d{4}")
-        self.assertRegex(parts[1].strip(), r"\d+\.\d{4}")
-        self.assertAlmostEqual(
-            float(quiz["answer"]), 1.1235 + 2.6543, places=4
-        )
+    def test_supported_operators_valid(self):
+        for op in SUPPORTED_OPERATORS:
+            with self.subTest(op=op):
+                op_dict = {"key": "op", "args": [op]}
+                specifiers = ["int", op_dict, "int"]
+                options = self._generate_options(specifiers)
+                blueprint = MathQuizUnit.generate_blueprint_unit(options)
+                elem = blueprint["elements"][1]
+                self.assertEqual(elem["type"], "operator")
+                self.assertEqual(elem["value"], op)
 
-    def test_default_start_values(self):
-        blueprint = {
-            "elements": [
-                {"type": "int", "end": 0},
-                {"type": "operator", "value": "+"},
-                {"type": "float", "end": 0},
-                {"type": "operator", "value": "+"},
-                {"type": "float.3", "end": 0},
-            ],
-            "count": 1,
-        }
-        result = MathQuizUnit.generate_quiz(blueprint)
-        quiz = result[0]
-        self.assertEqual(quiz["question"], "0 + 0 + 0")
-        self.assertEqual(quiz["answer"], "0")
+    def test_supported_functions_valid(self):
+        for func in SUPPORTED_FUNCTIONS:
+            with self.subTest(func=func):
+                func_dict = {"key": "func", "args": [func]}
+                specifiers = [
+                    func_dict,
+                    "bracket_open",
+                    "int",
+                    "bracket_close",
+                ]
+                options = self._generate_options(specifiers)
+                blueprint = MathQuizUnit.generate_blueprint_unit(options)
+                elem = blueprint["elements"][0]
+                self.assertEqual(elem["type"], "function")
+                self.assertEqual(elem["value"], func)
 
-    def test_zero_division_handling(self):
-        blueprint = {
-            "elements": [
-                {"type": "int", "start": 1, "end": 1},
-                {"type": "operator", "value": "/"},
-                {"type": "int", "start": 0, "end": 0},
-            ],
-            "count": 1,
-        }
-        result = MathQuizUnit.generate_quiz(blueprint)
-        self.assertEqual(result[0]["answer"], "inf")
+    def test_supported_constants_valid(self):
+        for const in SUPPORTED_CONSTANTS:
+            with self.subTest(const=const):
+                options = [{"key": "const", "args": [const]}]
+                blueprint = MathQuizUnit.generate_blueprint_unit(options)
+                elem = blueprint["elements"][0]
+                self.assertEqual(elem["type"], "constant")
+                self.assertEqual(elem["value"], const)
 
-    def test_invalid_element_type_raises(self):
-        blueprint = {
-            "elements": [{"type": "unknown", "value": "x"}],
-            "count": 1,
-        }
-        with self.assertRaises(ValueError):
-            MathQuizUnit.generate_quiz(blueprint)
+    def test_invalid_key(self):
+        cases = [
+            ({"key": "invalid_key", "args": []}),
+            ({"key": "float.2d", "args": []}),
+        ]
+        for option in cases:
+            with self.subTest(option=option):
+                with self.assertRaises(UserConfigError):
+                    MathQuizUnit.generate_blueprint_unit([option])
 
-    def test_start_greater_than_end_raises(self):
-        for element_type in ["int", "float", "float.3"]:
-            blueprint = {
-                "elements": [{"type": element_type, "start": 2, "end": 1}],
-                "count": 1,
-            }
-            with self.assertRaises(AssertionError):
-                MathQuizUnit.generate_quiz(blueprint)
+    def test_numeric_too_many_args(self):
+        cases = [
+            ({"key": "int", "args": ["1", "2", "3"]}),
+            ({"key": "float", "args": ["1.0", "2.0", "3.0"]}),
+            ({"key": "float.2", "args": ["1.0", "2.0", "3.0"]}),
+            ({"key": "const", "args": ["pi", "e"]}),
+        ]
+        for option in cases:
+            with self.subTest(option=option):
+                with self.assertRaises(UserConfigError):
+                    MathQuizUnit.generate_blueprint_unit([option])
 
-    def test_missing_end_raises_user_config_error(self):
-        blueprint = {
-            "elements": [{"type": "float", "start": 0}],
-            "count": 1,
-        }
+    def test_non_numeric_too_many_args(self):
+        cases = [
+            ({"key": "func", "args": ["sqrt", "log"]}),
+            ({"key": "(", "args": ["some_arg"]}),
+            ({"key": ")", "args": ["some_arg"]}),
+        ]
+        for option in cases:
+            with self.subTest(option=option):
+                with self.assertRaises(UserConfigError):
+                    MathQuizUnit.generate_blueprint_unit([option])
+
+    def test_numeric_no_args(self):
+        cases = [
+            {"key": "int", "args": []},
+            {"key": "float", "args": []},
+            {"key": "float.2", "args": []},
+            {"key": "const", "args": []},
+        ]
+        for option in cases:
+            with self.subTest(option=option):
+                with self.assertRaises(UserConfigError):
+                    MathQuizUnit.generate_blueprint_unit([option])
+
+    @patch(
+        "quiz.units.math_quiz_unit._assert_math_expression_elements",
+        return_value=None,
+    )
+    def test_non_numeric_no_args(self, mock_assert):
+        cases = [
+            {"key": "op", "args": []},
+            {"key": "func", "args": []},
+        ]
+        for option in cases:
+            with self.subTest(option=option):
+                with self.assertRaises(UserConfigError):
+                    MathQuizUnit.generate_blueprint_unit([option])
+
+    def test_numeric_invalid_args(self):
+        cases = [
+            ({"key": "int", "args": ["a", "b"]}),
+            ({"key": "int", "args": ["3.14", "2.71"]}),
+            ({"key": "float", "args": ["a", "b"]}),
+            ({"key": "float.2", "args": ["a", "b"]}),
+            ({"key": "const", "args": ["invalid_constant"]}),
+        ]
+        for option in cases:
+            with self.subTest(option=option):
+                with self.assertRaises(UserConfigError):
+                    MathQuizUnit.generate_blueprint_unit([option])
+
+    def test_operator_invalid_arg(self):
+        invalid_op = {"key": "op", "args": ["invalid_operator"]}
+        specifiers = ["int", invalid_op, "int"]
+        options = self._generate_options(specifiers)
         with self.assertRaises(UserConfigError):
-            MathQuizUnit.generate_quiz(blueprint)
+            MathQuizUnit.generate_blueprint_unit(options)
 
-    # ---------------- Test compare_answers method ----------------
-    def test_compare_answers_exact_and_tolerance(self):
-        equal_numbers = [
-            ("1.0", "1.00"),
-            ("1.5", "1.50"),
-            ("0.0001", "1e-4"),
-            ("0.00011", "1e-4"),
-            ("1000", "1e3"),
-            ("999", "1e3"),
-            ("2", "1.99"),
-            ("0.0001", "0.9e-4"),
+    def test_function_invalid_arg(self):
+        invalid_func = {"key": "func", "args": ["invalid_function"]}
+        specifiers = [invalid_func, "bracket_open", "int", "bracket_close"]
+        options = self._generate_options(specifiers)
+        with self.assertRaises(UserConfigError):
+            MathQuizUnit.generate_blueprint_unit(options)
+
+    # ----------------- Test Multiple Options in Sequence -----------------
+
+    def test_valid_sequence_simple(self):
+        options = [
+            {"key": "int", "args": ["1", "10"]},
+            {"key": "op", "args": ["+"]},
+            {"key": "int", "args": ["1", "10"]},
         ]
-        for a, b in equal_numbers:
-            with self.subTest(a=a, b=b):
-                self.assertTrue(MathQuizUnit.compare_answers(a, b))
-                self.assertTrue(MathQuizUnit.compare_answers(b, a))
+        blueprint = MathQuizUnit.generate_blueprint_unit(options)
+        self.assertEqual(len(blueprint["elements"]), 3)
+        self.assertEqual(blueprint["elements"][0]["type"], "int")
+        self.assertEqual(blueprint["elements"][1]["type"], "operator")
+        self.assertEqual(blueprint["elements"][2]["type"], "int")
 
-        not_equal_numbers = [
-            ("1.1", "1.0001"),
-            ("1.5", "1.59"),
-            ("1.5e-8", "1.5e-9"),
+    def test_valid_sequence_complex(self):
+        specifiers = [
+            "func",
+            "bracket_open",
+            "int",
+            "op",
+            "const",
+            "bracket_close",
+            "op",
+            "float",
+            "op",
+            "float.2",
         ]
-        for a, b in not_equal_numbers:
-            with self.subTest(a=a, b=b):
-                self.assertFalse(MathQuizUnit.compare_answers(a, b))
-                self.assertFalse(MathQuizUnit.compare_answers(b, a))
-
-    def test_compare_answers_incorrect(self):
-        self.assertFalse(MathQuizUnit.compare_answers("5", "2"))
-
-    # ---------------- Test parse_user_answer method ----------------
-    def test_parse_user_answer_valid(self):
-        valid_answers = [
-            "1.0",
-            "2.5",
-            "3.1400",
-            "4.0000",
-            "5.1234567890",
-            "1e3",
-            "2.0001",
+        options = self._generate_options(specifiers)
+        blueprint = MathQuizUnit.generate_blueprint_unit(options)
+        self.assertEqual(len(blueprint["elements"]), 10)
+        expected_types = [
+            "function",
+            "bracket",
+            "int",
+            "operator",
+            "constant",
+            "bracket",
+            "operator",
+            "float",
+            "operator",
+            "float.2",
         ]
-        for answer in valid_answers:
-            with self.subTest(answer=answer):
-                self.assertEqual(
-                    MathQuizUnit.parse_user_answer(answer), answer
+        for i, elem in enumerate(blueprint["elements"]):
+            with self.subTest(i=i):
+
+                self.assertEqual(elem["type"], expected_types[i])
+
+    def test_empty_options(self):
+        with self.assertRaises(UserConfigError):
+            MathQuizUnit.generate_blueprint_unit([])
+
+    def test_two_consecutive_numeric_types_problem(self):
+        types = ["int", "float", "float.2", "const"]
+        for i in range(len(types)):
+            for j in range(len(types)):
+                specifiers = [types[i], types[j]]
+                options = self._generate_options(specifiers)
+                with self.subTest(specifiers=specifiers):
+                    with self.assertRaises(UserConfigError) as exc:
+                        MathQuizUnit.generate_blueprint_unit(options)
+                    self.assertIn(
+                        "two consecutive numeric types",
+                        str(exc.exception),
+                    )
+
+    def test_consecutive_operators_problem(self):
+        operators = ["op", "op"]
+        for i in range(len(operators)):
+            for j in range(len(operators)):
+                specifiers = [operators[i], operators[j]]
+                options = self._generate_options(specifiers)
+                with self.subTest(specifiers=specifiers):
+                    with self.assertRaises(UserConfigError) as exc:
+                        MathQuizUnit.generate_blueprint_unit(options)
+                    self.assertIn(
+                        "two consecutive operators",
+                        str(exc.exception),
+                    )
+
+    def test_function_not_followed_by_bracket(self):
+        cases = [
+            ["func", "int"],
+            ["func", "op", "int"],
+            ["bracket_open", "func", "bracket_close"],
+        ]
+        for specifiers in cases:
+            options = self._generate_options(specifiers)
+            with self.subTest(specifiers=specifiers):
+                with self.assertRaises(UserConfigError) as exc:
+                    MathQuizUnit.generate_blueprint_unit(options)
+                self.assertIn(
+                    "function not followed by an opening bracket",
+                    str(exc.exception),
                 )
 
-    def test_parse_user_answer_invalid(self):
-        invalid_answers = [
-            "abc",
-            "1.2.3",
-            "1e",
-            "1e+",
-            "1e-",
-            "1.2e3.4",
-            "1.2e3+4",
+    def test_bracket_never_closed_or_opened(self):
+        cases = [
+            ["bracket_open", "int"],
+            ["int", "bracket_close"],
+            ["bracket_close", "int", "bracket_open"],
         ]
-        for answer in invalid_answers:
-            with self.subTest(answer=answer):
-                with self.assertRaises(UserResponseError):
-                    MathQuizUnit.parse_user_answer(answer)
-
-    # ---------------- Test prettify_answer method ----------------
-    def test_prettify_answer(self):
-        test_cases = [
-            ("1.0000", "1"),
-            ("2.5000", "2.5"),
-            ("3.1400", "3.14"),
-            ("4.0000", "4"),
-            ("5.1234567890", "5.123456789"),
-        ]
-        for input_val, expected in test_cases:
-            with self.subTest(input_val=input_val, expected=expected):
-                self.assertEqual(
-                    MathQuizUnit.prettify_answer(input_val), expected
+        for specifiers in cases:
+            options = self._generate_options(specifiers)
+            with self.subTest(specifiers=specifiers):
+                with self.assertRaises(UserConfigError) as exc:
+                    MathQuizUnit.generate_blueprint_unit(options)
+                exc_msg = str(exc.exception)
+                self.assertTrue(
+                    "bracket closed without opening" in exc_msg
+                    or "unmatched brackets" in exc_msg
                 )
+
+    def test_operator_at_beginning(self):
+        allowed_ops = ["+", "-"]
+        not_allowed_ops = SUPPORTED_OPERATORS - set(allowed_ops)
+        for op in not_allowed_ops:
+            with self.subTest(op=op):
+                options = [
+                    {"key": "op", "args": [op]},
+                    {"key": "int", "args": ["1", "10"]},
+                ]
+                with self.assertRaises(UserConfigError) as exc:
+                    MathQuizUnit.generate_blueprint_unit(options)
+                self.assertIn(
+                    "expression starts with an operator",
+                    str(exc.exception),
+                )
+
+    def test_operator_at_end(self):
+        op = self._generate_options(["int", "op"])
+        with self.assertRaises(UserConfigError) as exc:
+            MathQuizUnit.generate_blueprint_unit(op)
+        self.assertIn(
+            "expression ends with an operator",
+            str(exc.exception),
+        )
+
+    def test_function_at_end(self):
+        func = self._generate_options(["int", "op", "func"])
+        with self.assertRaises(UserConfigError) as exc:
+            MathQuizUnit.generate_blueprint_unit(func)
+        self.assertIn(
+            "expression ends with a function",
+            str(exc.exception),
+        )
+
+    def test_function_preceded_by_numeric(self):
+        specifiers = ["int", "func", "bracket_open", "int", "bracket_close"]
+        options = self._generate_options(specifiers)
+        with self.assertRaises(UserConfigError) as exc:
+            MathQuizUnit.generate_blueprint_unit(options)
+        self.assertIn(
+            "function preceded by numeric",
+            str(exc.exception),
+        )
 
 
 if __name__ == "__main__":

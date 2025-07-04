@@ -17,6 +17,42 @@ from quiz.units.shared import MappingError, map_args_to_option
 
 MAX_PRECISION = 10
 SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%", "**"}
+SUPPORTED_FUNCTIONS = {
+    "abs",
+    "ceil",
+    "floor",
+    "round",
+    "exp",
+    "log",
+    "log10",
+    "sqrt",
+    "sin",
+    "cos",
+    "tan",
+}
+SUPPORTED_CONSTANTS = {
+    "c",
+    "h",
+    "hbar",
+    "G",
+    "e",
+    "k",
+    "N_A",
+    "R",
+    "alpha",
+    "mu_0",
+    "epsilon_0",
+    "sigma",
+    "zero_Celsius",
+    "pi",
+    "Avogadro",
+    "Boltzmann",
+    "Planck",
+    "speed_of_light",
+    "elementary_charge",
+    "gravitational_constant",
+}
+
 KEY_MAPPING = {
     "op": "operator",
     "func": "function",
@@ -40,46 +76,11 @@ def _assert_bracket(bracket):
 
 
 def _assert_function(func):
-    supported = [
-        "abs",
-        "ceil",
-        "floor",
-        "round",
-        "exp",
-        "log",
-        "log10",
-        "sqrt",
-        "sin",
-        "cos",
-        "tan",
-    ]
-    assert func in supported, f"Unsupported function '{func}'"
+    assert func in SUPPORTED_FUNCTIONS, f"Unsupported function '{func}'"
 
 
 def _assert_constant(const):
-    supported = [
-        "c",  # speed of light
-        "h",  # Planck constant
-        "hbar",  # reduced Planck constant
-        "G",  # gravitational constant
-        "e",  # elementary charge
-        "k",  # Boltzmann constant
-        "N_A",  # Avogadro's number
-        "R",  # gas constant
-        "alpha",  # fine-structure constant
-        "mu_0",  # vacuum permeability
-        "epsilon_0",  # vacuum permittivity
-        "sigma",  # Stefan-Boltzmann constant
-        "zero_Celsius",  # zero Celsius in Kelvin
-        "pi",  # pi
-        "Avogadro",  # synonym for N_A
-        "Boltzmann",  # synonym for k
-        "Planck",  # synonym for h
-        "speed_of_light",  # synonym for c
-        "elementary_charge",  # synonym for e
-        "gravitational_constant",  # synonym for G
-    ]
-    assert const in supported, f"Unsupported constant '{const}'"
+    assert const in SUPPORTED_CONSTANTS, f"Unsupported constant '{const}'"
 
 
 def _is_numeric_type(type_, ignore_constants=False):
@@ -122,6 +123,8 @@ def _identify_math_expression_problem(elements):
                 brackets_counter += 1
             elif elem["value"] == ")":
                 brackets_counter -= 1
+        if brackets_counter < 0:
+            return "bracket closed without opening"
     if brackets_counter != 0:
         return "unmatched brackets"
 
@@ -144,7 +147,7 @@ def _identify_math_expression_problem(elements):
         if elements[i]["type"] == "function" and _is_numeric_type(
             elements[i - 1]["type"]
         ):
-            return "function preceded by a numeric type"
+            return "function preceded by numeric"
 
     return None
 
@@ -267,11 +270,6 @@ class MathQuizUnit(QuizUnitBase):
                     raise UserConfigError(f"Unknown option key: {key}")
         except (MappingError, AssertionError) as e:
             raise UserConfigError(f"Invalid option '{key}': {e}") from e
-
-        if not elems:
-            raise UserConfigError(
-                "At least one element must be defined in category 'math'."
-            )
 
         try:
             _assert_math_expression_elements(elems)
