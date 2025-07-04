@@ -1,3 +1,4 @@
+from copy import deepcopy
 import unittest
 from unittest.mock import patch
 
@@ -379,6 +380,28 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
             "function preceded by numeric",
             str(exc.exception),
         )
+
+
+class MathQuizUnparseOptionsTest(BaseTestCase):
+    def test_unparse_options_round_trip(self):
+        options = [
+            {"key": "func", "args": ["sqrt"]},
+            {"key": "(", "args": []},
+            {"key": "int", "args": ["1", "10"]},
+            {"key": "op", "args": ["+"]},
+            {"key": "float", "args": ["1.0", "10.0"]},
+            {"key": "op", "args": ["*"]},
+            {"key": "float.2", "args": ["1.0", "10.0"]},
+            {"key": "op", "args": ["-"]},
+            {"key": "const", "args": ["pi"]},
+            {"key": ")", "args": []},
+        ]
+        blueprint = MathQuizUnit.generate_blueprint_unit(deepcopy(options))
+        result = MathQuizUnit.unparse_options(blueprint)
+        for original, roundtrip in zip(options, result):
+            with self.subTest(original=original, roundtrip=roundtrip):
+                self.assertEqual(original["key"], roundtrip["key"])
+                self.assertEqual(original["args"], roundtrip["args"])
 
 
 if __name__ == "__main__":

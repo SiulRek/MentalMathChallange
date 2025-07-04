@@ -304,7 +304,7 @@ class MathQuizUnit(QuizUnitBase):
                 args = [elem["value"]]
             else:
                 raise ValueError(f"Invalid element type '{old_key}'")
-            args = map(str, args)
+            args = list(map(str, args))
             opt.update({"args": args})
             options.append(opt)
         return options
