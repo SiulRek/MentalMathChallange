@@ -10,9 +10,9 @@ from app.email_utils import (
     decode_email_token,
 )
 from app.collect_user_answers import collect_user_answers
-from core import generate_quiz, compute_quiz_results
-from core.units.exceptions import UserResponseError
-from core import unparse_blueprint_to_text
+from quiz import generate_quiz, compute_quiz_results
+from quiz.units.exceptions import UserResponseError
+from quiz import unparse_blueprint_to_text
 
 
 def _login_required(f):

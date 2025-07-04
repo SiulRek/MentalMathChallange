@@ -4,8 +4,8 @@ from sqlalchemy.exc import IntegrityError
 
 from app.models import UserBlueprint
 from app.validators import assert_blueprint_name
-from core import parse_blueprint_from_text
-from core.units.exceptions import UserConfigError
+from quiz import parse_blueprint_from_text
+from quiz.units.exceptions import UserConfigError
 
 
 class BlueprintService:

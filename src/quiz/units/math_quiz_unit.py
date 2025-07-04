@@ -11,9 +11,9 @@ from scipy.constants import (
     speed_of_light, elementary_charge, gravitational_constant   # noqa: F401
 )
 
-from core.units.exceptions import UserConfigError, UserResponseError
-from core.units.quiz_unit_base import QuizUnitBase
-from core.units.shared import MappingError, map_args_to_option
+from quiz.units.exceptions import UserConfigError, UserResponseError
+from quiz.units.quiz_unit_base import QuizUnitBase
+from quiz.units.shared import MappingError, map_args_to_option
 
 MAX_PRECISION = 10
 SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%", "**"}

@@ -1,4 +1,4 @@
-from core.quiz_engine import QuizEngine
+from quiz.quiz_engine import QuizEngine
 
 __all__ = [
     "parse_blueprint_from_text",

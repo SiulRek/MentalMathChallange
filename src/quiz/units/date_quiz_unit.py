@@ -1,11 +1,11 @@
-from core.units.date_utils import (
+from quiz.units.date_utils import (
     random_date,
     derive_weekday,
     standardize_weekday_string,
 )
-from core.units.exceptions import UserConfigError, UserResponseError
-from core.units.quiz_unit_base import QuizUnitBase
-from core.units.shared import MappingError, map_args_to_option
+from quiz.units.exceptions import UserConfigError, UserResponseError
+from quiz.units.quiz_unit_base import QuizUnitBase
+from quiz.units.shared import MappingError, map_args_to_option
 
 
 class DateQuizUnit(QuizUnitBase):

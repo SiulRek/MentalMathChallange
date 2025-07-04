@@ -1,13 +1,13 @@
 import unittest
 from unittest.mock import patch
 
-from core.units.exceptions import UserResponseError
-from core.units.math_quiz_unit import MathQuizUnit
-from core.units.exceptions import UserConfigError
+from quiz.units.exceptions import UserResponseError
+from quiz.units.math_quiz_unit import MathQuizUnit
+from quiz.units.exceptions import UserConfigError
 from tests.utils.base_test_case import BaseTestCase
 
 
-@patch("core.units.math_quiz_unit.MAX_PRECISION", 10)
+@patch("quiz.units.math_quiz_unit.MAX_PRECISION", 10)
 class MathQuizGeneratorTest(BaseTestCase):
 
     # ---------------- Test generate method ----------------

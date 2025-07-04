@@ -1,8 +1,8 @@
 import unittest
 
 from app.collect_user_answers import collect_user_answers
-from core import parse_blueprint_from_text, generate_quiz, compute_quiz_results
-from core.units.exceptions import UserConfigError, UserResponseError
+from quiz import parse_blueprint_from_text, generate_quiz, compute_quiz_results
+from quiz.units.exceptions import UserConfigError, UserResponseError
 from tests.utils.base_test_case import BaseTestCase
 
 

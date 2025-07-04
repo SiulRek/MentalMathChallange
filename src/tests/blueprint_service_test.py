@@ -7,7 +7,7 @@ from app import db
 from app.auth_service import AuthService
 from app.blueprint_service import BlueprintService
 from app.models import User, UserBlueprint
-from core import parse_blueprint_from_text
+from quiz import parse_blueprint_from_text
 from tests.utils.base_test_case import BaseTestCase
 
 
