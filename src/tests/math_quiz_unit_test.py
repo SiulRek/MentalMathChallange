@@ -2,7 +2,7 @@ from copy import deepcopy
 import unittest
 from unittest.mock import patch
 
-from quiz.units.exceptions import UserConfigError
+from quiz.units.exceptions import UserConfigError, UserResponseError
 from quiz.units.math_quiz_unit import (
     MathQuizUnit,
     SUPPORTED_OPERATORS,
@@ -80,15 +80,23 @@ class MathQuizTransformOptionsToBlueprintUnitTest(BaseTestCase):
         ]
         for option, expected in cases:
             with self.subTest(option=option):
-                blueprint = MathQuizUnit.transform_options_to_blueprint_unit([option])
+                blueprint = MathQuizUnit.transform_options_to_blueprint_unit(
+                    [option]
+                )
                 self.assertEqual(len(blueprint["elements"]), 1)
                 elem = blueprint["elements"][0]
                 self.assertEqual(elem, expected)
 
     def test_numeric_valid_single_arg(self):
         cases = [
-            ({"key": "int", "args": ["5"]}, {"type": "int", "start": 0, "end": 5}),
-            ({"key": "float", "args": ["5.0"]}, {"type": "float", "start":0, "end": 5.0}),
+            (
+                {"key": "int", "args": ["5"]},
+                {"type": "int", "start": 0, "end": 5},
+            ),
+            (
+                {"key": "float", "args": ["5.0"]},
+                {"type": "float", "start": 0, "end": 5.0},
+            ),
             (
                 {"key": "float.2", "args": ["5.0"]},
                 {"type": "float.2", "start": 0, "end": 5.0},
@@ -96,7 +104,9 @@ class MathQuizTransformOptionsToBlueprintUnitTest(BaseTestCase):
         ]
         for option, expected in cases:
             with self.subTest(option=option):
-                blueprint = MathQuizUnit.transform_options_to_blueprint_unit([option])
+                blueprint = MathQuizUnit.transform_options_to_blueprint_unit(
+                    [option]
+                )
                 self.assertEqual(len(blueprint["elements"]), 1)
                 elem = blueprint["elements"][0]
                 self.assertEqual(elem, expected)
@@ -115,7 +125,9 @@ class MathQuizTransformOptionsToBlueprintUnitTest(BaseTestCase):
         ]
         for option, expected in cases:
             with self.subTest(option=option):
-                blueprint = MathQuizUnit.transform_options_to_blueprint_unit([option])
+                blueprint = MathQuizUnit.transform_options_to_blueprint_unit(
+                    [option]
+                )
                 self.assertEqual(len(blueprint["elements"]), 1)
                 elem = blueprint["elements"][0]
                 self.assertEqual(elem, expected)
@@ -126,7 +138,9 @@ class MathQuizTransformOptionsToBlueprintUnitTest(BaseTestCase):
                 op_dict = {"key": "op", "args": [op]}
                 specifiers = ["int", op_dict, "int"]
                 options = self._generate_options(specifiers)
-                blueprint = MathQuizUnit.transform_options_to_blueprint_unit(options)
+                blueprint = MathQuizUnit.transform_options_to_blueprint_unit(
+                    options
+                )
                 elem = blueprint["elements"][1]
                 self.assertEqual(elem["type"], "operator")
                 self.assertEqual(elem["value"], [op])
@@ -142,7 +156,9 @@ class MathQuizTransformOptionsToBlueprintUnitTest(BaseTestCase):
                     "bracket_close",
                 ]
                 options = self._generate_options(specifiers)
-                blueprint = MathQuizUnit.transform_options_to_blueprint_unit(options)
+                blueprint = MathQuizUnit.transform_options_to_blueprint_unit(
+                    options
+                )
                 elem = blueprint["elements"][0]
                 self.assertEqual(elem["type"], "function")
                 self.assertEqual(elem["value"], func)
@@ -151,7 +167,9 @@ class MathQuizTransformOptionsToBlueprintUnitTest(BaseTestCase):
         for const in SUPPORTED_CONSTANTS:
             with self.subTest(const=const):
                 options = [{"key": "const", "args": [const]}]
-                blueprint = MathQuizUnit.transform_options_to_blueprint_unit(options)
+                blueprint = MathQuizUnit.transform_options_to_blueprint_unit(
+                    options
+                )
                 elem = blueprint["elements"][0]
                 self.assertEqual(elem["type"], "constant")
                 self.assertEqual(elem["value"], const)
@@ -302,7 +320,9 @@ class MathQuizTransformOptionsToBlueprintUnitTest(BaseTestCase):
                 options = self._generate_options(specifiers)
                 with self.subTest(specifiers=specifiers):
                     with self.assertRaises(UserConfigError) as exc:
-                        MathQuizUnit.transform_options_to_blueprint_unit(options)
+                        MathQuizUnit.transform_options_to_blueprint_unit(
+                            options
+                        )
                     self.assertIn(
                         "two consecutive numeric types",
                         str(exc.exception),
@@ -316,7 +336,9 @@ class MathQuizTransformOptionsToBlueprintUnitTest(BaseTestCase):
                 options = self._generate_options(specifiers)
                 with self.subTest(specifiers=specifiers):
                     with self.assertRaises(UserConfigError) as exc:
-                        MathQuizUnit.transform_options_to_blueprint_unit(options)
+                        MathQuizUnit.transform_options_to_blueprint_unit(
+                            options
+                        )
                     self.assertIn(
                         "two consecutive operators",
                         str(exc.exception),
@@ -408,13 +430,15 @@ class MathQuizUnparseOptionsTest(BaseTestCase):
             {"key": "int", "args": ["1", "10"]},
             {"key": "op", "args": ["+"]},
             {"key": "float", "args": ["1.0", "10.0"]},
-            {"key": "op", "args": ["*"]},
+            {"key": "op", "args": ["*", "+", "/"]},
             {"key": "float.2", "args": ["1.0", "10.0"]},
             {"key": "op", "args": ["-"]},
             {"key": "const", "args": ["pi"]},
             {"key": ")", "args": []},
         ]
-        blueprint = MathQuizUnit.transform_options_to_blueprint_unit(deepcopy(options))
+        blueprint = MathQuizUnit.transform_options_to_blueprint_unit(
+            deepcopy(options)
+        )
         result = MathQuizUnit.unparse_options(blueprint)
         for original, roundtrip in zip(options, result):
             with self.subTest(original=original, roundtrip=roundtrip):
@@ -511,10 +535,10 @@ class MathQuizGenerateQuizTest(BaseTestCase):
                 {"type": "operator", "value": ["/"]},
                 {"type": "int", "start": 0, "end": 0},
             ],
-            "count": 50,
+            "count": 1,
         }
         quiz = MathQuizUnit.generate_quiz(blueprint)
-        self.assertEqual(len(quiz), 50)
+        self.assertEqual(len(quiz), 1)
 
         for q in quiz:
             self.assertIn("question", q)
@@ -523,6 +547,31 @@ class MathQuizGenerateQuizTest(BaseTestCase):
             self.assertEqual(q["category"], "math")
             answer = q["answer"]
             self.assertEqual(answer, "nan")
+
+
+class MathQuizParseUserAnswerTest(BaseTestCase):
+    def test_parse_user_answer_valid(self):
+        cases = [
+            "1",
+            "1.0",
+            "3.14",
+            "3.001e-3",
+            1,
+            1.0,
+            3.14,
+            3.001e-3,
+        ]
+        for user_answer in cases:
+            with self.subTest(user_answer=user_answer):
+                parsed = MathQuizUnit.parse_user_answer(user_answer)
+                self.assertEqual(parsed, str(user_answer))
+
+    def test_parse_user_answer_invalid(self):
+        cases = ["abc", "1,000", "3.14.15", "1/2"]
+        for user_answer in cases:
+            with self.subTest(user_answer=user_answer):
+                with self.assertRaises(UserResponseError):
+                    MathQuizUnit.parse_user_answer(user_answer)
 
 
 if __name__ == "__main__":

@@ -389,6 +389,16 @@ class MathQuizUnit(QuizUnitBase):
         return quiz
 
     @classmethod
+    def parse_user_answer(cls, user_answer):
+        try:
+            float(user_answer)
+        except ValueError as e:
+            raise UserResponseError(
+                f"Invalid answer '{user_answer}'. Answer must be numeric."
+            ) from e
+        return str(user_answer)
+
+    @classmethod
     def compare_answers(cls, answer_a, answer_b):
         def adjust_precision(s):
             s = f"{float(s):.{MAX_PRECISION}f}"
@@ -421,16 +431,6 @@ class MathQuizUnit(QuizUnitBase):
         diff = abs(float(a) - float(b))
         tol = max(derive_tol(answer_a), derive_tol(answer_b)) / 2
         return diff <= tol
-
-    @classmethod
-    def parse_user_answer(cls, user_answer):
-        try:
-            float(user_answer)
-        except ValueError as e:
-            raise UserResponseError(
-                f"Invalid answer '{user_answer}'. Answer must be numeric."
-            ) from e
-        return str(user_answer)
 
     @classmethod
     def prettify_answer(cls, answer):
