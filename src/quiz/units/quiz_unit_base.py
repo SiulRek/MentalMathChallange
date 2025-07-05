@@ -40,7 +40,7 @@ class QuizUnitBase(ABC):
 
     @classmethod
     @abstractmethod
-    def compare_answers(cls, answer_a, answer_b):
+    def compare_answers(cls, user_answer, correct_answer):
         """
         Compare two answers and return True if they are equivalent, False
         otherwise.
