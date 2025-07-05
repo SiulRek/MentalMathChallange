@@ -246,7 +246,6 @@ class MathQuizUnit(QuizUnitBase):
                     assert (
                         len(args) > 0
                     ), "At least one operator must be defined"
-                    args = args[0] if len(args) == 1 else args
                     opt.update({"value": args})
                 elif key == "bracket":
                     args = [old_key] + args
@@ -345,8 +344,7 @@ class MathQuizUnit(QuizUnitBase):
 
             elif elem_type == "operator":
                 op = elem["value"]
-                if isinstance(op, list):
-                    op = random.choice(op)
+                op = random.choice(op)
                 expr += op
             elif elem_type in ["function", "constant"]:
                 expr += elem["value"]

@@ -107,7 +107,7 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
     )
     def test_non_numeric_valid(self, mock_assert):
         cases = [
-            (self.op_option, {"type": "operator", "value": "+"}),
+            (self.op_option, {"type": "operator", "value": ["+"]}),
             (self.ops_option, {"type": "operator", "value": ["-", "*", "/"]}),
             (self.func_option, {"type": "function", "value": "sqrt"}),
             (self.bracket_open_option, {"type": "bracket", "value": "("}),
@@ -129,7 +129,7 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
                 blueprint = MathQuizUnit.generate_blueprint_unit(options)
                 elem = blueprint["elements"][1]
                 self.assertEqual(elem["type"], "operator")
-                self.assertEqual(elem["value"], op)
+                self.assertEqual(elem["value"], [op])
 
     def test_supported_functions_valid(self):
         for func in SUPPORTED_FUNCTIONS:
