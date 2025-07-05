@@ -323,7 +323,7 @@ def _register_quiz_routes(app):
             session["start_time"] = datetime.utcnow().isoformat()
             return render_template("quiz.html", quiz=session["quiz"])
 
-        blueprint = json.loads(session["blueprint"])
+        blueprint = session["blueprint"]
         quiz = generate_quiz(blueprint)
         session["quiz"] = quiz
         session["start_time"] = datetime.utcnow().isoformat()
