@@ -15,7 +15,6 @@ from quiz.units.exceptions import UserConfigError, UserResponseError
 from quiz.units.quiz_unit_base import QuizUnitBase
 from quiz.units.shared import MappingError, map_args_to_option
 
-MAX_PRECISION = 10
 SUPPORTED_OPERATORS = {"+", "-", "*", "/", "//", "%", "**"}
 SUPPORTED_FUNCTIONS = {
     "abs",
@@ -344,10 +343,10 @@ class MathQuizUnit(QuizUnitBase):
                     prec = (
                         int(float_precision_match.group(1))
                         if float_precision_match
-                        else MAX_PRECISION
+                        else None
                     )
                     d = random.uniform(start, end)
-                    expr += f"{d:.{prec}f}"
+                    expr += f"{d:.{prec}f}" if prec is not None else str(d)
 
             elif elem_type == "operator":
                 op = elem["value"]
@@ -365,13 +364,12 @@ class MathQuizUnit(QuizUnitBase):
     def _envaluate_question(cls, expr):
         try:
             res = eval(expr)
-            res = float(res)
-            res = f"{res:.{MAX_PRECISION}f}"
+            float(res) # Ensure the result can be converted to float
         except ZeroDivisionError:
-            res = str(float("nan"))
+            res = float("nan")
         except (ValueError, TypeError, SyntaxError) as exc:
             raise ValueError(f"Invalid expression '{expr}': {exc}") from exc
-        return res
+        return str(res)
 
     @classmethod
     def _prettify_question(cls, expr):
