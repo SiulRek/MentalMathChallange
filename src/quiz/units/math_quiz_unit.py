@@ -91,12 +91,14 @@ def _is_numeric_type(type_, ignore_constants=False):
 
 
 def _identify_math_expression_problem(elements):
+    # 1. Check for two consecutive numeric types
     for i in range(len(elements) - 1):
         if _is_numeric_type(elements[i]["type"]) and _is_numeric_type(
             elements[i + 1]["type"]
         ):
             return "two consecutive numeric types"
 
+    # 2. Check for two consecutive operators
     for i in range(len(elements) - 1):
         if (
             elements[i]["type"] == "operator"
@@ -104,6 +106,7 @@ def _identify_math_expression_problem(elements):
         ):
             return "two consecutive operators"
 
+    # 3. Check for operator followed by a bracket
     for i in range(len(elements) - 1):
         if elements[i]["type"] == "function":
             if (
@@ -112,6 +115,7 @@ def _identify_math_expression_problem(elements):
             ):
                 return "function not followed by an opening bracket"
 
+    # 4. Check for unmatched brackets
     brackets_counter = 0
     for elem in elements:
         if elem["type"] == "bracket":
@@ -124,17 +128,20 @@ def _identify_math_expression_problem(elements):
     if brackets_counter != 0:
         return "unmatched brackets"
 
+    # 5. Check for expression starting with an operator
     if elements[0]["type"] == "operator" and elements[0]["value"] not in [
         "-",
         "+",
     ]:
         return "expression starts with an operator"
 
+    # 6. Check for expression ending with an operator or function
     if elements[-1]["type"] in ["operator", "function"]:
         type_ = elements[-1]["type"]
         type_ = "an operator" if type_ == "operator" else "a function"
         return f"expression ends with {type_}"
 
+    # 7. Check for function preceded by numeric type
     for i in range(len(elements) - 1):
         i = i + 1
         if elements[i]["type"] == "function" and _is_numeric_type(
@@ -358,12 +365,13 @@ class MathQuizUnit(QuizUnitBase):
     def _envaluate_question(cls, expr):
         try:
             res = eval(expr)
-            float(res)
+            res = float(res)
+            res = f"{res:.{MAX_PRECISION}f}"
         except ZeroDivisionError:
-            res = float("nan")
+            res = str(float("nan"))
         except (ValueError, TypeError, SyntaxError) as exc:
             raise ValueError(f"Invalid expression '{expr}': {exc}") from exc
-        return str(res)
+        return res
 
     @classmethod
     def _prettify_question(cls, expr):
@@ -399,18 +407,7 @@ class MathQuizUnit(QuizUnitBase):
         return str(user_answer)
 
     @classmethod
-    def compare_answers(cls, answer_a, answer_b):
-        def adjust_precision(s):
-            s = f"{float(s):.{MAX_PRECISION}f}"
-            if "." in s:
-                exponent = 0
-                if "e" in s:
-                    s, exponent = s.split("e")
-                    exponent = int(exponent)
-                s = s.rstrip("0").rstrip(".")
-                s = s + "e" + str(exponent) if exponent != 0 else s
-            return s
-
+    def compare_answers(cls, user_answer, correct_answer):
         def derive_tol(s):
             exponent = 0
             if "e" in s:
@@ -420,16 +417,14 @@ class MathQuizUnit(QuizUnitBase):
             tol = tol[:-1] + "1"
             return float(tol) * 10**exponent
 
-        if answer_a == answer_b:
+        if user_answer == correct_answer:
             return True
 
-        if "nan" in (answer_a, answer_b):
+        if "nan" in (user_answer, correct_answer):
             return False
 
-        a = adjust_precision(answer_a)
-        b = adjust_precision(answer_b)
-        diff = abs(float(a) - float(b))
-        tol = max(derive_tol(answer_a), derive_tol(answer_b)) / 2
+        diff = abs(float(user_answer) - float(correct_answer))
+        tol = max(derive_tol(user_answer), derive_tol(correct_answer)) / 2
         return diff <= tol
 
     @classmethod

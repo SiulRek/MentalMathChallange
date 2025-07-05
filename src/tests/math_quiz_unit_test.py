@@ -574,5 +574,40 @@ class MathQuizParseUserAnswerTest(BaseTestCase):
                     MathQuizUnit.parse_user_answer(user_answer)
 
 
+class MathQuizCompareAnswersTest(BaseTestCase):
+    def test_compare_answers_equal(self):
+        equal_numbers = [
+            ("1.0", "1.00"),
+            ("1.5", "1.50"),
+            ("0.0001", "1e-4"),
+            ("0.00011", "1e-4"),
+            ("1000", "1e3"),
+            ("999", "1e3"),
+            ("2", "1.99"),
+            ("0.0001", "0.9e-4"),
+        ]
+        for user_answer, correct_answer in equal_numbers:
+            with self.subTest(
+                user_answer=user_answer, correct_answer=correct_answer
+            ):
+                self.assertTrue(
+                    MathQuizUnit.compare_answers(user_answer, correct_answer)
+                )
+
+    def test_compare_answers_not_equal(self):
+        not_equal_numbers = [
+            ("1.1", "1.0001"),
+            ("1.5", "1.59"),
+            ("1.5e-8", "1.5e-9"),
+        ]
+        for user_answer, correct_answer in not_equal_numbers:
+            with self.subTest(
+                user_answer=user_answer, correct_answer=correct_answer
+            ):
+                self.assertFalse(
+                    MathQuizUnit.compare_answers(user_answer, correct_answer)
+                )
+
+
 if __name__ == "__main__":
     unittest.main()
