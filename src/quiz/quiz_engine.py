@@ -70,7 +70,7 @@ class QuizEngine:
                 block_text += lines[i].rstrip() + "\n"
                 i += 1
             options = self._parse_options(block_text)
-            blueprint_unit = quiz_unit.generate_blueprint_unit(options)
+            blueprint_unit = quiz_unit.transform_options_to_blueprint_unit(options)
 
             blueprint_unit.update({"count": count})
             blueprint.append((blueprint_unit, category))

@@ -15,7 +15,7 @@ class DateQuizUnit(QuizUnitBase):
     """
 
     @classmethod
-    def generate_blueprint_unit(cls, options):
+    def transform_options_to_blueprint_unit(cls, options):
         """
         Convert options to a blueprint unit for the date quiz.
         """
