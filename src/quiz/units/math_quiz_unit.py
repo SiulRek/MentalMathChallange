@@ -91,14 +91,12 @@ def _is_numeric_type(type_, ignore_constants=False):
 
 
 def _identify_math_expression_problem(elements):
-    # 1. Check for consecutive numeric types
     for i in range(len(elements) - 1):
         if _is_numeric_type(elements[i]["type"]) and _is_numeric_type(
             elements[i + 1]["type"]
         ):
             return "two consecutive numeric types"
 
-    # 2. Check for consecutive operators
     for i in range(len(elements) - 1):
         if (
             elements[i]["type"] == "operator"
@@ -106,7 +104,6 @@ def _identify_math_expression_problem(elements):
         ):
             return "two consecutive operators"
 
-    # 3. Check for function not followed by a bracket
     for i in range(len(elements) - 1):
         if elements[i]["type"] == "function":
             if (
@@ -115,7 +112,6 @@ def _identify_math_expression_problem(elements):
             ):
                 return "function not followed by an opening bracket"
 
-    # 4. Check for bracket never closed or opened
     brackets_counter = 0
     for elem in elements:
         if elem["type"] == "bracket":
@@ -128,20 +124,17 @@ def _identify_math_expression_problem(elements):
     if brackets_counter != 0:
         return "unmatched brackets"
 
-    # 5. Check for operator at the beginning (not + or -)
     if elements[0]["type"] == "operator" and elements[0]["value"] not in [
         "-",
         "+",
     ]:
         return "expression starts with an operator"
 
-    # 6. Check for operator or function at the end
     if elements[-1]["type"] in ["operator", "function"]:
         type_ = elements[-1]["type"]
         type_ = "an operator" if type_ == "operator" else "a function"
         return f"expression ends with {type_}"
 
-    # 7. Check for function preceded by a numeric type
     for i in range(len(elements) - 1):
         i = i + 1
         if elements[i]["type"] == "function" and _is_numeric_type(
@@ -155,7 +148,6 @@ def _identify_math_expression_problem(elements):
 def _assert_math_expression_elements(elements):
     assert len(elements) > 0, "at least one math element must be defined"
 
-    # Build an example expression
     expr = ""
     for elem in elements:
         type_ = elem["type"]
@@ -201,6 +193,21 @@ class MathQuizUnit(QuizUnitBase):
     """
 
     @classmethod
+    def _maybe_convert_constant_option(cls, opt):
+        val = opt["value"]
+        if val.isnumeric():
+            type_ = "int"
+            val = int(val)
+        else:
+            try:
+                val = float(val)
+                type_ = "float"
+            except ValueError:
+                return
+        opt.clear()
+        opt.update({"type": type_, "start": val, "end": val})
+
+    @classmethod
     def generate_blueprint_unit(cls, options):
         """
         Convert options to a blueprint unit for the math quiz.
@@ -211,7 +218,7 @@ class MathQuizUnit(QuizUnitBase):
             for opt in options:
                 old_key = opt.pop("key")
                 key = KEY_MAPPING.get(old_key, old_key)
-                elems.append({"type": key})
+                opt.update({"type": key})
                 args = opt.pop("args")
                 if key == "int":
                     args.reverse()
@@ -262,11 +269,14 @@ class MathQuizUnit(QuizUnitBase):
                     )
                 else:
                     raise UserConfigError(f"Unknown option key: {key}")
-                
+
                 if _is_numeric_type(key, ignore_constants=True):
                     opt.setdefault("start", 0)
-                
-                elems[-1].update(opt)
+
+                if opt["type"] == "constant":
+                    cls._maybe_convert_constant_option(opt)
+
+                elems.append(opt)
 
         except (MappingError, AssertionError) as e:
             raise UserConfigError(f"Invalid option '{key}': {e}") from e
@@ -394,10 +404,6 @@ class MathQuizUnit(QuizUnitBase):
             return s
 
         def derive_tol(s):
-            # Derive a tolerance range based on the least significant decimal
-            # digit, scaled by the exponent (if in scientific notation).
-            # Examples: "1.2345"      → 0.0001 "1.23450"     → 0.00001
-            # "1.2345e+2"   → 0.0001 * 10^2 = 0.01 "1000"        → 1
             exponent = 0
             if "e" in s:
                 s, exponent = s.split("e")
@@ -408,7 +414,7 @@ class MathQuizUnit(QuizUnitBase):
 
         if answer_a == answer_b:
             return True
-        
+
         if "nan" in (answer_a, answer_b):
             return False
 

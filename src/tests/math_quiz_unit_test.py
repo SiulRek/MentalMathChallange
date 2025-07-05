@@ -24,6 +24,8 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
         self.bracket_open_option = {"key": "(", "args": []}
         self.bracket_close_option = {"key": ")", "args": []}
         self.constant_option = {"key": "const", "args": ["pi"]}
+        self.constant_int_option = {"key": "const", "args": ["10"]}
+        self.constant_float_option = {"key": "const", "args": ["3.14"]}
         return super().setUp()
 
     def _generate_options(self, option_specifiers):
@@ -31,7 +33,7 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
         for specifier in option_specifiers:
             if isinstance(specifier, dict):
                 opt = specifier
-            if specifier == "int":
+            elif specifier == "int":
                 opt = self.int_option
             elif specifier == "float":
                 opt = self.float_option
@@ -47,6 +49,14 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
                 opt = self.bracket_close_option
             elif specifier == "const":
                 opt = self.constant_option
+            elif specifier == "const_int":
+                opt = self.constant_int_option
+            elif specifier == "const_float":
+                opt = self.constant_float_option
+            else:
+                raise ValueError(
+                    f"Unknown specifier: {specifier}"
+                )
             options.append(deepcopy(opt))
         return options
 
@@ -59,6 +69,14 @@ class MathQuizGenerateBlueprintUnitTest(BaseTestCase):
                 {"type": "float.2", "start": 1.0, "end": 10.0},
             ),
             (self.constant_option, {"type": "constant", "value": "pi"}),
+            (
+                self.constant_int_option,
+                {"type": "int", "start": 10, "end": 10},
+            ),
+            (
+                self.constant_float_option,
+                {"type": "float", "start": 3.14, "end": 3.14},
+            ),
         ]
         for option, expected in cases:
             with self.subTest(option=option):
