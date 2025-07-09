@@ -1,5 +1,7 @@
 from copy import deepcopy
 import unittest
+from unittest import TestCase
+from unittest.mock import patch
 
 from quiz.units.date_quiz_unit import DateQuizUnit
 from quiz.units.exceptions import UserConfigError
@@ -65,12 +67,21 @@ class DateQuizUnparseOptionsTest(unittest.TestCase):
         self.assertEqual(roundtrip, options)
 
 
-# class DateQuizGenerateQuizTest(unittest.TestCase): def
-# test_generate_quiz(self): blueprint = {"start_year": 2000, "end_year": 2000,
-# "count": 3} quiz = DateQuizUnit.generate_quiz(blueprint)
-# self.assertEqual(len(quiz), 3) for q in quiz: self.assertIn("question", q)
-# self.assertIn("answer", q) self.assertIn("category", q)
-# self.assertEqual(q["category"], "date")
+class DateQuizGenerateQuizTest(TestCase):
+    def test_generate_quiz(self):
+        with patch(
+            "quiz.units.date_quiz_unit.random_date"
+        ) as mock_random_date:
+            mock_random_date.return_value = "2000-01-01"
+            blueprint = {"start_year": 2000, "end_year": 2000, "count": 5}
+            quiz = DateQuizUnit.generate_quiz(blueprint)
+            self.assertEqual(len(quiz), 5)
+            for q in quiz:
+                self.assertIn("question", q)
+                self.assertIn("answer", q)
+                self.assertIn("category", q)
+                self.assertEqual(q["category"], "date")
+                self.assertEqual(q["answer"], "saturday")
 
 
 # class DateQuizParseUserAnswerTest(unittest.TestCase): def

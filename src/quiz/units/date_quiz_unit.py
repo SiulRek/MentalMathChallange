@@ -98,7 +98,7 @@ class DateQuizUnit(QuizUnitBase):
 
     @classmethod
     def generate_quiz(cls, blueprint_unit):
-        count = blueprint_unit.get("count", 1)
+        count = blueprint_unit["count"]
         quiz = []
 
         for _ in range(count):
