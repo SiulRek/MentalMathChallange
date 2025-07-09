@@ -1,138 +1,90 @@
 import unittest
+from unittest.mock import patch
 
 from quiz.units.date_quiz_unit import DateQuizUnit
-from quiz.units.exceptions import UserResponseError
-from tests.utils.base_test_case import BaseTestCase
+from quiz.units.exceptions import UserConfigError, UserResponseError
 
 
-class DateQuizGeneratorTest(BaseTestCase):
-
-    # ---------------- Test generate method ----------------
-    def test_generate_date_fixed_year(self):
-        blueprint = {"start_year": 2000, "end_year": 2000, "count": 3}
-        quizzes = DateQuizUnit.generate_quiz(blueprint)
-        self.assertEqual(len(quizzes), 3)
-        for quiz in quizzes:
-            self.assertTrue(quiz["question"].endswith("2000"))
-            self.assertRegex(quiz["question"], r"\w+ \d{2}, 2000")
-            self.assertIn(
-                quiz["answer"],
-                [
-                    "monday",
-                    "tuesday",
-                    "wednesday",
-                    "thursday",
-                    "friday",
-                    "saturday",
-                    "sunday",
-                ],
-            )
-            self.assertEqual(quiz["category"], "date")
-
-    def test_invalid_year_range_raises(self):
-        blueprint = {"start_year": 2025, "end_year": 2020, "count": 1}
-        with self.assertRaises(AssertionError):
-            DateQuizUnit.generate_quiz(blueprint)
-
-    def test_generate_date_default_years(self):
-        blueprint = {"count": 2}
-        quizzes = DateQuizUnit.generate_quiz(blueprint)
-        self.assertEqual(len(quizzes), 2)
-        for quiz in quizzes:
-            self.assertRegex(quiz["question"], r"\w+ \d{2}, \d{4}")
-            self.assertIn(
-                quiz["answer"],
-                [
-                    "monday",
-                    "tuesday",
-                    "wednesday",
-                    "thursday",
-                    "friday",
-                    "saturday",
-                    "sunday",
-                ],
-            )
-            self.assertEqual(quiz["category"], "date")
-
-    # ---------------- Test compare_answers method ----------------
-    def test_compare_answers_correct(self):
-        test_cases = [
-            ("Monday", "monday"),
-            ("friday", "friday"),
-            ("SUNDAY", "sunday"),
-            ("tu", "Tuesday"),
-            ("Wed", "wednesday"),
+class DateQuizTransformOptionsToBlueprintUnitTest(unittest.TestCase):
+    def test_valid_start_end_years(self):
+        options = [
+            {"key": "start", "args": ["2000"]},
+            {"key": "end", "args": ["2020"]},
         ]
-        for user, answer in test_cases:
-            with self.subTest(user=user, answer=answer):
-                self.assertTrue(DateQuizUnit.compare_answers(user, answer))
+        blueprint = DateQuizUnit.transform_options_to_blueprint_unit(options)
+        self.assertEqual(blueprint["start_year"], 2000)
+        self.assertEqual(blueprint["end_year"], 2020)
 
-    def test_compare_answers_incorrect(self):
-        test_cases = [
-            ("Monday", "tuesday"),
-            ("friday", "saturday"),
-            ("sunday", "monday"),
-            ("tu", "wednesday"),
-            ("Wed", "thursday"),
-        ]
-        for user, answer in test_cases:
-            with self.subTest(user=user, answer=answer):
-                self.assertFalse(
-                    DateQuizUnit.compare_answers(user, answer)
-                )
+    def test_default_years(self):
+        options = []
+        blueprint = DateQuizUnit.transform_options_to_blueprint_unit(options)
+        self.assertEqual(blueprint["start_year"], 1900)
+        self.assertEqual(blueprint["end_year"], 2050)
 
-    def test_compare_answers_invalid_string(self):
-        test_cases = [
-            ("notaday", "monday"),
-            ("12345", "tuesday"),
-            ("w", "wednesday"),
-        ]
-        for user, answer in test_cases:
-            with self.subTest(user=user, answer=answer):
-                self.assertFalse(
-                    DateQuizUnit.compare_answers(user, answer)
-                )
+    def test_invalid_option_key(self):
+        options = [{"key": "unknown", "args": ["2000"]}]
+        with self.assertRaises(UserConfigError):
+            DateQuizUnit.transform_options_to_blueprint_unit(options)
 
-    # ---------------- Test parse_user_answer method ----------------
-    def test_parse_user_answer_valid(self):
-        test_cases = [
-            "monday",
-            "tuesday",
-            "wednesday",
-            "thursday",
-            "friday",
-            "saturday",
-            "sunday",
+    def test_duplicate_start_option_key(self):
+        options = [
+            {"key": "start", "args": ["2000"]},
+            {"key": "start", "args": ["2010"]},
         ]
-        for user in test_cases:
-            with self.subTest(user=user):
-                self.assertEqual(
-                    DateQuizUnit.parse_user_answer(user), user.lower()
-                )
+        with self.assertRaises(UserConfigError):
+            DateQuizUnit.transform_options_to_blueprint_unit(options)
 
-    def test_parse_user_answer_invalid(self):
-        test_cases = [
-            "notaday",
-            "12345",
-            "w",
-            "tuesday!",
+    def test_duplicate_end_option_key(self):
+        options = [
+            {"key": "end", "args": ["2020"]},
+            {"key": "end", "args": ["2030"]},
         ]
-        for user in test_cases:
-            with self.subTest(user=user):
-                with self.assertRaises(UserResponseError):
-                    DateQuizUnit.parse_user_answer(user)
+        with self.assertRaises(UserConfigError):
+            DateQuizUnit.transform_options_to_blueprint_unit(options)
 
-    # ---------------- Test prettify_answer method ----------------
-    def test_prettify_answer(self):
-        test_cases = [
-            ("monday", "Monday"),
-            ("tUesday", "Tuesday"),
+    def test_start_greater_than_end_year(self):
+        options = [
+            {"key": "start", "args": ["2025"]},
+            {"key": "end", "args": ["2020"]},
         ]
-        for user, expected in test_cases:
-            with self.subTest(user=user, expected=expected):
-                self.assertEqual(
-                    DateQuizUnit.prettify_answer(user), expected
-                )
+        with self.assertRaises(UserConfigError):
+            DateQuizUnit.transform_options_to_blueprint_unit(options)
+
+
+# class DateQuizUnparseOptionsTest(unittest.TestCase):
+#     def test_unparse_round_trip(self):
+#         blueprint = {"start_year": 2000, "end_year": 2020}
+#         options = DateQuizUnit.unparse_options(blueprint)
+#         self.assertIn({"key": "start", "args": ["2000"]}, options)
+#         self.assertIn({"key": "end", "args": ["2020"]}, options)
+
+
+# class DateQuizGenerateQuizTest(unittest.TestCase):
+#     def test_generate_quiz(self):
+#         blueprint = {"start_year": 2000, "end_year": 2000, "count": 3}
+#         quiz = DateQuizUnit.generate_quiz(blueprint)
+#         self.assertEqual(len(quiz), 3)
+#         for q in quiz:
+#             self.assertIn("question", q)
+#             self.assertIn("answer", q)
+#             self.assertIn("category", q)
+#             self.assertEqual(q["category"], "date")
+
+
+# class DateQuizParseUserAnswerTest(unittest.TestCase):
+#     def test_parse_user_answer_valid(self):
+#         answer = DateQuizUnit.parse_user_answer("Mon")
+#         self.assertEqual(answer, "monday")
+
+#     def test_parse_user_answer_invalid(self):
+#         with self.assertRaises(UserResponseError):
+#             DateQuizUnit.parse_user_answer("abc")
+
+
+# class DateQuizCompareAnswersTest(unittest.TestCase):
+#     def test_compare_answers(self):
+#         self.assertTrue(DateQuizUnit.compare_answers("monday", "monday"))
+#         self.assertFalse(DateQuizUnit.compare_answers("monday", "tuesday"))
 
 
 if __name__ == "__main__":

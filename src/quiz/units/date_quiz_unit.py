@@ -7,6 +7,9 @@ from quiz.units.exceptions import UserConfigError, UserResponseError
 from quiz.units.quiz_unit_base import QuizUnitBase
 from quiz.units.shared import MappingError, map_args_to_option
 
+DEFAULT_START_YEAR = 1900
+DEFAULT_END_YEAR = 2050
+
 
 class DateQuizUnit(QuizUnitBase):
     """
@@ -41,10 +44,12 @@ class DateQuizUnit(QuizUnitBase):
             raise UserConfigError(
                 f"Invalid option {key}: {e}"
             ) from e
-
-        # Test if blueprint unit can generate a quiz
-        cls._generate_question(unit_bp)
-
+        unit_bp.setdefault("start_year", DEFAULT_START_YEAR)
+        unit_bp.setdefault("end_year", DEFAULT_END_YEAR)
+        if unit_bp["start_year"] > unit_bp["end_year"]:
+            raise UserConfigError(
+                "Start year > end year."
+            )
         return unit_bp
 
     @classmethod
@@ -53,17 +58,18 @@ class DateQuizUnit(QuizUnitBase):
         Convert a blueprint unit back to options for the date quiz.
         """
         options = []
-        if "start_year" in blueprint_unit:
-            options.append({"key": "start", "args": [str(blueprint_unit["start_year"])]})
-        if "end_year" in blueprint_unit:
-            options.append({"key": "end", "args": [str(blueprint_unit["end_year"])]})
+        options.append(
+            {"key": "start", "args": [str(blueprint_unit["start_year"])]}
+        )
+        options.append(
+            {"key": "end", "args": [str(blueprint_unit["end_year"])]}
+        )
         return options
-    
+
     @classmethod
     def _generate_question(cls, blueprint_unit):
-        start_year = blueprint_unit.get("start_year", 1900)
-        end_year = blueprint_unit.get("end_year", 2050)
-        assert end_year >= start_year, "End year must be >= start year"
+        start_year = blueprint_unit["start_year"]
+        end_year = blueprint_unit["end_year"]
         return random_date(start_year, end_year)
 
     @classmethod
@@ -107,22 +113,16 @@ class DateQuizUnit(QuizUnitBase):
         return quiz
 
     @classmethod
-    def compare_answers(cls, answer_a, answer_b):
-        try:
-            answer_a = standardize_weekday_string(answer_a)
-            answer_b = standardize_weekday_string(answer_b)
-        except Exception:
-            return False
-        return answer_a == answer_b
+    def compare_answers(cls, user_answer, correct_answer):
+        return user_answer == correct_answer
 
     @classmethod
     def parse_user_answer(cls, user_answer):
         try:
             return standardize_weekday_string(user_answer)
         except (AssertionError, ValueError) as e:
-            # TODO: Remove line 75 to 76 of error message
             raise UserResponseError(
-                f"Invalid weekday string "
+                str(e)
             ) from e
 
     @classmethod
