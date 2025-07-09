@@ -4,7 +4,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from quiz.units.date_quiz_unit import DateQuizUnit
-from quiz.units.exceptions import UserConfigError
+from quiz.units.exceptions import UserConfigError, UserResponseError
 
 
 class DateQuizTransformOptionsToBlueprintUnitTest(unittest.TestCase):
@@ -84,9 +84,27 @@ class DateQuizGenerateQuizTest(TestCase):
                 self.assertEqual(q["answer"], "saturday")
 
 
-# class DateQuizParseUserAnswerTest(unittest.TestCase): def
-# test_parse_user_answer_valid(self): answer =
-# DateQuizUnit.parse_user_answer("Mon") self.assertEqual(answer, "monday")
+class DateQuizParseUserAnswerTest(unittest.TestCase):
+    def test_parse_user_answer_valid(self):
+        cases = [
+            ("Monday", "monday"),
+            ("tu", "tuesday"),
+            ("WEDNESDAY", "wednesday")
+        ]
+        for answer, expected in cases:
+            answer = DateQuizUnit.parse_user_answer(answer)
+            self.assertEqual(answer, expected)
+
+    def test_parse_user_answer_invalid(self):
+        answers = [
+            "Moonday",
+            "t",
+            "wednesdayay"
+        ]
+        for answer in answers:
+            with self.assertRaises(UserResponseError):
+                DateQuizUnit.parse_user_answer(answer)
+            
 
 # def test_parse_user_answer_invalid(self): with
 # self.assertRaises(UserResponseError): DateQuizUnit.parse_user_answer("abc")
