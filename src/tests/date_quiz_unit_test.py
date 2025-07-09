@@ -1,8 +1,8 @@
+from copy import deepcopy
 import unittest
-from unittest.mock import patch
 
 from quiz.units.date_quiz_unit import DateQuizUnit
-from quiz.units.exceptions import UserConfigError, UserResponseError
+from quiz.units.exceptions import UserConfigError
 
 
 class DateQuizTransformOptionsToBlueprintUnitTest(unittest.TestCase):
@@ -51,40 +51,40 @@ class DateQuizTransformOptionsToBlueprintUnitTest(unittest.TestCase):
             DateQuizUnit.transform_options_to_blueprint_unit(options)
 
 
-# class DateQuizUnparseOptionsTest(unittest.TestCase):
-#     def test_unparse_round_trip(self):
-#         blueprint = {"start_year": 2000, "end_year": 2020}
-#         options = DateQuizUnit.unparse_options(blueprint)
-#         self.assertIn({"key": "start", "args": ["2000"]}, options)
-#         self.assertIn({"key": "end", "args": ["2020"]}, options)
+class DateQuizUnparseOptionsTest(unittest.TestCase):
+    def test_parse_unparse_roundrip(self):
+        options = [
+            {"key": "start", "args": ["2020"]},
+            {"key": "end", "args": ["2025"]},
+        ]
+        blueprint = DateQuizUnit.transform_options_to_blueprint_unit(
+            deepcopy(options)
+        )
+        roundtrip = DateQuizUnit.unparse_options(blueprint)
+        self.assertEqual(len(roundtrip), 2)
+        self.assertEqual(roundtrip, options)
 
 
-# class DateQuizGenerateQuizTest(unittest.TestCase):
-#     def test_generate_quiz(self):
-#         blueprint = {"start_year": 2000, "end_year": 2000, "count": 3}
-#         quiz = DateQuizUnit.generate_quiz(blueprint)
-#         self.assertEqual(len(quiz), 3)
-#         for q in quiz:
-#             self.assertIn("question", q)
-#             self.assertIn("answer", q)
-#             self.assertIn("category", q)
-#             self.assertEqual(q["category"], "date")
+# class DateQuizGenerateQuizTest(unittest.TestCase): def
+# test_generate_quiz(self): blueprint = {"start_year": 2000, "end_year": 2000,
+# "count": 3} quiz = DateQuizUnit.generate_quiz(blueprint)
+# self.assertEqual(len(quiz), 3) for q in quiz: self.assertIn("question", q)
+# self.assertIn("answer", q) self.assertIn("category", q)
+# self.assertEqual(q["category"], "date")
 
 
-# class DateQuizParseUserAnswerTest(unittest.TestCase):
-#     def test_parse_user_answer_valid(self):
-#         answer = DateQuizUnit.parse_user_answer("Mon")
-#         self.assertEqual(answer, "monday")
+# class DateQuizParseUserAnswerTest(unittest.TestCase): def
+# test_parse_user_answer_valid(self): answer =
+# DateQuizUnit.parse_user_answer("Mon") self.assertEqual(answer, "monday")
 
-#     def test_parse_user_answer_invalid(self):
-#         with self.assertRaises(UserResponseError):
-#             DateQuizUnit.parse_user_answer("abc")
+# def test_parse_user_answer_invalid(self): with
+# self.assertRaises(UserResponseError): DateQuizUnit.parse_user_answer("abc")
 
 
-# class DateQuizCompareAnswersTest(unittest.TestCase):
-#     def test_compare_answers(self):
-#         self.assertTrue(DateQuizUnit.compare_answers("monday", "monday"))
-#         self.assertFalse(DateQuizUnit.compare_answers("monday", "tuesday"))
+# class DateQuizCompareAnswersTest(unittest.TestCase): def
+# test_compare_answers(self):
+# self.assertTrue(DateQuizUnit.compare_answers("monday", "monday"))
+# self.assertFalse(DateQuizUnit.compare_answers("monday", "tuesday"))
 
 
 if __name__ == "__main__":
