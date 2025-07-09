@@ -1,7 +1,5 @@
-from quiz.units.date_quiz_unit import DateQuizUnit
 from quiz.units.exceptions import UserConfigError
-from quiz.units.math_quiz_unit import MathQuizUnit
-
+from quiz.units import QUIZ_UNIT_MAPPING
 
 class QuizEngine:
     def __init__(self):
@@ -18,10 +16,9 @@ class QuizEngine:
         return options
 
     def _get_quiz_unit(self, type):
-        if type == "math":
-            return MathQuizUnit
-        if type == "date":
-            return DateQuizUnit
+        quiz_unit = QUIZ_UNIT_MAPPING.get(type, None)
+        if quiz_unit:
+            return quiz_unit
         raise ValueError(
             f"Unsupported quiz type: {type}"
         )
