@@ -10,7 +10,7 @@ def standardize_weekday_string(weekday):
     weekday = weekday.lower().strip()
     assert (
         len(weekday) > 1
-    ), "Weekday string must be at least 2 characters long to be unique"
+    ), "Weekday string must be at least 2 characters long"
     for sanitized_weekday in [
         "monday",
         "tuesday",
