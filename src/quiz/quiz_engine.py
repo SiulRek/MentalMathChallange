@@ -5,7 +5,7 @@ from quiz.units.math_quiz_unit import MathQuizUnit
 
 class QuizEngine:
     def __init__(self):
-        self.active_unit = None
+        self._active_unit = None
 
     def _parse_options(self, text):
         options = []
@@ -70,7 +70,9 @@ class QuizEngine:
                 block_text += lines[i].rstrip() + "\n"
                 i += 1
             options = self._parse_options(block_text)
-            blueprint_unit = quiz_unit.transform_options_to_blueprint_unit(options)
+            blueprint_unit = quiz_unit.transform_options_to_blueprint_unit(
+                options
+            )
 
             blueprint_unit.update({"count": count})
             blueprint.append((blueprint_unit, category))
@@ -88,7 +90,7 @@ class QuizEngine:
             )
             text += "\n\n"
         return text.strip()
-    
+
     def generate_quiz(self, blueprint):
         quiz = []
         for blueprint_unit, category in blueprint:
@@ -97,10 +99,10 @@ class QuizEngine:
         return quiz
 
     def _focus_on_category(self, category):
-        self.active_unit = self._get_quiz_unit(category)
+        self._active_unit = self._get_quiz_unit(category)
 
     def _validate_focused_quiz_unit(self):
-        if not self.active_unit:
+        if not self._active_unit:
             raise ValueError(
                 "No focused quiz unit set. Use focus_on_category() first."
             )
@@ -109,7 +111,7 @@ class QuizEngine:
         self._validate_focused_quiz_unit()
         if not answer_a or not answer_b:
             return False
-        return self.active_unit.compare_answers(answer_a, answer_b)
+        return self._active_unit.compare_answers(answer_a, answer_b)
 
     def _parse_user_answer(self, user_answer):
         self._validate_focused_quiz_unit()
@@ -120,13 +122,13 @@ class QuizEngine:
         if not user_answer:
             return None
 
-        return self.active_unit.parse_user_answer(user_answer)
+        return self._active_unit.parse_user_answer(user_answer)
 
     def _prettify_answer(self, answer):
         self._validate_focused_quiz_unit()
         if not answer:
             return None
-        return self.active_unit.prettify_answer(answer)
+        return self._active_unit.prettify_answer(answer)
 
     def compute_quiz_results(self, quiz, user_answers):
         quiz = [(q["question"], q["answer"], q["category"]) for q in quiz]
@@ -135,14 +137,13 @@ class QuizEngine:
             question, correct_answer, category = quiz_elem
             correct_answer = correct_answer.lower()
             self._focus_on_category(category)
-            q_unit = self.active_unit
-            user_answer = q_unit.parse_user_answer(user_answer)
-            correct = q_unit.compare_answers(
+            user_answer = self._parse_user_answer(user_answer)
+            correct = self._compare_answers(
                 user_answer,
                 correct_answer,
             )
-            user_answer = q_unit.prettify_answer(user_answer)
-            correct_answer = q_unit.prettify_answer(correct_answer)
+            user_answer = self._prettify_answer(user_answer)
+            correct_answer = self._prettify_answer(correct_answer)
             results.append(
                 {
                     "question": question,
