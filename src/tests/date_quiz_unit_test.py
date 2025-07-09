@@ -106,14 +106,10 @@ class DateQuizParseUserAnswerTest(unittest.TestCase):
                 DateQuizUnit.parse_user_answer(answer)
             
 
-# def test_parse_user_answer_invalid(self): with
-# self.assertRaises(UserResponseError): DateQuizUnit.parse_user_answer("abc")
-
-
-# class DateQuizCompareAnswersTest(unittest.TestCase): def
-# test_compare_answers(self):
-# self.assertTrue(DateQuizUnit.compare_answers("monday", "monday"))
-# self.assertFalse(DateQuizUnit.compare_answers("monday", "tuesday"))
+class DateQuizCompareAnswersTest(unittest.TestCase): 
+    def test_compare_answers(self):
+        self.assertTrue(DateQuizUnit.compare_answers("monday", "monday"))
+        self.assertFalse(DateQuizUnit.compare_answers("monday", "tuesday"))
 
 
 if __name__ == "__main__":
