@@ -1,92 +1,168 @@
 import unittest
+from unittest.mock import patch
 
-from quiz.units.exceptions import UserResponseError
 from quiz.quiz_engine import QuizEngine
+from quiz.units.exceptions import UserConfigError
+from quiz.units.quiz_unit_base import QuizUnitBase
 from tests.utils.base_test_case import BaseTestCase
 
-# NOTE: The logic for generating quizzes and computing results is not tested
-# here, as it is covered in the public_core_test.py file.
+
+class DummyQuizUnit(QuizUnitBase):
+    @classmethod
+    def transform_options_to_blueprint_unit(cls, options):
+        return {"value": "dummy"}
+
+    @classmethod
+    def unparse_options(cls, blueprint_unit):
+        return [{"key": "dummy_option", "args": ["dummy_arg"]}]
+
+    @classmethod
+    def generate_quiz(cls, blueprint_unit):
+        return [{"question": "2+2?", "answer": "4", "category": "DUMMY"}]
+
+    @classmethod
+    def parse_user_answer(cls, user_answer):
+        return user_answer.strip()
+
+    @classmethod
+    def compare_answers(cls, user_answer, correct_answer):
+        return user_answer == correct_answer
+
+    @classmethod
+    def prettify_answer(cls, answer):
+        return answer
 
 
-class CompareAnswersTest(BaseTestCase):
+old_mapping = "quiz.quiz_engine.QUIZ_UNIT_MAPPING"
+new_mapping = {"DUMMY": DummyQuizUnit}
+
+
+@patch(old_mapping, new_mapping)
+class ParseBlueprintFromTextTest(BaseTestCase):
+
     def setUp(self):
-        self.quiz_engine = QuizEngine()
+        super().setUp()
+        self.engine = QuizEngine()
+        self.std_blueprint_text = "DUMMY: 2\n  dummy_option dummy_arg\n"
 
-    def test_compare_math_true(self):
-        self.quiz_engine._focus_on_category("math")
-        self.assertTrue(self.quiz_engine._compare_answers("2", "2.0"))
-        self.assertFalse(self.quiz_engine._compare_answers("5", "2"))
-
-    def test_compare_date_true(self):
-        self.quiz_engine._focus_on_category("date")
-        self.assertTrue(self.quiz_engine._compare_answers("Monday", "monday"))
-        self.assertFalse(
-            self.quiz_engine._compare_answers("notaday", "monday")
+    def _tranform_function_spy(self):
+        return patch.object(
+            DummyQuizUnit,
+            "transform_options_to_blueprint_unit",
+            wraps=DummyQuizUnit.transform_options_to_blueprint_unit,
         )
 
-    def test_compare_empty(self):
-        self.quiz_engine._focus_on_category("math")
-        self.assertFalse(self.quiz_engine._compare_answers("", "2"))
-        self.assertFalse(self.quiz_engine._compare_answers("2", ""))
-        self.assertFalse(self.quiz_engine._compare_answers(None, ""))
+    def _assert_unit_in_blueprint(self, blueprint):
+        for unit, category in blueprint:
+            self.assertEqual(unit["count"], 2)
+            self.assertEqual(unit["value"], "dummy")
+            self.assertEqual(category, "DUMMY")
 
-    def test_compare_without_focus_raises(self):
-        with self.assertRaises(ValueError):
-            self.quiz_engine._compare_answers("2", "2")
-
-
-class ParseUserAnswerTest(BaseTestCase):
-    def setUp(self):
-        self.quiz_engine = QuizEngine()
-
-    def test_parse_user_answer_math(self):
-        self.quiz_engine._focus_on_category("math")
+    def _assert_transform_call_args(self, func_spy):
+        if isinstance(func_spy, unittest.mock._Call):
+            called_args = func_spy[0][0]
+        else:
+            called_args = func_spy.call_args[0][0]
         self.assertEqual(
-            self.quiz_engine._parse_user_answer("2.0000"), "2.0000"
+            called_args, [{"key": "dummy_option", "args": ["dummy_arg"]}]
         )
-        self.assertEqual(
-            self.quiz_engine._parse_user_answer("3.1400"), "3.1400"
-        )
-        with self.assertRaises(UserResponseError):
-            self.quiz_engine._parse_user_answer("notanumber")
 
-    def test_parse_user_answer_date(self):
-        self.quiz_engine._focus_on_category("date")
-        self.assertEqual(
-            self.quiz_engine._parse_user_answer("Monday"), "monday"
-        )
-        self.assertEqual(self.quiz_engine._parse_user_answer("tu"), "tuesday")
-        with self.assertRaises(UserResponseError):
-            self.quiz_engine._parse_user_answer("notaday")
+    def test_one_blueprint_unit(self):
+        with self._tranform_function_spy() as spy:
+            blueprint = self.engine.parse_blueprint_from_text(
+                self.std_blueprint_text
+            )
 
-    def test_parse_without_focus_raises(self):
-        with self.assertRaises(ValueError):
-            self.quiz_engine._parse_user_answer("Monday")
+            self.assertEqual(len(blueprint), 1)
+            self._assert_unit_in_blueprint(blueprint)
 
+            spy.assert_called_once()
+            self._assert_transform_call_args(spy)
 
-class PrettifyAnswerTest(BaseTestCase):
-    def setUp(self):
-        self.quiz_engine = QuizEngine()
+    def test_multiple_blueprint_units(self):
+        blueprint_text = self.std_blueprint_text
+        blueprint_text = "\n".join([blueprint_text] * 3)
+        with self._tranform_function_spy() as spy:
+            blueprint = self.engine.parse_blueprint_from_text(blueprint_text)
 
-    def test_prettify_answer_math(self):
-        self.quiz_engine._focus_on_category("math")
-        self.assertEqual(self.quiz_engine._prettify_answer("2.0000"), "2")
-        self.assertEqual(self.quiz_engine._prettify_answer("3.1400"), "3.14")
-        self.assertIsNone(self.quiz_engine._prettify_answer(""))
-        self.assertIsNone(self.quiz_engine._prettify_answer(None))
+            self.assertEqual(len(blueprint), 3)
+            self._assert_unit_in_blueprint(blueprint)
 
-    def test_prettify_answer_date(self):
-        self.quiz_engine._focus_on_category("date")
-        self.assertEqual(self.quiz_engine._prettify_answer("Monday"), "Monday")
-        self.assertEqual(
-            self.quiz_engine._prettify_answer("tuesday"), "Tuesday"
-        )
-        self.assertIsNone(self.quiz_engine._prettify_answer(""))
-        self.assertIsNone(self.quiz_engine._prettify_answer(None))
+            self.assertEqual(spy.call_count, 3)
+            for call in spy.call_args_list:
+                self._assert_transform_call_args(call)
 
-    def test_prettify_without_focus_raises(self):
-        with self.assertRaises(ValueError):
-            self.quiz_engine._prettify_answer("Monday")
+    def test_unnecessary_blank_lines(self):
+        blueprint_text = self.std_blueprint_text.replace("\n", "\n\n")
+        blueprint_text = "\n" + blueprint_text + "\n"
+        with self._tranform_function_spy() as spy:
+            blueprint = self.engine.parse_blueprint_from_text(blueprint_text)
+
+            self.assertEqual(len(blueprint), 1)
+            self._assert_unit_in_blueprint(blueprint)
+            spy.assert_called_once()
+            self._assert_transform_call_args(spy)
+
+    def test_unnecessary_spaces(self):
+        blueprint_text = self.std_blueprint_text.replace(" ", "  ")
+        blueprint_text = blueprint_text.replace("\n", "\n ")
+        blueprint_text = blueprint_text.replace(":", " :")
+        with self._tranform_function_spy() as spy:
+            blueprint = self.engine.parse_blueprint_from_text(blueprint_text)
+
+            self.assertEqual(len(blueprint), 1)
+            self._assert_unit_in_blueprint(blueprint)
+            spy.assert_called_once()
+            self._assert_transform_call_args(spy)
+
+    def test_no_options(self):
+        blueprint_text = "DUMMY: 1\n"
+        with self._tranform_function_spy() as spy:
+            blueprint = self.engine.parse_blueprint_from_text(blueprint_text)
+
+            self.assertEqual(len(blueprint), 1)
+            self.assertEqual(blueprint[0][0]["count"], 1)
+            self.assertEqual(blueprint[0][0]["value"], "dummy")
+            self.assertEqual(blueprint[0][1], "DUMMY")
+            spy.assert_called_once()
+            called_args = spy.call_args[0][0]
+            self.assertEqual(called_args, [])
+
+    def test_invalid_block_start(self):
+        cases = [
+            "DUMMY \n  dummy_option dummy_arg\n",
+            "DUMMY 1\n  dummy_option dummy_arg\n",
+            "DUMMY: one\n  dummy_option dummy_arg\n",
+            "DUMMY: 1 2\n  dummy_option dummy_arg\n",
+        ]
+        for blueprint_text in cases:
+            with self.assertRaises(UserConfigError):
+                self.engine.parse_blueprint_from_text(blueprint_text)
+
+    def test_unknown_category(self):
+        blueprint_text = "UNKNOWN: 1\n  dummy_option dummy_arg\n"
+        with self.assertRaises(UserConfigError):
+            self.engine.parse_blueprint_from_text(blueprint_text)
+
+    def test_invalid_count(self):
+        cases = [
+            "DUMMY: 0\n  dummy_option dummy_arg\n",
+            "DUMMY: -1\n  dummy_option dummy_arg\n",
+            "DUMMY: 1.5\n  dummy_option dummy_arg\n",
+        ]
+        for blueprint_text in cases:
+            with self.assertRaises(UserConfigError):
+                self.engine.parse_blueprint_from_text(blueprint_text)
+
+    def test_unexpected_indentation(self):
+        blueprint_text = "  DUMMY: 1\n dummy_option dummy_arg\n"
+        with self.assertRaises(UserConfigError):
+            self.engine.parse_blueprint_from_text(blueprint_text)
+
+    def test_missing_indentation(self):
+        blueprint_text = "DUMMY: 1\ndummy_option dummy_arg\n"
+        with self.assertRaises(UserConfigError):
+            self.engine.parse_blueprint_from_text(blueprint_text)
 
 
 if __name__ == "__main__":

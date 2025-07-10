@@ -10,6 +10,7 @@ class QuizEngine:
         lines = text.strip().splitlines()
         for line in lines:
             args = line.strip().split()
+            args = [arg for arg in args if arg]
             key = args[0]
             args = args[1:] if len(args) > 1 else []
             options.append({"key": key, "args": args})
@@ -19,8 +20,8 @@ class QuizEngine:
         quiz_unit = QUIZ_UNIT_MAPPING.get(type, None)
         if quiz_unit:
             return quiz_unit
-        raise ValueError(
-            f"Unsupported quiz type: {type}"
+        raise KeyError(
+            f"Unsupported quiz type: '{type}'"
         )
 
     def parse_blueprint_from_text(self, text):
@@ -53,7 +54,16 @@ class QuizEngine:
                 raise UserConfigError(
                     f"Invalid blueprint block start: '{line}'"
                 ) from exc
-
+            except KeyError as exc:
+                raise UserConfigError(
+                    str(exc)
+                ) from exc
+                
+            if count < 1:
+                raise UserConfigError(
+                    f"Invalid count in blueprint block: '{line}'"
+                )
+            
             i += 1
 
             # Parse the block body
