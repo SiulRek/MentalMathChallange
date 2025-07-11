@@ -62,7 +62,7 @@ class DateQuizUnparseOptionsTest(unittest.TestCase):
         blueprint = DateQuizUnit.transform_options_to_blueprint_unit(
             deepcopy(options)
         )
-        roundtrip = DateQuizUnit.unparse_options(blueprint)
+        roundtrip = DateQuizUnit.transform_blueprint_unit_to_options(blueprint)
         self.assertEqual(len(roundtrip), 2)
         self.assertEqual(roundtrip, options)
 

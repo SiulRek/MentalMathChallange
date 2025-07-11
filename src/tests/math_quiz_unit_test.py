@@ -423,7 +423,7 @@ class MathQuizTransformOptionsToBlueprintUnitTest(BaseTestCase):
 
 
 class MathQuizUnparseOptionsTest(BaseTestCase):
-    def test_unparse_options_round_trip(self):
+    def test_transform_blueprint_unit_to_options_round_trip(self):
         options = [
             {"key": "func", "args": ["sqrt"]},
             {"key": "(", "args": []},
@@ -439,7 +439,7 @@ class MathQuizUnparseOptionsTest(BaseTestCase):
         blueprint = MathQuizUnit.transform_options_to_blueprint_unit(
             deepcopy(options)
         )
-        result = MathQuizUnit.unparse_options(blueprint)
+        result = MathQuizUnit.transform_blueprint_unit_to_options(blueprint)
         for original, roundtrip in zip(options, result):
             with self.subTest(original=original, roundtrip=roundtrip):
                 self.assertEqual(original["key"], roundtrip["key"])

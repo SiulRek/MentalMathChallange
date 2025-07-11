@@ -53,7 +53,7 @@ class DateQuizUnit(QuizUnitBase):
         return unit_bp
 
     @classmethod
-    def unparse_options(cls, blueprint_unit):
+    def transform_blueprint_unit_to_options(cls, blueprint_unit):
         """
         Convert a blueprint unit back to options for the date quiz.
         """

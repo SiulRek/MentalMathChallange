@@ -14,7 +14,7 @@ class DummyQuizUnit(QuizUnitBase):
         return {"value": "dummy"}
 
     @classmethod
-    def unparse_options(cls, blueprint_unit):
+    def transform_blueprint_unit_to_options(cls, blueprint_unit):
         return [{"key": "dummy_option", "args": ["dummy_arg"]}]
 
     @classmethod
@@ -178,11 +178,11 @@ class UnparseBlueprintToTextTest(BaseTestCase):
     def blueprint(self):
         return deepcopy(self._blueprint)
 
-    def test_unparse_options_called_correctly(self):
+    def test_transform_blueprint_unit_to_options_called_correctly(self):
         with patch.object(
             DummyQuizUnit,
-            "unparse_options",
-            wraps=DummyQuizUnit.unparse_options,
+            "transform_blueprint_unit_to_options",
+            wraps=DummyQuizUnit.transform_blueprint_unit_to_options,
         ) as spy:
             text = self.engine.unparse_blueprint_to_text(self.blueprint)
             self.assertEqual(text, "DUMMY: 2\n  dummy_option dummy_arg")
@@ -204,7 +204,7 @@ class UnparseBlueprintToTextTest(BaseTestCase):
         self.assertEqual(text, expected)
 
     def test_unparse_no_options(self):
-        with patch.object(DummyQuizUnit, "unparse_options", return_value=[]):
+        with patch.object(DummyQuizUnit, "transform_blueprint_unit_to_options", return_value=[]):
             blueprint = [({"count": 1, "value": "dummy"}, "DUMMY")]
             text = self.engine.unparse_blueprint_to_text(blueprint)
             expected = "DUMMY: 1"

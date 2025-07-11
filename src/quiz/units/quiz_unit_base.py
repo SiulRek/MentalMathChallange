@@ -16,7 +16,7 @@ class QuizUnitBase(ABC):
     
     @classmethod
     @abstractmethod
-    def unparse_options(cls, blueprint_unit):
+    def transform_blueprint_unit_to_options(cls, blueprint_unit):
         """
         Transform a blueprint unit back to options for the quiz engine.
         """

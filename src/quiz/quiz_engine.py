@@ -90,7 +90,7 @@ class QuizEngine:
         for blueprint_unit, category in blueprint:
             text += f"{category}: {blueprint_unit.pop('count')}\n"
             quiz_unit = self._get_quiz_unit(category)
-            options = quiz_unit.unparse_options(blueprint_unit)
+            options = quiz_unit.transform_blueprint_unit_to_options(blueprint_unit)
             text += "\n".join(
                 f"  {opt['key']} {' '.join(opt['args'])}" for opt in options
             )
