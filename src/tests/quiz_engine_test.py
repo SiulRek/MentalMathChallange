@@ -178,6 +178,18 @@ class UnparseBlueprintToTextTest(BaseTestCase):
     def blueprint(self):
         return deepcopy(self._blueprint)
 
+    def test_unparse_options_called_correctly(self):
+        with patch.object(
+            DummyQuizUnit,
+            "unparse_options",
+            wraps=DummyQuizUnit.unparse_options,
+        ) as spy:
+            text = self.engine.unparse_blueprint_to_text(self.blueprint)
+            self.assertEqual(text, "DUMMY: 2\n  dummy_option dummy_arg")
+            expected_call = self.blueprint[0][0]
+            expected_call.pop("count")
+            spy.assert_called_once_with(expected_call)
+
     def test_unparse_one_blueprint_unit(self):
         text = self.engine.unparse_blueprint_to_text(self.blueprint)
         expected = "DUMMY: 2\n  dummy_option dummy_arg"
@@ -192,14 +204,12 @@ class UnparseBlueprintToTextTest(BaseTestCase):
         self.assertEqual(text, expected)
 
     def test_unparse_no_options(self):
-        with patch.object(
-            DummyQuizUnit, "unparse_options", return_value=[]
-        ):
+        with patch.object(DummyQuizUnit, "unparse_options", return_value=[]):
             blueprint = [({"count": 1, "value": "dummy"}, "DUMMY")]
             text = self.engine.unparse_blueprint_to_text(blueprint)
             expected = "DUMMY: 1"
             self.assertEqual(text, expected)
-            
+
     def test_unparse_multiple_options(self):
         blueprint = [
             ({"count": 2, "value": "dummy"}, "DUMMY"),
@@ -211,6 +221,44 @@ class UnparseBlueprintToTextTest(BaseTestCase):
             "DUMMY: 3\n  dummy_option dummy_arg"
         )
         self.assertEqual(text, expected)
+
+
+@patch(old_mapping, new_mapping)
+class GenerateQuizTest(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.engine = QuizEngine()
+        self.blueprint = [({"count": 1, "value": "dummy"}, "DUMMY")]
+
+    def test_generate_quiz_called_correctly(self):
+        with patch.object(
+            DummyQuizUnit,
+            "generate_quiz",
+            wraps=DummyQuizUnit.generate_quiz,
+        ) as spy:
+            quiz = self.engine.generate_quiz(self.blueprint)
+            self.assertEqual(len(quiz), 1)
+            self.assertEqual(quiz[0]["question"], "2+2?")
+            self.assertEqual(quiz[0]["answer"], "4")
+            self.assertEqual(quiz[0]["category"], "DUMMY")
+            spy.assert_called_once_with(self.blueprint[0][0])
+
+    def test_generate_quiz_single_question(self):
+        quiz = self.engine.generate_quiz(self.blueprint)
+        self.assertEqual(len(quiz), 1)
+        self.assertEqual(quiz[0]["question"], "2+2?")
+        self.assertEqual(quiz[0]["answer"], "4")
+        self.assertEqual(quiz[0]["category"], "DUMMY")
+
+    def test_generate_quiz_multiple_questions(self):
+        blueprint = self.blueprint * 3
+        quiz = self.engine.generate_quiz(blueprint)
+        self.assertEqual(len(quiz), 3)
+        for q in quiz:
+            self.assertEqual(q["question"], "2+2?")
+            self.assertEqual(q["answer"], "4")
+            self.assertEqual(q["category"], "DUMMY")
 
 
 if __name__ == "__main__":
