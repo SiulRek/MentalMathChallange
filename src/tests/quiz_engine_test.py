@@ -261,5 +261,59 @@ class GenerateQuizTest(BaseTestCase):
             self.assertEqual(q["category"], "DUMMY")
 
 
+@patch(old_mapping, new_mapping)
+class ComputeQuizResultsTest(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.engine = QuizEngine()
+        self.quiz = [{"question": "2+2?", "answer": "4", "category": "DUMMY"}]
+
+    def test_internal_function_called_correctly(self):
+        with patch.object(
+            DummyQuizUnit,
+            "parse_user_answer",
+            wraps=DummyQuizUnit.parse_user_answer,
+        ) as parse_spy, patch.object(
+            DummyQuizUnit,
+            "compare_answers",
+            wraps=DummyQuizUnit.compare_answers,
+        ) as compare_spy, patch.object(
+            DummyQuizUnit,
+            "prettify_answer",
+            wraps=DummyQuizUnit.prettify_answer,
+        ) as prettify_spy:
+            user_answers = ["4"]
+            results = self.engine.compute_quiz_results(self.quiz, user_answers)
+
+            parse_spy.assert_called_once_with("4")
+            compare_spy.assert_called_once_with("4", "4")
+            prettify_spy.assert_called_with("4")
+            self.assertEqual(len(results), 1)
+
+    def test_compute_correct_result(self):
+        user_answers = ["4"]
+        results = self.engine.compute_quiz_results(self.quiz, user_answers)
+        self.assertEqual(len(results), 1)
+        result = results[0]
+        self.assertEqual(result["question"], "2+2?")
+        self.assertEqual(result["category"], "DUMMY")
+        self.assertEqual(result["correct_answer"], "4")
+        self.assertEqual(result["user_answer"], "4")
+        self.assertTrue(result["is_correct"])
+
+    def test_compute_incorrect_result(self):
+        user_answers = ["5"]
+        results = self.engine.compute_quiz_results(self.quiz, user_answers)
+        self.assertFalse(results[0]["is_correct"])
+        self.assertEqual(results[0]["user_answer"], "5")
+
+    def test_compute_not_answered(self):
+        user_answers = [""]
+        results = self.engine.compute_quiz_results(self.quiz, user_answers)
+        self.assertFalse(results[0]["is_correct"])
+        self.assertEqual(results[0]["user_answer"], "Not answered")
+
+
 if __name__ == "__main__":
     unittest.main()

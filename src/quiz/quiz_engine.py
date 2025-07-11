@@ -1,5 +1,6 @@
-from quiz.units.exceptions import UserConfigError
 from quiz.units import QUIZ_UNIT_MAPPING
+from quiz.units.exceptions import UserConfigError
+
 
 class QuizEngine:
     def __init__(self):
@@ -55,15 +56,13 @@ class QuizEngine:
                     f"Invalid blueprint block start: '{line}'"
                 ) from exc
             except KeyError as exc:
-                raise UserConfigError(
-                    str(exc)
-                ) from exc
-                
+                raise UserConfigError(str(exc)) from exc
+
             if count < 1:
                 raise UserConfigError(
                     f"Invalid count in blueprint block: '{line}'"
                 )
-            
+
             i += 1
 
             # Parse the block body
@@ -108,20 +107,12 @@ class QuizEngine:
     def _focus_on_category(self, category):
         self._active_unit = self._get_quiz_unit(category)
 
-    def _validate_focused_quiz_unit(self):
-        if not self._active_unit:
-            raise ValueError(
-                "No focused quiz unit set. Use focus_on_category() first."
-            )
-
     def _compare_answers(self, answer_a, answer_b):
-        self._validate_focused_quiz_unit()
         if not answer_a or not answer_b:
             return False
         return self._active_unit.compare_answers(answer_a, answer_b)
 
     def _parse_user_answer(self, user_answer):
-        self._validate_focused_quiz_unit()
         try:
             user_answer = user_answer.strip()
         except AttributeError:
@@ -132,9 +123,6 @@ class QuizEngine:
         return self._active_unit.parse_user_answer(user_answer)
 
     def _prettify_answer(self, answer):
-        self._validate_focused_quiz_unit()
-        if not answer:
-            return None
         return self._active_unit.prettify_answer(answer)
 
     def compute_quiz_results(self, quiz, user_answers):
@@ -142,7 +130,6 @@ class QuizEngine:
         results = []
         for quiz_elem, user_answer in zip(quiz, user_answers):
             question, correct_answer, category = quiz_elem
-            correct_answer = correct_answer.lower()
             self._focus_on_category(category)
             user_answer = self._parse_user_answer(user_answer)
             correct = self._compare_answers(
