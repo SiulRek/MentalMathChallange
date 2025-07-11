@@ -1,3 +1,4 @@
+from copy import deepcopy
 import unittest
 from unittest.mock import patch
 
@@ -163,6 +164,53 @@ class ParseBlueprintFromTextTest(BaseTestCase):
         blueprint_text = "DUMMY: 1\ndummy_option dummy_arg\n"
         with self.assertRaises(UserConfigError):
             self.engine.parse_blueprint_from_text(blueprint_text)
+
+
+@patch(old_mapping, new_mapping)
+class UnparseBlueprintToTextTest(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.engine = QuizEngine()
+        self._blueprint = [({"count": 2, "value": "dummy"}, "DUMMY")]
+
+    @property
+    def blueprint(self):
+        return deepcopy(self._blueprint)
+
+    def test_unparse_one_blueprint_unit(self):
+        text = self.engine.unparse_blueprint_to_text(self.blueprint)
+        expected = "DUMMY: 2\n  dummy_option dummy_arg"
+        self.assertEqual(text, expected)
+
+    def test_unparse_multiple_blueprint_units(self):
+        # Create three independent copies of self.blueprint using manual
+        # addition instead of repeating references with self.blueprint * 3
+        blueprint = self.blueprint + self.blueprint + self.blueprint
+        text = self.engine.unparse_blueprint_to_text(blueprint)
+        expected = "\n\n".join(["DUMMY: 2\n  dummy_option dummy_arg"] * 3)
+        self.assertEqual(text, expected)
+
+    def test_unparse_no_options(self):
+        with patch.object(
+            DummyQuizUnit, "unparse_options", return_value=[]
+        ):
+            blueprint = [({"count": 1, "value": "dummy"}, "DUMMY")]
+            text = self.engine.unparse_blueprint_to_text(blueprint)
+            expected = "DUMMY: 1"
+            self.assertEqual(text, expected)
+            
+    def test_unparse_multiple_options(self):
+        blueprint = [
+            ({"count": 2, "value": "dummy"}, "DUMMY"),
+            ({"count": 3, "value": "dummy"}, "DUMMY"),
+        ]
+        text = self.engine.unparse_blueprint_to_text(blueprint)
+        expected = (
+            "DUMMY: 2\n  dummy_option dummy_arg\n\n"
+            "DUMMY: 3\n  dummy_option dummy_arg"
+        )
+        self.assertEqual(text, expected)
 
 
 if __name__ == "__main__":

@@ -89,7 +89,7 @@ class QuizEngine:
     def unparse_blueprint_to_text(self, blueprint):
         text = ""
         for blueprint_unit, category in blueprint:
-            text += f"{category}: {blueprint_unit['count']}\n"
+            text += f"{category}: {blueprint_unit.pop('count')}\n"
             quiz_unit = self._get_quiz_unit(category)
             options = quiz_unit.unparse_options(blueprint_unit)
             text += "\n".join(
