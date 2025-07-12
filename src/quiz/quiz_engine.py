@@ -3,6 +3,18 @@ from quiz.units.exceptions import UserConfigError
 
 
 class QuizEngine:
+    """
+    Central engine for parsing, generating, and evaluating quizzes composed of
+    multiple unit types.
+
+    This class manages quiz construction from text-based blueprints, delegates
+    generation and validation logic to unit-specific handlers (inheriting from
+    `QuizUnitBase`), and computes final quiz results.
+
+    The engine is designed to work with a pluggable set of unit types defined
+    in `QUIZ_UNIT_MAPPING`.
+    """
+
     def __init__(self):
         self._active_unit = None
 
@@ -90,7 +102,9 @@ class QuizEngine:
         for blueprint_unit, category in blueprint:
             text += f"{category}: {blueprint_unit.pop('count')}\n"
             quiz_unit = self._get_quiz_unit(category)
-            options = quiz_unit.transform_blueprint_unit_to_options(blueprint_unit)
+            options = quiz_unit.transform_blueprint_unit_to_options(
+                blueprint_unit
+            )
             text += "\n".join(
                 f"  {opt['key']} {' '.join(opt['args'])}" for opt in options
             )
