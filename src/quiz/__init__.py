@@ -36,7 +36,7 @@ def parse_blueprint_from_text(blueprint_text):
                                     # zero_Celsius, pi, Avogadro, Boltzmann,
                                     # Planck, speed_of_light, elementary_charge,
                                     # gravitational_constant (uses scipy
-                                    # constants)
+                                    # constants), or any number as a string
 
     For 'date', valid indented lines include:
         - start <year>              # Optional, default = 1900
@@ -138,7 +138,7 @@ def compute_quiz_results(quiz, user_answers):
         - "user_answers" : str
             The correct answer to the question.
         - "category" : str
-            The category of the question, either "date" or "math".
+            The category of the question, e.g. "date" or "math".
     answers : list of str
         A list of strings representing the user's answers to the quiz questions
         in the same order as the quiz.
@@ -150,7 +150,7 @@ def compute_quiz_results(quiz, user_answers):
         - "question" : str
             The question text.
         - "category" : str
-            The category of the question, either "date" or "math".
+            The category of the question, e.g. "date" or "math".
         - "correct_answer" : str
             The correct answer to the question.
         - "user_answer" : str
