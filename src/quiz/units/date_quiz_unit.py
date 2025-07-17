@@ -114,6 +114,7 @@ class DateQuizUnit(QuizUnitBase):
 
     @classmethod
     def compare_answers(cls, user_answer, correct_answer):
+        correct_answer = correct_answer.lower()   # Undo prettification if any
         return user_answer == correct_answer
 
     @classmethod
