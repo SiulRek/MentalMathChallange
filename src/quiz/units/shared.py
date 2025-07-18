@@ -27,7 +27,7 @@ def map_args_to_option(option, args, mapping, required_length=0):
 
     if len(args) > len(mapping):
         raise MappingError(
-            f"Too many arguments provided: {len(args)} > {len(mapping)}"
+            f"Too many arguments provided"
         )
     mapping = mapping[: len(args)]
     for arg, mapping in zip(args, mapping):
