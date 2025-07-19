@@ -16,6 +16,10 @@ class QuizIntegrationTest(BaseTestCase):
             """date: 1
   start 2020
   end 2020""",
+            """memory: 1
+  fruit apple on
+  animal dog off
+  color blue off""",
         ]
         length = len(blueprint_text)
         blueprint_text = "\n\n".join(blueprint_text)
@@ -30,6 +34,7 @@ class QuizIntegrationTest(BaseTestCase):
         submission = {
             "answer_0": "3",
             "answer_1": "Monday",
+            "answer_2": "apple",
         }
         user_answers = collect_user_answers(submission, len(quiz))
         results = compute_quiz_results(quiz, user_answers)
@@ -44,6 +49,10 @@ class QuizIntegrationTest(BaseTestCase):
         # Verify Date quiz results
         self.assertTrue(results[1]["is_correct"])
         self.assertEqual(results[1]["user_answer"].lower(), "monday")
+
+        # Verify Memory quiz results
+        self.assertTrue(results[2]["is_correct"])
+        self.assertEqual(results[2]["user_answer"], "apple")
 
 
 if __name__ == "__main__":
