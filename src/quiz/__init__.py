@@ -17,7 +17,7 @@ def parse_blueprint_from_text(blueprint_text):
 
     <category>: <count>
 
-    - <category>: 'math' or 'date'
+    - <category>: 'math', 'date', or 'memory'
     - <count>: number of expressions to generate
 
     For 'math', the block must include indented lines specifying elements:
@@ -41,6 +41,9 @@ def parse_blueprint_from_text(blueprint_text):
     For 'date', valid indented lines include:
         - start <year>              # Optional, default = 1900
         - end <year>                # Optional, default = 2050
+
+    For 'memory', valid indented lines include:
+        - <key> <value> [on|off]   # Optional, default = on
 
     Lines may be indented using spaces or tabs. Blank lines are allowed.
     Malformed input will raise a UserConfigError.
