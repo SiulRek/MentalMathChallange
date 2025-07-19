@@ -31,14 +31,26 @@ class MemoryQuizUnit(QuizUnitBase):
             for opt in options:
                 key = opt.pop("key")
                 args = opt.pop("args")
-                assert len(args) == 1, "Only one argument is allowed"
+                assert len(args) in (
+                    1,
+                    2,
+                ), "only one or two arguments are allowed"
                 value = args[0]
+                if len(args) == 2:
+                    status = args[1].lower()
+                    assert status in [
+                        "off",
+                        "on",
+                    ], "second argument must be 'off' or 'on'"
+                    enable = status == "on"
+                else:
+                    enable = True
                 _assert_valid_key(key)
                 _assert_valid_value(value)
-                items.append({"key": key, "value": value})
+                items.append({"key": key, "value": value, "enable": enable})
         except AssertionError as e:
             raise UserConfigError(
-                f"Invalid option {key}: {e}"
+                f"Invalid option '{key}': {e}"
             ) from e
         return unit_bp
 
@@ -49,7 +61,9 @@ class MemoryQuizUnit(QuizUnitBase):
         """
         options = []
         for item in blueprint_unit["items"]:
-            options.append({"key": item["key"], "args": [item["value"]]})
+            args = [item["value"]]
+            args += ["on" if item["enable"] else "off"]
+            options.append({"key": item["key"], "args": args})
         return options
 
     @classmethod
@@ -59,10 +73,14 @@ class MemoryQuizUnit(QuizUnitBase):
         """
         count = blueprint_unit["count"]
 
-        items = [(item["key"], item["value"]) for item in blueprint_unit["items"]]
+        items = [
+            (item["key"], item["value"])
+            for item in blueprint_unit["items"]
+            if item["enable"]
+        ]
         if not items or len(items) < count:
             raise UserConfigError(
-                f"Blueprint unit must contain at least {count} items"
+                "Not enough enabled items to generate the quiz"
             )
         selected_items = random.sample(items, count)
 
@@ -80,7 +98,7 @@ class MemoryQuizUnit(QuizUnitBase):
         return quiz
 
     @classmethod
-    def parse_user_answer(cls, user_answer, blueprint_unit):
+    def parse_user_answer(cls, user_answer):
         return str(user_answer)
 
     @classmethod
