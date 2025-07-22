@@ -53,7 +53,7 @@ class DateQuizTransformOptionsToBlueprintUnitTest(unittest.TestCase):
             DateQuizUnit.transform_options_to_blueprint_unit(options)
 
 
-class DateQuizUnparseOptionsTest(unittest.TestCase):
+class DateQuizTransformOptionsToBlueprintTest(unittest.TestCase):
     def test_parse_unparse_roundrip(self):
         options = [
             {"key": "start", "args": ["2020"]},

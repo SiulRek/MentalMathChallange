@@ -422,7 +422,7 @@ class MathQuizTransformOptionsToBlueprintUnitTest(BaseTestCase):
         )
 
 
-class MathQuizUnparseOptionsTest(BaseTestCase):
+class MathQuizTransoformOptionsToblueprintUnitTest(BaseTestCase):
     def test_transform_blueprint_unit_to_options_round_trip(self):
         options = [
             {"key": "func", "args": ["sqrt"]},
