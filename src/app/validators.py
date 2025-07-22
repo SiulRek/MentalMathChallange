@@ -4,7 +4,7 @@ from app.models import User
 def assert_username(username):
     assert username, "Username cannot be empty."
     assert len(username) >= 3, "Username must be at least 3 characters long."
-    assert username.isalnum(), "Username must be alphanumeric."
+    assert username.isidentifier(), "Username must be alphanumeric or contain underscores."
     assert len(username) <= 32, "Username cannot be longer than 32 characters."
 
 
